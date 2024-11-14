@@ -1,6 +1,6 @@
 services:
   autossh:
-    image: oaklight/autossh-tunnel:latest
+    build: .
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
       - ./config.yaml:/etc/autossh/config.yaml:ro

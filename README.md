@@ -16,6 +16,14 @@
 * 本地机器上已安装 Docker 和 Docker Compose。
 * 已设置用于访问远程主机的 SSH 密钥。
 
+## 发布版本
+
+我已将第一个版本发布到 Docker Hub。您可以通过以下链接访问该版本：
+
+[Docker Hub 链接](https://hub.docker.com/r/oaklight/autossh-tunnel)
+
+欢迎使用并提供反馈！
+
 ## 设置
 
 ### 1. 克隆仓库
@@ -50,13 +58,19 @@ tunnels:
 
 ### 4. 构建并运行 Docker 容器
 
-使用 Docker Compose 构建并运行容器：
+#### 使用 Dockerhub 发布版本
 
 ```sh
-# 构建
-docker compose build
-# 运行
-docker compose up -d
+docker-compose up -d
+```
+
+#### 本地构建并运行容器
+
+```sh
+# build
+docker compose build -f compose.dev.yaml
+# run
+docker compose up -f compose.dev.yaml -d
 ```
 
 ### 5. 访问服务

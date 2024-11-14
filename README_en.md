@@ -16,6 +16,14 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 * Docker and Docker Compose installed on your local machine.
 * SSH keys set up for accessing remote hosts.
 
+## Release
+
+I have released the first version to Docker Hub. You can access the version via the following link:
+
+[Docker Hub Link](https://hub.docker.com/r/oaklight/autossh-tunnel)
+
+Feel free to use it and provide feedback!
+
 ## Setup
 
 ### 1. Clone the Repository
@@ -50,13 +58,19 @@ tunnels:
 
 ### 4. Build and Run the Docker Container
 
-Use Docker Compose to build and run the container:
+#### Use dockerhub release image
+
+```sh
+docker-compose up -d
+```
+
+#### Build and run the container by yourself
 
 ```sh
 # build
-docker compose build
+docker compose build -f compose.dev.yaml
 # run
-docker compose up -d
+docker compose up -f compose.dev.yaml -d
 ```
 
 ### 5. Access the Services
