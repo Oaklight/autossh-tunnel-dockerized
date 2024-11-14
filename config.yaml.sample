@@ -1,0 +1,8 @@
+tunnels:
+  - remote_host: "user@remote-host1"
+    remote_port: 8000
+    local_port: 8000
+  - remote_host: "user@remote-host2"
+    remote_port: 9000
+    local_port: 9000
+  # Add more tunnels as needed
