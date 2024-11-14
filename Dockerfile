@@ -1,9 +1,14 @@
 # Use an official lightweight Linux image
-FROM alpine:latest
+FROM alpine:3.20.2 AS base
 
-# Install autossh and yq
-RUN apk add --no-cache autossh curl
-RUN curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq && chmod +x /usr/bin/yq
+# Install necessary packages
+RUN apk add --no-cache autossh
+
+# Download yq and make it executable
+RUN apk add --no-cache curl && \
+    curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq && \
+    chmod +x /usr/bin/yq && \
+    apk del curl  # Remove curl after use
 
 # Create a non-root user and set up the environment
 RUN adduser -D myuser
