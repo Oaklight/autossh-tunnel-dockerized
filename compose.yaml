@@ -7,3 +7,4 @@ services:
     environment:
       - AUTOSSH_GATETIME=0
     network_mode: "host"
+    restart: always
