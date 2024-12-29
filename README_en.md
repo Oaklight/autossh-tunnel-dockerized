@@ -136,7 +136,7 @@ To address this, we provide `compose.custom.yaml` and `Dockerfile.custom` files.
    
 
 ```bash
-   UID=$(id -u) GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
+   HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
    ```
 
 ### Why Are These Files Needed?

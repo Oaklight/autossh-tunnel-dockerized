@@ -136,7 +136,7 @@ docker compose up -f compose.dev.yaml -d
    
 
 ```bash
-   UID=$(id -u) GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
+   HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
    ```
 
 ### 为什么需要这些文件？

@@ -2,11 +2,11 @@ services:
   autossh:
     build:
       context: .
-      dockerfile: Dockerfile.custom  # Path to the custom Dockerfile
+      dockerfile: Dockerfile.custom
       args:
-        UID: ${UID:-1000}  # Use the host UID or default to 1000
-        GID: ${GID:-1000}  # Use the host GID or default to 1000
-    image: custom-autossh-tunnel:latest  # Name of the newly built image
+        UID: ${HOST_UID:-1000}  # Use HOST_UID or default to 1000
+        GID: ${HOST_GID:-1000}  # Use HOST_GID or default to 1000
+    image: custom-autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
       - ./config.yaml:/etc/autossh/config.yaml:ro
