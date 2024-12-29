@@ -3,20 +3,19 @@ FROM oaklight/autossh-tunnel:latest
 
 USER root
 
-# Accept UID and GID as build arguments
 ARG UID
 ARG GID
 
-# Install shadow, modify UID/GID, and remove shadow in one layer
-RUN apk add --no-cache shadow && \
-    usermod -u ${UID} myuser && \
-    groupmod -g ${GID} myuser && \
-    chown -R myuser:myuser /home/myuser && \
-    chown -R myuser:myuser /etc/autossh && \
-    apk del shadow
+# Only remove and recreate myuser if UID or GID is different from 1000:1000
+RUN if [ "$UID" != "1000" ] || [ "$GID" != "1000" ]; then \
+        if id myuser > /dev/null 2>&1; then deluser myuser; fi && \
+        adduser -D -u ${UID} -g ${GID} myuser && \
+        chown -R myuser:myuser /home/myuser && \
+        chown -R myuser:myuser /etc/autossh; \
+    fi
 
 # Ensure the entrypoint script is still executable
 RUN chmod +x /entrypoint.sh
 
-# Switch back to the modified myuser
+# Switch to the new myuser
 USER myuser
