@@ -4,6 +4,31 @@
 
 This project provides a Docker-based solution to manage SSH tunnels using `autossh` and a YAML configuration file. The setup allows you to easily map remote ports to local ports, making it convenient to access services on remote machines behind firewalls.
 
+## Table of Contents
+
+* [Features](#features)
+* [Prerequisites](#prerequisites)
+* [Release](#release)
+* [Setup](#setup)
+  + [1. Clone the Repository](#1-clone-the-repository)
+  + [2. Configure SSH Keys](#2-configure-ssh-keys)
+  + [3. Configure the YAML File](#3-configure-the-yaml-file)
+  + [4. Build and Run the Docker Container](#4-build-and-run-the-docker-container)
+  + [5. Access the Services](#5-access-the-services)
+* [Customization](#customization)
+  + [Adding More Tunnels](#adding-more-tunnels)
+  + [Modifying the Dockerfile](#modifying-the-dockerfile)
+  + [Modifying the Entrypoint Script](#modifying-the-entrypoint-script)
+* [Using `compose.custom.yaml` and `Dockerfile.custom`](#using-composecustomyaml-and-dockerfilecustom)
+  + [Steps to Use](#steps-to-use)
+  + [Why Are These Files Needed?](#why-are-these-files-needed)
+* [Troubleshooting](#troubleshooting)
+  + [SSH Key Permissions](#ssh-key-permissions)
+  + [Docker Permissions](#docker-permissions)
+  + [Logs](#logs)
+* [License](#license)
+* [Acknowledgments](#acknowledgments)
+
 ## Features
 
 * **Dockerized**: Uses Docker to encapsulate the environment, making it easy to deploy and manage.
@@ -61,7 +86,7 @@ tunnels:
 #### Use dockerhub release image
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
 
 #### Build and run the container by yourself
@@ -97,6 +122,28 @@ If you need to customize the Docker environment, you can modify the `Dockerfile`
 
 The `entrypoint.sh` script is responsible for reading the `config.yaml` file and starting the SSH tunnels. You can modify this script if you need to add additional functionality or change how the tunnels are managed.
 
+## Using `compose.custom.yaml` and `Dockerfile.custom`
+
+In some cases, you may need to customize the container's user ID (UID) and group ID (GID) to match the host user's permissions. For example, if the host's `.ssh` folder has a different UID and GID than the default user in the container, it may cause permission issues.
+
+To address this, we provide `compose.custom.yaml` and `Dockerfile.custom` files. These files allow you to dynamically set the container's UID and GID to match the host user's UID and GID.
+
+### Steps to Use
+
+1. Ensure you have cloned the repository and configured the `config.yaml` file.
+2. Run the following command to build and start the container using `compose.custom.yaml`:
+
+   
+
+```bash
+   UID=$(id -u) GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
+   ```
+
+### Why Are These Files Needed?
+
+* **UID/GID Mismatch Issue**: By default, the `myuser` in the container uses UID 1000 and GID 1000. If the host's `.ssh` folder has a different UID and GID, the container will not be able to access it.
+* **Dynamic UID/GID Setting**: `compose.custom.yaml` and `Dockerfile.custom` allow you to dynamically set the container's UID and GID to match the host user's UID and GID, resolving permission issues.
+
 ## Troubleshooting
 
 ### SSH Key Permissions
@@ -121,7 +168,7 @@ sudo usermod -aG docker $USER
 Check the Docker container logs for any errors:
 
 ```sh
-docker-compose logs -f
+docker compose logs -f
 ```
 
 ## License

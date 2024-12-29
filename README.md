@@ -4,6 +4,31 @@
 
 本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将远程端口映射到本地端口，从而方便地访问位于防火墙后的远程机器上的服务。
 
+## 目录
+
+* [功能](#功能)
+* [先决条件](#先决条件)
+* [发布版本](#发布版本)
+* [设置](#设置)
+  + [1. 克隆仓库](#1-克隆仓库)
+  + [2. 配置 SSH 密钥](#2-配置-ssh-密钥)
+  + [3. 配置 YAML 文件](#3-配置-yaml-文件)
+  + [4. 构建并运行 Docker 容器](#4-构建并运行-docker-容器)
+  + [5. 访问服务](#5-访问服务)
+* [自定义](#自定义)
+  + [添加更多隧道](#添加更多隧道)
+  + [修改 Dockerfile](#修改-dockerfile)
+  + [修改入口点脚本](#修改入口点脚本)
+* [使用 `compose.custom.yaml` 和 `Dockerfile.custom`](#使用-composecustomyaml-和-dockerfilecustom)
+  + [使用步骤](#使用步骤)
+  + [为什么需要这些文件？](#为什么需要这些文件)
+* [故障排除](#故障排除)
+  + [SSH 密钥权限](#ssh-密钥权限)
+  + [Docker 权限](#docker-权限)
+  + [日志](#日志)
+* [许可证](#许可证)
+* [致谢](#致谢)
+
 ## 功能
 
 * **Docker 化**：使用 Docker 封装环境，使其易于部署和管理。
@@ -61,7 +86,7 @@ tunnels:
 #### 使用 Dockerhub 发布版本
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
 
 #### 本地构建并运行容器
@@ -97,6 +122,28 @@ docker compose up -f compose.dev.yaml -d
 
 `entrypoint.sh` 脚本负责读取 `config.yaml` 文件并启动 SSH 隧道。如果需要添加其他功能或更改隧道的管理方式，可以修改此脚本。
 
+## 使用 `compose.custom.yaml` 和 `Dockerfile.custom`
+
+在某些情况下，您可能需要自定义容器的用户 ID（UID）和组 ID（GID），以匹配主机上的用户权限。例如，如果主机的 `.ssh` 文件夹的 UID 和 GID 与容器中的默认用户不匹配，可能会导致权限问题。
+
+为此，我们提供了 `compose.custom.yaml` 和 `Dockerfile.custom` 文件。这些文件允许您动态地设置容器的 UID 和 GID，以匹配主机用户的 UID 和 GID。
+
+### 使用步骤
+
+1. 确保您已克隆仓库并配置了 `config.yaml` 文件。
+2. 运行以下命令，使用 `compose.custom.yaml` 构建和启动容器：
+
+   
+
+```bash
+   UID=$(id -u) GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
+   ```
+
+### 为什么需要这些文件？
+
+* **UID/GID 不匹配问题**：默认情况下，容器中的用户 `myuser` 使用 UID 1000 和 GID 1000。如果主机上的 `.ssh` 文件夹的 UID 和 GID 不同，容器将无法访问 `.ssh` 文件夹。
+* **动态 UID/GID 设置**：`compose.custom.yaml` 和 `Dockerfile.custom` 允许您动态地将容器的 UID 和 GID 设置为主机用户的 UID 和 GID，从而解决权限问题。
+
 ## 故障排除
 
 ### SSH 密钥权限
@@ -121,7 +168,7 @@ sudo usermod -aG docker $USER
 检查 Docker 容器日志以查找任何错误：
 
 ```sh
-docker-compose logs -f
+docker compose logs -f
 ```
 
 ## 许可证

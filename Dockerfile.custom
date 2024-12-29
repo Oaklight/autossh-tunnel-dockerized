@@ -1,0 +1,22 @@
+# Dockerfile.custom
+FROM oaklight/autossh-tunnel:latest
+
+USER root
+
+# Accept UID and GID as build arguments
+ARG UID
+ARG GID
+
+# Install shadow, modify UID/GID, and remove shadow in one layer
+RUN apk add --no-cache shadow && \
+    usermod -u ${UID} myuser && \
+    groupmod -g ${GID} myuser && \
+    chown -R myuser:myuser /home/myuser && \
+    chown -R myuser:myuser /etc/autossh && \
+    apk del shadow
+
+# Ensure the entrypoint script is still executable
+RUN chmod +x /entrypoint.sh
+
+# Switch back to the modified myuser
+USER myuser
