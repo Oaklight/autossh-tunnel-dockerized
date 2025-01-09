@@ -11,7 +11,7 @@ if [ "$(id -u myuser)" != "$PUID" ] || [ "$(id -g myuser)" != "$PGID" ]; then
 fi
 
 # Ensure the autossh directory is owned by myuser
-chown -R myuser:myuser /etc/autossh
+chown -R myuser:mygroup /etc/autossh
 
 # Switch to myuser and start a shell
 exec su myuser -c "/bin/sh"

@@ -18,7 +18,7 @@ RUN addgroup -g ${PGID} mygroup && \
     adduser -u ${PUID} -G mygroup -D myuser
 
 # Create a directory for autossh configuration
-RUN mkdir /etc/autossh && chown myuser:myuser /etc/autossh
+RUN mkdir /etc/autossh && chown myuser:mygroup /etc/autossh
 
 # Copy the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
