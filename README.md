@@ -34,6 +34,7 @@
 * **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射。
 * **Autossh**：自动维护 SSH 连接，确保隧道保持活动状态。
 * **动态 UID/GID 支持**：通过 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户的权限。
+* **多架构支持**：现已支持所有 Alpine 的底层架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
 
 ## 先决条件
 

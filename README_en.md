@@ -34,6 +34,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 * **YAML Configuration**: Uses a `config.yaml` file to define multiple SSH tunnel mappings.
 * **Autossh**: Automatically maintains SSH connections, ensuring tunnels stay active.
 * **Dynamic UID/GID Support**: Dynamically sets the container user's UID and GID using `PUID` and `PGID` environment variables to match the host user's permissions.
+* **Multi-Architecture Support**: Now supports all Alpine-based architectures, including `linux/amd64`,  `linux/arm64/v8`,  `linux/arm/v7`,  `linux/arm/v6`,  `linux/386`,  `linux/ppc64le`,  `linux/s390x`, and `linux/riscv64`.
 
 ## Prerequisites
 
