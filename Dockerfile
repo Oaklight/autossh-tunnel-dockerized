@@ -23,6 +23,7 @@ RUN mkdir /etc/autossh && chown myuser:mygroup /etc/autossh
 
 # Copy the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
+
 # Copy the start_autossh script
 COPY start_autossh.sh /usr/local/bin/start_autossh
 
@@ -31,3 +32,6 @@ RUN chmod +x /entrypoint.sh /usr/local/bin/start_autossh
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
+
+# Set the default command
+CMD ["/usr/local/bin/start_autossh"]
