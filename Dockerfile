@@ -10,6 +10,7 @@ RUN apk add --no-cache curl && \
     chmod +x /usr/bin/yq && \
     apk del curl  # Remove curl after use
 
+# Define PUID and PGID as environment variables
 ENV PUID=1000
 ENV PGID=1000
 
@@ -22,9 +23,11 @@ RUN mkdir /etc/autossh && chown myuser:mygroup /etc/autossh
 
 # Copy the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
+# Copy the start_autossh script
+COPY start_autossh.sh /usr/local/bin/start_autossh
 
-# Make the entrypoint script executable
-RUN chmod +x /entrypoint.sh
+# Make the scripts executable
+RUN chmod +x /entrypoint.sh /usr/local/bin/start_autossh
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
