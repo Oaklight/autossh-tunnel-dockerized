@@ -10,8 +10,5 @@ if [ "$(id -u myuser)" != "$PUID" ] || [ "$(id -g myuser)" != "$PGID" ]; then
     sed -i "s/^mygroup:x:[0-9]*:/mygroup:x:$PGID:/" /etc/group
 fi
 
-# # Ensure the autossh directory is owned by myuser
-# chown -R myuser:mygroup /etc/autossh
-
-# Switch to myuser and start a shell
-exec su myuser -c "/bin/sh"
+# Switch to myuser and execute the command passed as arguments
+exec su myuser -c "$@"
