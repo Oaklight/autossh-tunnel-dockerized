@@ -9,7 +9,7 @@ services:
     image: custom-autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config.yaml:/etc/autossh/config.yaml:ro
+      - ./config:/etc/autossh/config:ro
     environment:
       - AUTOSSH_GATETIME=0
     network_mode: "host"
