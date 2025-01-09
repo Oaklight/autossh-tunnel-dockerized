@@ -19,9 +19,6 @@
   + [添加更多隧道](#添加更多隧道)
   + [修改 Dockerfile](#修改-dockerfile)
   + [修改入口点脚本](#修改入口点脚本)
-* [使用 `compose.custom.yaml` 和 `Dockerfile.custom`](#使用-composecustomyaml-和-dockerfilecustom)
-  + [使用步骤](#使用步骤)
-  + [为什么需要这些文件？](#为什么需要这些文件)
 * [故障排除](#故障排除)
   + [SSH 密钥权限](#ssh-密钥权限)
   + [Docker 权限](#docker-权限)
@@ -35,6 +32,7 @@
 * **非 root 用户**：以非 root 用户运行容器，增强安全性。
 * **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射。
 * **Autossh**：自动维护 SSH 连接，确保隧道保持活动状态。
+* **动态 UID/GID 支持**：通过 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户的权限。
 
 ## 先决条件
 
@@ -93,9 +91,9 @@ docker compose up -d
 
 ```sh
 # build
-docker compose build -f compose.dev.yaml
+docker compose -f compose.dev.yaml build
 # run
-docker compose up -f compose.dev.yaml -d
+docker compose -f compose.dev.yaml up -d
 ```
 
 ### 5. 访问服务
@@ -122,27 +120,32 @@ docker compose up -f compose.dev.yaml -d
 
 `entrypoint.sh` 脚本负责读取 `config.yaml` 文件并启动 SSH 隧道。如果需要添加其他功能或更改隧道的管理方式，可以修改此脚本。
 
-## 使用 `compose.custom.yaml` 和 `Dockerfile.custom`
+## 动态 UID/GID 支持
 
-在某些情况下，您可能需要自定义容器的用户 ID（UID）和组 ID（GID），以匹配主机上的用户权限。例如，如果主机的 `.ssh` 文件夹的 UID 和 GID 与容器中的默认用户不匹配，可能会导致权限问题。
+为了确保容器中的用户权限与主机用户权限匹配，您可以通过 `compose.yaml` 文件中的 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID。例如：
 
-为此，我们提供了 `compose.custom.yaml` 和 `Dockerfile.custom` 文件。这些文件允许您动态地设置容器的 UID 和 GID，以匹配主机用户的 UID 和 GID。
+```yaml
+services:
+  autossh:
+    image: oaklight/autossh-tunnel:latest
+    volumes:
+      - ~/.ssh:/home/myuser/.ssh:ro
+      - ./config:/etc/autossh/config:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - AUTOSSH_GATETIME=0
+    network_mode: "host"
+    restart: always
+```
 
-### 使用步骤
-
-1. 确保您已克隆仓库并配置了 `config.yaml` 文件。
-2. 运行以下命令，使用 `compose.custom.yaml` 构建和启动容器：
-
-   
+或者使用 `docker run` 命令并设置环境变量：
 
 ```bash
-   HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
-   ```
+docker run --net host -v ~/.ssh:/home/myuser/.ssh:ro -v ./config:/etc/autossh/config:ro -e PUID=1000 -e PGID=1000 -e AUTOSSH_GATETIME=0 --restart always oaklight/autossh-tunnel:latest
+```
 
-### 为什么需要这些文件？
-
-* **UID/GID 不匹配问题**：默认情况下，容器中的用户 `myuser` 使用 UID 1000 和 GID 1000。如果主机上的 `.ssh` 文件夹的 UID 和 GID 不同，容器将无法访问 `.ssh` 文件夹。
-* **动态 UID/GID 设置**：`compose.custom.yaml` 和 `Dockerfile.custom` 允许您动态地将容器的 UID 和 GID 设置为主机用户的 UID 和 GID，从而解决权限问题。
+您可以根据主机用户的 UID 和 GID 调整 `PUID` 和 `PGID` 的值，以确保容器能够正确访问主机的 `.ssh` 目录。
 
 ## 故障排除
 
