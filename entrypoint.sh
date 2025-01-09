@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Load the configuration from config.yaml
-CONFIG_FILE="/etc/autossh/config.yaml"
+CONFIG_FILE="/etc/autossh/config/config.yaml"
 
 # Function to parse YAML and start autossh
 start_autossh() {
