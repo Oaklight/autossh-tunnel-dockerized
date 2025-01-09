@@ -19,9 +19,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
   + [Adding More Tunnels](#adding-more-tunnels)
   + [Modifying the Dockerfile](#modifying-the-dockerfile)
   + [Modifying the Entrypoint Script](#modifying-the-entrypoint-script)
-* [Using `compose.custom.yaml` and `Dockerfile.custom`](#using-composecustomyaml-and-dockerfilecustom)
-  + [Steps to Use](#steps-to-use)
-  + [Why Are These Files Needed?](#why-are-these-files-needed)
+* [Dynamic UID/GID Support](#dynamic-uidgid-support)
 * [Troubleshooting](#troubleshooting)
   + [SSH Key Permissions](#ssh-key-permissions)
   + [Docker Permissions](#docker-permissions)
@@ -35,6 +33,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 * **Non-Root User**: Runs the container as a non-root user for enhanced security.
 * **YAML Configuration**: Uses a `config.yaml` file to define multiple SSH tunnel mappings.
 * **Autossh**: Automatically maintains SSH connections, ensuring tunnels stay active.
+* **Dynamic UID/GID Support**: Dynamically sets the container user's UID and GID using `PUID` and `PGID` environment variables to match the host user's permissions.
 
 ## Prerequisites
 
@@ -83,19 +82,19 @@ tunnels:
 
 ### 4. Build and Run the Docker Container
 
-#### Use dockerhub release image
+#### Use Dockerhub Release Image
 
 ```sh
 docker compose up -d
 ```
 
-#### Build and run the container by yourself
+#### Build and Run the Container Locally
 
 ```sh
 # build
-docker compose build -f compose.dev.yaml
+docker compose -f compose.dev.yaml build
 # run
-docker compose up -f compose.dev.yaml -d
+docker compose -f compose.dev.yaml up -d
 ```
 
 ### 5. Access the Services
@@ -122,27 +121,32 @@ If you need to customize the Docker environment, you can modify the `Dockerfile`
 
 The `entrypoint.sh` script is responsible for reading the `config.yaml` file and starting the SSH tunnels. You can modify this script if you need to add additional functionality or change how the tunnels are managed.
 
-## Using `compose.custom.yaml` and `Dockerfile.custom`
+## Dynamic UID/GID Support
 
-In some cases, you may need to customize the container's user ID (UID) and group ID (GID) to match the host user's permissions. For example, if the host's `.ssh` folder has a different UID and GID than the default user in the container, it may cause permission issues.
+To ensure that the container user's permissions match the host user's permissions, you can dynamically set the container user's UID and GID using the `PUID` and `PGID` environment variables in the `compose.yaml` file. For example:
 
-To address this, we provide `compose.custom.yaml` and `Dockerfile.custom` files. These files allow you to dynamically set the container's UID and GID to match the host user's UID and GID.
+```yaml
+services:
+  autossh:
+    image: oaklight/autossh-tunnel:latest
+    volumes:
+      - ~/.ssh:/home/myuser/.ssh:ro
+      - ./config:/etc/autossh/config:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - AUTOSSH_GATETIME=0
+    network_mode: "host"
+    restart: always
+```
 
-### Steps to Use
-
-1. Ensure you have cloned the repository and configured the `config.yaml` file.
-2. Run the following command to build and start the container using `compose.custom.yaml`:
-
-   
+or use docker run with environment variables:
 
 ```bash
-   HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose -f compose.custom.yaml up -d --build
-   ```
+docker run --net host -v ~/.ssh:/home/myuser/.ssh:ro -v ./config:/etc/autossh/config:ro -e PUID=1000 -e PGID=1000 -e AUTOSSH_GATETIME=0 --restart always oaklight/autossh-tunnel:latest
+```
 
-### Why Are These Files Needed?
-
-* **UID/GID Mismatch Issue**: By default, the `myuser` in the container uses UID 1000 and GID 1000. If the host's `.ssh` folder has a different UID and GID, the container will not be able to access it.
-* **Dynamic UID/GID Setting**: `compose.custom.yaml` and `Dockerfile.custom` allow you to dynamically set the container's UID and GID to match the host user's UID and GID, resolving permission issues.
+You can adjust the `PUID` and `PGID` values to match your host user's UID and GID, ensuring that the container can access the host's `.ssh` directory correctly.
 
 ## Troubleshooting
 
