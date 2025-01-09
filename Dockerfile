@@ -10,8 +10,12 @@ RUN apk add --no-cache curl && \
     chmod +x /usr/bin/yq && \
     apk del curl  # Remove curl after use
 
-# Create a non-root user and set up the environment
-RUN adduser -D myuser
+ENV PUID=1000
+ENV PGID=1000
+
+# Create a non-root user and set up the environment, default UID and GID is PUID and PGID
+RUN addgroup -g ${PGID} mygroup && \
+    adduser -u ${PUID} -G mygroup -D myuser
 
 # Create a directory for autossh configuration
 RUN mkdir /etc/autossh && chown myuser:myuser /etc/autossh
@@ -21,9 +25,6 @@ COPY entrypoint.sh /entrypoint.sh
 
 # Make the entrypoint script executable
 RUN chmod +x /entrypoint.sh
-
-# Switch to the non-root user
-USER myuser
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
