@@ -2,48 +2,50 @@
 
 [中文版](README.md) | [English](README_en.md)
 
-本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将远程端口映射到本地端口，从而方便地访问位于防火墙后的远程机器上的服务。
+本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将 **本地服务通过 SSH 隧道暴露到远程服务器**，或将 **远程服务映射到本地端口**，从而方便地访问位于防火墙后的服务。
 
 ## 目录
 
-* [功能](#功能)
-* [先决条件](#先决条件)
-* [发布版本](#发布版本)
-* [设置](#设置)
-  + [1. 克隆仓库](#1-克隆仓库)
-  + [2. 配置 SSH 密钥](#2-配置-ssh-密钥)
-  + [3. 配置 YAML 文件](#3-配置-yaml-文件)
-  + [4. 构建并运行 Docker 容器](#4-构建并运行-docker-容器)
-  + [5. 访问服务](#5-访问服务)
-* [自定义](#自定义)
-  + [添加更多隧道](#添加更多隧道)
-  + [修改 Dockerfile](#修改-dockerfile)
-  + [修改入口点脚本](#修改入口点脚本)
-* [动态 UID/GID 支持](#动态-uidgid-支持)
-* [故障排除](#故障排除)
-  + [SSH 密钥权限](#ssh-密钥权限)
-  + [Docker 权限](#docker-权限)
-  + [日志](#日志)
-* [许可证](#许可证)
-* [致谢](#致谢)
+- [功能](#功能)
+- [先决条件](#先决条件)
+- [发布版本](#发布版本)
+- [设置](#设置)
+  - [1. 克隆仓库](#1-克隆仓库)
+  - [2. 配置 SSH 密钥](#2-配置-ssh-密钥)
+  - [3. 配置 YAML 文件](#3-配置-yaml-文件)
+  - [4. 构建并运行 Docker 容器](#4-构建并运行-docker-容器)
+  - [5. 访问服务](#5-访问服务)
+- [自定义](#自定义)
+  - [添加更多隧道](#添加更多隧道)
+  - [修改 Dockerfile](#修改-dockerfile)
+  - [修改入口点脚本](#修改入口点脚本)
+- [动态 UID/GID 支持](#动态-uidgid-支持)
+- [安全注意事项](#安全注意事项)
+- [故障排除](#故障排除)
+  - [SSH 密钥权限](#ssh-密钥权限)
+  - [Docker 权限](#docker-权限)
+  - [日志](#日志)
+- [许可证](#许可证)
+- [致谢](#致谢)
 
 ## 功能
 
-* **Docker 化**：使用 Docker 封装环境，使其易于部署和管理。
-* **非 root 用户**：以非 root 用户运行容器，增强安全性。
-* **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射。
-* **Autossh**：自动维护 SSH 连接，确保隧道保持活动状态。
-* **动态 UID/GID 支持**：通过 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户的权限。
-* **多架构支持**：现已支持所有 Alpine 的底层架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
+- **Docker 化**：使用 Docker 封装环境，使其易于部署和管理。
+- **非 root 用户**：以非 root 用户运行容器，增强安全性。
+- **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射。
+- **Autossh**：自动维护 SSH 连接，确保隧道保持活动状态。
+- **动态 UID/GID 支持**：通过 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户的权限。
+- **多架构支持**：现已支持所有 Alpine 的底层架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
+- **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 
 ## 先决条件
 
-* 本地机器上已安装 Docker 和 Docker Compose。
-* 已设置用于访问远程主机的 SSH 密钥。
+- 本地机器上已安装 Docker 和 Docker Compose。
+- 已设置用于访问远程主机的 SSH 密钥。
 
 ## 发布版本
 
-我已将第一个版本发布到 Docker Hub。您可以通过以下链接访问该版本：
+我已将打包好的 docker image 发布到 Docker Hub。您可以通过以下链接访问该版本：
 
 [Docker Hub 链接](https://hub.docker.com/r/oaklight/autossh-tunnel)
 
@@ -56,8 +58,8 @@
 将此仓库克隆到您的本地机器：
 
 ```sh
-git clone https://github.com/yourusername/ssh-tunnel-manager.git
-cd ssh-tunnel-manager
+git clone https://github.com/Oaklight/autossh-tunnel-dockerized.git
+cd autossh-tunnel-dockerized
 ```
 
 ### 2. 配置 SSH 密钥
@@ -66,20 +68,64 @@ cd ssh-tunnel-manager
 
 ### 3. 配置 YAML 文件
 
-编辑 `config.yaml` 文件以定义您的 SSH 隧道映射。每个条目应指定远程主机、远程端口和本地端口。
+编辑 `config.yaml` 文件以定义您的 SSH 隧道映射。每个条目应指定远程主机、远程端口、本地端口和方向（`local_to_remote` 或 `remote_to_local`）。
 
 示例 `config.yaml.sample` （复制到 `config.yaml` 并进行必要的更改）：
 
 ```yaml
 tunnels:
+  # 将本地服务暴露到远程服务器
   - remote_host: "user@remote-host1"
+    remote_port: 22323
+    local_port: 18120
+    direction: local_to_remote
+  # 将远程服务映射到本地端口
+  - remote_host: "user@remote-host2"
     remote_port: 8000
     local_port: 8001
-  - remote_host: "user@remote-host2"
-    remote_port: 9000
-    local_port: 9001
+    direction: remote_to_local
   # 根据需要添加更多隧道
 ```
+
+#### 高级配置：指定绑定地址
+
+如果您希望将 **远程端口** 或 **本地服务** 绑定到特定 IP 地址，可以使用 `ip:port` 格式。
+
+##### 1. **指定远程绑定地址**
+
+将远程端口绑定到特定 IP 地址（例如 `192.168.45.130`）：
+
+```yaml
+tunnels:
+  - remote_host: "user@remote-host1"
+    remote_port: "192.168.45.130:22323" # 远程绑定到 192.168.45.130
+    local_port: 18120 # 本地服务端口
+    direction: local_to_remote
+```
+
+##### 2. **指定本地绑定地址**
+
+将本地服务绑定到特定 IP 地址（例如 `192.168.1.100`）：
+
+```yaml
+tunnels:
+  - remote_host: "user@remote-host1"
+    remote_port: 22323 # 远程端口
+    local_port: "192.168.1.100:18120" # 本地绑定到 192.168.1.100
+    direction: local_to_remote
+```
+
+##### 3. **同时指定远程和本地绑定地址**
+
+```yaml
+tunnels:
+  - remote_host: "user@remote-host1"
+    remote_port: "192.168.45.130:22323" # 远程绑定到 192.168.45.130
+    local_port: "192.168.1.100:18120" # 本地绑定到 192.168.1.100
+    direction: local_to_remote
+```
+
+通过这种方式，您可以灵活地控制隧道绑定的 IP 地址，从而满足不同的网络环境和安全需求。
 
 ### 4. 构建并运行 Docker 容器
 
@@ -100,7 +146,7 @@ docker compose -f compose.dev.yaml up -d
 
 ### 5. 访问服务
 
-容器运行后，您可以使用指定的本地端口访问本地机器上的服务。例如，如果您将 `remote-host1:8000` 映射到 `localhost:8001` ，则可以通过 `http://localhost:8001` 访问服务。
+容器运行后，您可以通过远程服务器的指定端口（例如 `remote-host1:22323`）访问本地服务，或通过本地端口（例如 `localhost:8001`）访问远程服务。
 
 ## 自定义
 
@@ -112,6 +158,7 @@ docker compose -f compose.dev.yaml up -d
 - remote_host: "user@remote-host"
   remote_port: <remote_port>
   local_port: <local_port>
+  direction: <local_to_remote 或 remote_to_local> (如不填写则默认: remote_to_local)
 ```
 
 ### 修改 Dockerfile
@@ -149,6 +196,24 @@ docker run --net host -v ~/.ssh:/home/myuser/.ssh:ro -v ./config:/etc/autossh/co
 
 您可以根据主机用户的 UID 和 GID 调整 `PUID` 和 `PGID` 的值，以确保容器能够正确访问主机的 `.ssh` 目录。
 
+## 安全注意事项
+
+在启用 `-R` 参数时，远程端口默认绑定到 `localhost`。如果希望通过远程服务器的其他 IP 地址访问隧道，需在远程服务器的 `sshd_config` 中启用 `GatewayPorts` 选项：
+
+```bash
+# 编辑 /etc/ssh/sshd_config
+GatewayPorts clientspecified  # 允许客户端指定绑定地址
+GatewayPorts yes              # 或绑定到所有网络接口
+```
+
+重启 SSH 服务：
+
+```bash
+sudo systemctl restart sshd
+```
+
+启用 `GatewayPorts` 可能会暴露服务到公网，请确保采取适当的安全措施，例如配置防火墙或启用访问控制。
+
 ## 故障排除
 
 ### SSH 密钥权限
@@ -182,9 +247,9 @@ docker compose logs -f
 
 ## 致谢
 
-* [autossh](http://www.harding.motd.ca/autossh/) 用于维护 SSH 连接。
-* [yq](https://github.com/mikefarah/yq) 用于解析 YAML 配置文件。
-* [Docker](https://www.docker.com/) 用于容器化。
+- [autossh](http://www.harding.motd.ca/autossh/) 用于维护 SSH 连接。
+- [yq](https://github.com/mikefarah/yq) 用于解析 YAML 配置文件。
+- [Docker](https://www.docker.com/) 用于容器化。
 
 ---
 

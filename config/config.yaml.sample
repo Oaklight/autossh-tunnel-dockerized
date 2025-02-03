@@ -5,4 +5,5 @@ tunnels:
   - remote_host: "user@remote-host2"
     remote_port: 9000
     local_port: 9001
+    direction: remote_to_local
   # Add more tunnels as needed
