@@ -1,49 +1,35 @@
-# 第一阶段：构建阶段
-FROM alpine:3.21 AS builder
+# Build stage
+FROM golang:1.20-alpine AS builder
 
-# 设置工作目录
 WORKDIR /app
 
-# 复制依赖文件
-COPY requirements.txt .
+# Copy Go module files and generate/update go.sum
+COPY go.mod ./
+RUN go mod tidy
 
-# 安装必要的构建工具和依赖
-RUN apk add --no-cache --virtual .build-deps \
-        gcc \
-        musl-dev \
-        libffi-dev \
-        make \
-        python3-dev \
-        py3-pip \
-        && python3 -m venv /venv \
-        && /venv/bin/pip install --no-cache-dir --prefer-binary -r requirements.txt \
-        && find /venv/lib/python3.*/site-packages -name "*.pyc" -delete \
-        && find /venv/lib/python3.*/site-packages -name "__pycache__" -delete \
-        && apk del .build-deps
+# Download dependencies
+RUN go mod download
 
-# 复制应用代码
+# Copy the rest of the application code
 COPY . .
 
-# 第二阶段：运行阶段
+# Build the Go binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app .
+
+# Final stage
 FROM alpine:3.21
 
-# 安装运行时依赖
-RUN apk add --no-cache \
-        libffi \
-        python3
-
-# 设置工作目录
 WORKDIR /app
 
-# 复制虚拟环境和应用代码
-COPY --from=builder /venv /venv
-COPY --from=builder /app /app
+# Copy the compiled binary from the builder stage
+COPY --from=builder /app/app .
 
-# 设置虚拟环境路径
-ENV PATH="/venv/bin:$PATH"
+# Copy static assets (CSS, JS, HTML templates)
+COPY static /app/static
+COPY templates /app/templates
 
-# 暴露端口
+# Expose the application port
 EXPOSE 5000
 
-# 启动命令
-CMD ["python3", "app.py"]
+# Run the application
+CMD ["./app"]
