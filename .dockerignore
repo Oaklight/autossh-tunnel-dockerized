@@ -1,0 +1,6 @@
+config/
+.git
+__pycache__
+tests/
+docs/
+*.log
