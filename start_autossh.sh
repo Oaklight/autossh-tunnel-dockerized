@@ -41,6 +41,9 @@ start_autossh() {
     fi
 }
 
+# clear old autossh processes if any
+pkill -f "autossh"
+
 # Read the config.yaml file and start autossh for each entry
 while IFS=$'\t' read -r remote_host remote_port local_port direction; do
     start_autossh "$remote_host" "$remote_port" "$local_port" "$direction" &

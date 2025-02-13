@@ -2,7 +2,7 @@
 
 [中文版](README.md) | [English](README_en.md)
 
-This project provides a Docker-based solution to manage SSH tunnels using `autossh` and a YAML configuration file. This setup allows you to easily expose **local services to a remote server through an SSH tunnel** or **map remote services to a local port**, making it convenient to access services behind a firewall.
+This project provides a Docker-based solution to manage SSH tunnels using `autossh` and a YAML configuration file. This setup allows you to easily expose **local services to a remote server through an SSH tunnel** or **map remote services to a local port**, making it convenient to access services behind a firewall. Additionally, it detects changes in `config.yaml` and automatically reloads the service configuration.
 
 ## Table of Contents
 
@@ -32,11 +32,12 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 
 - **Dockerized**: Environment encapsulated with Docker, making it easy to deploy and manage.
 - **Non-root User**: Run container as a non-root user to enhance security.
-- **YAML Configuration**: Define multiple SSH tunnel mappings using the `config.yaml` file.
+- **YAML Configuration**: Define multiple SSH tunnel mappings using the `config.yaml` file and support automatic service reload upon configuration changes.
 - **Autossh**: Automatically maintain SSH connection to ensure tunnels remain active.
 - **Dynamic UID/GID Support**: Set container user's UID and GID dynamically using `PUID` and `PGID` environment variables to match host user permissions.
 - **Multi-architecture Support**: Supports all Alpine base architectures, including `linux/amd64`, `linux/arm64/v8`, `linux/arm/v7`, `linux/arm/v6`, `linux/386`, `linux/ppc64le`, `linux/s390x`, and `linux/riscv64`.
 - **Flexible Direction Configuration**: Support exposing local services to a remote server (`local_to_remote`) or mapping remote services to a local port (`remote_to_local`).
+- **Automatic Reload**: Detect changes in `config.yaml` and automatically reload the service configuration.
 
 ## Prerequisites
 

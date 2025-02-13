@@ -2,7 +2,7 @@
 
 [中文版](README.md) | [English](README_en.md)
 
-本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将 **本地服务通过 SSH 隧道暴露到远程服务器**，或将 **远程服务映射到本地端口**，从而方便地访问位于防火墙后的服务。
+本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将 **本地服务通过 SSH 隧道暴露到远程服务器**，或将 **远程服务映射到本地端口**，从而方便地访问位于防火墙后的服务。最新版本可监测 `config.yaml` 变化并自动重载服务。
 
 ## 目录
 
@@ -32,11 +32,12 @@
 
 - **Docker 化**：使用 Docker 封装环境，使其易于部署和管理。
 - **非 root 用户**：以非 root 用户运行容器，增强安全性。
-- **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射。
+- **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射，并支持配置文件变化自动重载。
 - **Autossh**：自动维护 SSH 连接，确保隧道保持活动状态。
 - **动态 UID/GID 支持**：通过 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户的权限。
 - **多架构支持**：现已支持所有 Alpine 的底层架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
+- **自动重载**：检测 `config.yaml` 变化并自动重载服务。
 
 ## 先决条件
 
