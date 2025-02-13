@@ -1,16 +1,16 @@
 # Variables
 IMAGE_NAME_AUTOSSH = oaklight/autossh-tunnel
 IMAGE_TAG_AUTOSSH = latest
-ADDITIONAL_TAGS_AUTOSSH = v1.5.0
+ADDITIONAL_TAGS_AUTOSSH = v1.6.0
 PLATFORMS_AUTOSSH = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
 
 IMAGE_NAME_WEB = oaklight/autossh-tunnel-web-panel
 IMAGE_TAG_WEB = latest
-ADDITIONAL_TAGS_WEB = v1.0.0
-PLATFORMS_WEB = linux/amd64,linux/arm64/v8,linux/arm/v7
+ADDITIONAL_TAGS_WEB = v1.6.0
+PLATFORMS_WEB = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
 
 # Default target
-all: build-autossh build-web
+all: push-autossh push-web
 
 # Build the multi-arch autossh-tunnel image with multiple tags and push
 build-autossh:
@@ -18,7 +18,7 @@ build-autossh:
 	docker buildx build --platform $(PLATFORMS_AUTOSSH) \
 		-t $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH) \
 		$(foreach tag, $(ADDITIONAL_TAGS_AUTOSSH), -t $(IMAGE_NAME_AUTOSSH):$(tag)) \
-		--push .
+		.
 
 # Build the multi-arch web-panel image with multiple tags and push
 build-web:
@@ -26,7 +26,7 @@ build-web:
 	docker buildx build --platform $(PLATFORMS_WEB) \
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
 		$(foreach tag, $(ADDITIONAL_TAGS_WEB), -t $(IMAGE_NAME_WEB):$(tag)) \
-		--push .
+		.
 
 # Push the multi-arch autossh-tunnel image to Docker Hub (only if already built)
 push-autossh:
