@@ -1,6 +1,6 @@
 # 使用 Docker 和 Autossh 管理 SSH 隧道
 
-[中文版](README.md) | [English](README_en.md)
+[中文版](README_zh.md) | [English](README_en.md)
 
 本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将 **本地服务通过 SSH 隧道暴露到远程服务器**，或将 **远程服务映射到本地端口**，从而方便地访问位于防火墙后的服务。最新版本可监测 `config.yaml` 变化并自动重载服务。
 
