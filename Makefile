@@ -1,7 +1,7 @@
 # Variables
 IMAGE_NAME = oaklight/autossh-tunnel
 IMAGE_TAG = latest
-ADDITIONAL_TAGS = v1.4.0
+ADDITIONAL_TAGS = v1.5.0
 PLATFORMS = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
 
 # Default target

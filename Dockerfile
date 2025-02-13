@@ -1,37 +1,24 @@
 # Use an official lightweight Linux image
 FROM alpine:3.20.2 AS base
 
-# Install necessary packages
-RUN apk add --no-cache autossh
+# install dependencies
+RUN apk add --no-cache \
+    autossh \
+    inotify-tools \
+    yq
 
-# Download yq and make it executable
-RUN apk add --no-cache curl && \
-    curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq && \
-    chmod +x /usr/bin/yq && \
-    apk del curl  # Remove curl after use
+# create user and group
+RUN addgroup -g 1000 mygroup && \
+    adduser -D -u 1000 -G mygroup myuser
 
-# Define PUID and PGID as environment variables
-ENV PUID=1000
-ENV PGID=1000
-
-# Create a non-root user and set up the environment, default UID and GID is PUID and PGID
-RUN addgroup -g ${PGID} mygroup && \
-    adduser -u ${PUID} -G mygroup -D myuser
-
-# Create a directory for autossh configuration
-RUN mkdir /etc/autossh && chown myuser:mygroup /etc/autossh
-
-# Copy the entrypoint script
+# copy scripts and setup permssions
 COPY entrypoint.sh /entrypoint.sh
-
-# Copy the start_autossh script
-COPY start_autossh.sh /usr/local/bin/start_autossh
-
-# Make the scripts executable
-RUN chmod +x /entrypoint.sh /usr/local/bin/start_autossh
+COPY start_autossh.sh /start_autossh.sh
+COPY spinoff_monitor.sh /spinoff_monitor.sh
+RUN chmod +x /entrypoint.sh /start_autossh.sh /spinoff_monitor.sh
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Set the default command
-CMD ["/usr/local/bin/start_autossh"]
+CMD ["/start_autossh.sh"]
