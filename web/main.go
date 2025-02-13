@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	configDir       = "config"
-	configFile      = "config/config.yaml"
+	configDir       = "/home/myuser/config"
+	configFile      = "/home/myuser/config/config.yaml"
 	staticDir       = "static"
 	templatesDir    = "templates"
-	backupDir       = "config/backups"
+	backupDir       = "/home/myuser/config/backups"
 	defaultPort     = ":5000"
 )
 
@@ -137,6 +137,30 @@ func saveConfig(config Config) error {
 	return nil
 }
 
+func checkConfigDirectory() error {
+	info, err := os.Stat(configDir)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("config directory '%s' does not exist. Please ensure it is mounted correctly", configDir)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to access config directory '%s': %v", configDir, err)
+	}
+
+	stat, ok := info.Sys().(*syscall.Stat_t)
+	if !ok {
+		return fmt.Errorf("failed to get ownership of config directory '%s'", configDir)
+	}
+
+	uid, gid := int(stat.Uid), int(stat.Gid)
+	expectedUID, expectedGID := os.Getuid(), os.Getgid()
+	if uid != expectedUID || gid != expectedGID {
+		return fmt.Errorf("ownership mismatch for config directory '%s'. Expected UID: %d, GID: %d; Got UID: %d, GID: %d",
+			configDir, expectedUID, expectedGID, uid, gid)
+	}
+
+	return nil
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "index.html")))
 	tmpl.Execute(w, nil)
@@ -169,6 +193,11 @@ func updateConfigHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Check if the config directory exists and has correct ownership
+	if err := checkConfigDirectory(); err != nil {
+		log.Fatalf("Configuration error: %v\n", err)
+	}
+
 	fs := http.FileServer(http.Dir(staticDir))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 

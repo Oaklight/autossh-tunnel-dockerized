@@ -6,7 +6,7 @@ WORKDIR /app
 # Copy the rest of the application code
 COPY web .
 
-# initialize Go modules
+# Initialize Go modules
 RUN go mod init app
 
 # Force regenerate go.sum and download dependencies
@@ -18,6 +18,10 @@ RUN CGO_ENABLED=0 go build -o app .
 # Final stage
 FROM alpine:3.21
 
+# Create a non-root user with default UID/GID (will be overridden in entrypoint.sh)
+RUN addgroup -g 1000 mygroup && \
+    adduser -D -u 1000 -G mygroup myuser
+
 WORKDIR /app
 
 # Copy the compiled binary from the builder stage
@@ -27,8 +31,15 @@ COPY --from=builder /app/app .
 COPY web/static /app/static
 COPY web/templates /app/templates
 
+# Copy entrypoint script
+COPY web/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose the application port
 EXPOSE 5000
 
-# Run the application
+# Set the entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Run the application as myuser
 CMD ["./app"]
