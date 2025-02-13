@@ -15,6 +15,9 @@
   - [3. 配置 YAML 文件](#3-配置-yaml-文件)
   - [4. 构建并运行 Docker 容器](#4-构建并运行-docker-容器)
   - [5. 访问服务](#5-访问服务)
+- [网页配置功能](#网页配置功能)
+  - [概述](#概述)
+  - [使用方法](#使用方法)
 - [自定义](#自定义)
   - [添加更多隧道](#添加更多隧道)
   - [修改 Dockerfile](#修改-dockerfile)
@@ -38,6 +41,7 @@
 - **多架构支持**：现已支持所有 Alpine 的底层架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 - **自动重载**：检测 `config.yaml` 变化并自动重载服务。
+- **网页配置功能**：通过网页界面管理隧道配置。
 
 ## 先决条件
 
@@ -148,6 +152,47 @@ docker compose -f compose.dev.yaml up -d
 ### 5. 访问服务
 
 容器运行后，您可以通过远程服务器的指定端口（例如 `remote-host1:22323`）访问本地服务，或通过本地端口（例如 `localhost:8001`）访问远程服务。
+
+## 网页配置功能
+
+### 概述
+
+本项目新增了 **网页配置功能**，允许用户通过网页界面管理 SSH 隧道配置。网页界面提供以下功能：
+
+- 可视化编辑 `config.yaml` 文件。
+- 自动备份配置更改。
+- 实时更新隧道配置，无需重启容器。
+
+### 使用方法
+
+1. **启动网页服务**：
+   确保在 `docker-compose.yaml` 文件中启动 `web` 服务：
+
+   ```yaml
+   services:
+     web:
+       image: oaklight/autossh-tunnel-web-panel:latest
+       ports:
+         - "5000:5000"
+       volumes:
+         - ./config:/home/myuser/config:z
+       environment:
+         - PUID=${PUID:-1000}
+         - PGID=${PGID:-1000}
+         - TZ=Asia/Shanghai
+       restart: always
+   ```
+
+2. **访问网页界面**：
+   打开浏览器并导航到 `http://localhost:5000`。您将看到管理隧道的网页界面。
+
+3. **编辑配置**：
+
+   - 使用网页界面查看和修改 `config.yaml` 文件。
+   - 保存更改，系统将自动备份先前的配置并应用新的配置。
+
+4. **验证更改**：
+   - 检查 `config` 目录，确保新配置已保存，并且备份文件保存在 `backups` 子目录中。
 
 ## 自定义
 
