@@ -3,18 +3,16 @@ FROM golang:1.20-alpine AS builder
 
 WORKDIR /app
 
-# Copy Go module files and generate/update go.sum
-COPY go.mod ./
-RUN go mod tidy
+COPY *.go ./
 
-# Download dependencies
-RUN go mod download
+RUN go mod init app
+RUN go mod tidy
 
 # Copy the rest of the application code
 COPY . .
 
 # Build the Go binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app .
+RUN CGO_ENABLED=0 go build -o app .
 
 # Final stage
 FROM alpine:3.21
