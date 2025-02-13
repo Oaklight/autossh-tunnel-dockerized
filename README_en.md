@@ -161,7 +161,7 @@ This project now includes a **web-based configuration panel** that allows users 
 
 - A visual interface to view and edit the `config.yaml` file.
 - Automatic backup of configuration changes.
-- Real-time updates to the 隧道 configuration without needing to restart the container.
+- Real-time updates to the tunneling configuration without needing to restart the container.
 
 ### Usage
 
