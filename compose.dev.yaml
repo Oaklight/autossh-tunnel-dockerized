@@ -17,6 +17,8 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./config:/app/config
+      - ./config:/home/myuser/config
     environment:
+      - PUID=1000
+      - PGID=1000
       - TZ=Asia/Shanghai

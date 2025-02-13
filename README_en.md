@@ -15,6 +15,9 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
   - [3. Configure YAML File](#3-configure-yaml-file)
   - [4. Build and Run the Docker Container](#4-build-and-run-the-docker-container)
   - [5. Access Services](#5-access-services)
+- [Web-Based Configuration](#web-based-configuration)
+  - [Overview](#overview)
+  - [Usage](#usage)
 - [Customization](#customization)
   - [Add More Tunnels](#add-more-tunnels)
   - [Modify Dockerfile](#modify-dockerfile)
@@ -38,6 +41,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 - **Multi-architecture Support**: Supports all Alpine base architectures, including `linux/amd64`, `linux/arm64/v8`, `linux/arm/v7`, `linux/arm/v6`, `linux/386`, `linux/ppc64le`, `linux/s390x`, and `linux/riscv64`.
 - **Flexible Direction Configuration**: Support exposing local services to a remote server (`local_to_remote`) or mapping remote services to a local port (`remote_to_local`).
 - **Automatic Reload**: Detect changes in `config.yaml` and automatically reload the service configuration.
+- **Web-Based Configuration**: Manage tunnels and configuration updates via a web panel.
 
 ## Prerequisites
 
@@ -148,6 +152,49 @@ docker compose -f compose.dev.yaml up -d
 ### 5. Access Services
 
 Once the container is running, you can access the local service via the specified port on the remote server (e.g., `remote-host1:22323`) or access the remote service through the local port (e.g., `localhost:8001`).
+
+## Web-Based Configuration
+
+### Overview
+
+This project now includes a **web-based configuration panel** that allows users to manage SSH tunnel configurations directly through a web interface. The web panel provides:
+
+- A visual interface to view and edit the `config.yaml` file.
+- Automatic backup of configuration changes.
+- Real-time updates to the 隧道 configuration without needing to restart the container.
+
+### Usage
+
+1. **Start the Web Panel Service**:
+   Ensure the `web` service is running in your `docker-compose.yaml` file:
+
+   ```yaml
+   services:
+     web:
+       image: oaklight/autossh-tunnel-web-panel:latest
+       ports:
+         - "5000:5000"
+       volumes:
+         - ./config:/home/myuser/config:z
+       environment:
+         - PUID=1000
+         - PGID=1000
+         - TZ=Asia/Shanghai
+       restart: always
+   ```
+
+2. **Access the Web Panel**:
+   Open your browser and navigate to `http://localhost:5000`. You will see the web interface for managing tunnels.
+
+3. **Edit Configuration**:
+
+   - Use the web interface to view and modify the `config.yaml` file.
+   - Save changes, and the system will automatically back up the previous configuration and apply the new one.
+
+4. **Verify Changes**:
+   Check the `config` directory to ensure that the new configuration is saved and that the backup files are created in the `backups` subdirectory.
+
+---
 
 ## Customization
 
