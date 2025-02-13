@@ -1,0 +1,34 @@
+# Build stage
+FROM golang:1.20-alpine AS builder
+
+WORKDIR /app
+
+# Copy the rest of the application code
+COPY web .
+
+# initialize Go modules
+RUN go mod init app
+
+# Force regenerate go.sum and download dependencies
+RUN go mod tidy && go mod download
+
+# Build the Go binary
+RUN CGO_ENABLED=0 go build -o app .
+
+# Final stage
+FROM alpine:3.21
+
+WORKDIR /app
+
+# Copy the compiled binary from the builder stage
+COPY --from=builder /app/app .
+
+# Copy static assets (CSS, JS, HTML templates)
+COPY web/static /app/static
+COPY web/templates /app/templates
+
+# Expose the application port
+EXPOSE 5000
+
+# Run the application
+CMD ["./app"]

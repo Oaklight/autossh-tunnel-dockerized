@@ -1,12 +1,23 @@
+name: autotunnel
 services:
   autossh:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
       - AUTOSSH_GATETIME=0
     network_mode: "host"
+    restart: always
+
+  web:
+    image: oaklight/autossh-tunnel-web-panel:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./config:/app/config
+    environment:
+      - TZ=Asia/Shanghai
     restart: always

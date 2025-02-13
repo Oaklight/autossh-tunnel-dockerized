@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Tunnel Config</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>SSH Tunnel Configuration</h1>
+        <table id="tunnelTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Remote Host</th>
+                    <th>Remote Port</th>
+                    <th>Local Port</th>
+                    <th>Direction</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+        <button id="addRow">Add Tunnel</button>
+        <button id="saveConfig">Save</button>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
