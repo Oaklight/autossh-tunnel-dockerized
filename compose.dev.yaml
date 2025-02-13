@@ -9,3 +9,14 @@ services:
       - PGID=1000
       - AUTOSSH_GATETIME=0
     network_mode: "host"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./config:/app/config
+    environment:
+      - TZ=Asia/Shanghai
