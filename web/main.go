@@ -93,48 +93,61 @@ func createDirectoryWithOwnership(dirPath string, uid, gid int, mode os.FileMode
 }
 
 func saveConfig(config Config) error {
-	timestamp := time.Now().Format("20060102150405")
-	backupFile := filepath.Join(backupDir, fmt.Sprintf("config_%s.yaml", timestamp))
+    log.Println("Starting saveConfig...")
+    timestamp := time.Now().Format("20060102150405")
+    backupFile := filepath.Join(backupDir, fmt.Sprintf("config_%s.yaml", timestamp))
 
 	// Get ownership and permissions of the original config file
-	uid, gid, mode, err := getFileOwnershipAndPermissions(configFile)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
+    uid, gid, mode, err := getFileOwnershipAndPermissions(configFile)
+    if err != nil && !os.IsNotExist(err) {
+        log.Printf("Error getting file ownership and permissions: %v\n", err)
+        return err
+    }
 
-	// Ensure the backup directory exists with the correct ownership and permissions
-	if err := createDirectoryWithOwnership(backupDir, uid, gid, mode|os.ModeDir); err != nil {
-		return err
-	}
+    // Ensure the backup directory exists with the correct ownership and permissions
+    // Add execute permission for the owner (0100)
+    backupMode := mode | os.ModeDir | 0100
+
+    // Ensure the backup directory exists with the correct ownership and permissions
+    if err := createDirectoryWithOwnership(backupDir, uid, gid, backupMode); err != nil {
+        log.Printf("Error creating backup directory: %v\n", err)
+        return err
+    }
 
 	// Backup the existing config file if it exists
-	if _, err := os.Stat(configFile); !os.IsNotExist(err) {
-		err := os.Rename(configFile, backupFile)
-		if err != nil {
-			return err
-		}
+    if _, err := os.Stat(configFile); !os.IsNotExist(err) {
+        if err := os.Rename(configFile, backupFile); err != nil {
+            log.Printf("Error backing up config file: %v\n", err)
+            return err
+        }
 
 		// Apply the same ownership and permissions to the backup file
-		if err := setFileOwnershipAndPermissions(backupFile, uid, gid, mode); err != nil {
-			return err
-		}
-	}
+        if err := setFileOwnershipAndPermissions(backupFile, uid, gid, mode); err != nil {
+            log.Printf("Error setting ownership/permissions on backup file: %v\n", err)
+            return err
+        }
+    }
 
 	// Write the new config file
-	data, err := yaml.Marshal(config)
-	if err != nil {
-		return err
-	}
-	if err := ioutil.WriteFile(configFile, data, mode); err != nil {
-		return err
-	}
+    data, err := yaml.Marshal(config)
+    if err != nil {
+        log.Printf("Error marshaling config to YAML: %v\n", err)
+        return err
+    }
+
+    if err := ioutil.WriteFile(configFile, data, mode); err != nil {
+        log.Printf("Error writing config file: %v. Check ownership and permissions.", err)
+        return err
+    }
 
 	// Apply the same ownership and permissions to the new config file
-	if err := setFileOwnershipAndPermissions(configFile, uid, gid, mode); err != nil {
-		return err
-	}
+    if err := setFileOwnershipAndPermissions(configFile, uid, gid, mode); err != nil {
+        log.Printf("Error setting ownership/permissions on config file: %v\n", err)
+        return err
+    }
 
-	return nil
+    log.Println("Config saved successfully.")
+    return nil
 }
 
 func checkConfigDirectory() error {
