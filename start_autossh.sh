@@ -37,7 +37,7 @@ start_autossh() {
         autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -R $target_host:$target_port:$local_host:$local_port $remote_host
     else
         echo "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port"
-        autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -L $local_port:$target_host:$target_port $remote_host
+        autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -L $local_host:$local_port:$target_host:$target_port $remote_host
     fi
 }
 
