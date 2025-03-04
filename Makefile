@@ -24,6 +24,7 @@ build-autossh:
 build-web:
 	@echo "Building and pushing multi-arch Docker image for web-panel with tags: $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) and additional tags: $(ADDITIONAL_TAGS_WEB)..."
 	docker buildx build --platform $(PLATFORMS_WEB) \
+		-f Dockerfile.web \
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
 		$(foreach tag, $(ADDITIONAL_TAGS_WEB), -t $(IMAGE_NAME_WEB):$(tag)) \
 		.
@@ -40,6 +41,7 @@ push-autossh:
 push-web:
 	@echo "Pushing multi-arch Docker image for web-panel to Docker Hub with tags: $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) and additional tags: $(ADDITIONAL_TAGS_WEB)..."
 	docker buildx build --platform $(PLATFORMS_WEB) \
+		-f Dockerfile.web \
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
 		$(foreach tag, $(ADDITIONAL_TAGS_WEB), -t $(IMAGE_NAME_WEB):$(tag)) \
 		--push .
