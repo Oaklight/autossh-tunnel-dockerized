@@ -186,12 +186,15 @@ docker compose -f compose.dev.yaml up -d
 2. **访问网页界面**：
    打开浏览器并导航到 `http://localhost:5000`。您将看到管理隧道的网页界面。
 
-3. **编辑配置**：
+   ![图片](https://github.com/user-attachments/assets/b1c4e4c6-f72b-482b-9849-9af58101468f)
+
+
+4. **编辑配置**：
 
    - 使用网页界面查看和修改 `config.yaml` 文件。
    - 保存更改，系统将自动备份先前的配置并应用新的配置。
 
-4. **验证更改**：
+5. **验证更改**：
    - 检查 `config` 目录，确保新配置已保存，并且备份文件保存在 `backups` 子目录中。
 
 ## 自定义
