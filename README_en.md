@@ -186,12 +186,16 @@ This project now includes a **web-based configuration panel** that allows users 
 2. **Access the Web Panel**:
    Open your browser and navigate to `http://localhost:5000`. You will see the web interface for managing tunnels.
 
-3. **Edit Configuration**:
+   ![图片](https://github.com/user-attachments/assets/a9d7255e-77c1-4f3e-b63e-4a0e67ff4460)
+
+
+
+4. **Edit Configuration**:
 
    - Use the web interface to view and modify the `config.yaml` file.
    - Save changes, and the system will automatically back up the previous configuration and apply the new one.
 
-4. **Verify Changes**:
+5. **Verify Changes**:
    Check the `config` directory to ensure that the new configuration is saved and that the backup files are created in the `backups` subdirectory.
 
 ---
