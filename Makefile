@@ -1,12 +1,12 @@
 # Variables
 IMAGE_NAME_AUTOSSH = oaklight/autossh-tunnel
 IMAGE_TAG_AUTOSSH = latest
-ADDITIONAL_TAGS_AUTOSSH = v1.6.0
+ADDITIONAL_TAGS_AUTOSSH = v1.6.1
 PLATFORMS_AUTOSSH = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
 
 IMAGE_NAME_WEB = oaklight/autossh-tunnel-web-panel
 IMAGE_TAG_WEB = latest
-ADDITIONAL_TAGS_WEB = v1.6.0
+ADDITIONAL_TAGS_WEB = v1.6.1
 PLATFORMS_WEB = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
 
 # Default target
