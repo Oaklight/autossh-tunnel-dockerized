@@ -10,19 +10,18 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 - [Prerequisites](#prerequisites)
 - [Releases](#releases)
 - [Setup](#setup)
-  - [1. Clone the Repository](#1-clone-the-repository)
+  - [1. Download Required Files](#1-download-required-files)
   - [2. Configure SSH Keys](#2-configure-ssh-keys)
   - [3. Configure YAML File](#3-configure-yaml-file)
-  - [4. Build and Run the Docker Container](#4-build-and-run-the-docker-container)
-  - [5. Access Services](#5-access-services)
+  - [4. Configure User Permissions (PUID/PGID)](#4-configure-user-permissions-puidpgid)
+  - [5. Build and Run the Docker Container](#5-build-and-run-the-docker-container)
+  - [6. Access Services](#6-access-services)
+- [SSH Config Configuration Guide](README_ssh_config_en.md)
 - [Web-Based Configuration](#web-based-configuration)
-  - [Overview](#overview)
-  - [Usage](#usage)
 - [Customization](#customization)
   - [Add More Tunnels](#add-more-tunnels)
   - [Modify Dockerfile](#modify-dockerfile)
   - [Modify Entrypoint Script](#modify-entrypoint-script)
-- [Dynamic UID/GID Support](#dynamic-uidgid-support)
 - [Security Considerations](#security-considerations)
 - [Troubleshooting](#troubleshooting)
   - [SSH Key Permissions](#ssh-key-permissions)
@@ -58,9 +57,37 @@ Feel free to use it and provide feedback!
 
 ## Setup
 
-### 1. Clone the Repository
+### 1. Download Required Files
 
-Clone this repository to your local machine:
+For most users, you only need to download the Docker Compose file. You can either:
+
+**Option A: Download files directly**
+
+Create a new directory and download the required files:
+
+```sh
+mkdir autossh-tunnel
+cd autossh-tunnel
+
+# Download docker-compose.yaml (includes both autossh tunnel and web panel services)
+curl -O https://oaklight.github.io/autossh-tunnel-dockerized/compose.yaml
+
+# Create config directory
+mkdir config
+
+# Option 1: Download sample config (if you want to configure manually)
+curl -o config/config.yaml.sample https://oaklight.github.io/autossh-tunnel-dockerized/config/config.yaml.sample
+cp config/config.yaml.sample config/config.yaml
+
+# Option 2: Create empty config (if you want to use web panel for configuration)
+touch config/config.yaml
+```
+
+**Note**: The `compose.yaml` file includes both the autossh tunnel service and the web panel service. The web panel is optional - you can disable it by commenting out the `web` service section in the compose file if you prefer manual configuration.
+
+**Option B: Clone the repository (for developers)**
+
+If you want to modify the source code or build locally:
 
 ```sh
 git clone https://github.com/Oaklight/autossh-tunnel-dockerized.git
@@ -71,11 +98,19 @@ cd autossh-tunnel-dockerized
 
 Ensure your SSH keys are located in the `~/.ssh` directory. This directory should contain your private key files (e.g., `id_ed25519`) and any necessary SSH configuration files.
 
+**Important**: This project heavily relies on the `~/.ssh/config` file for SSH connection configuration. The SSH config file allows you to define connection parameters such as hostnames, usernames, ports, and key files for each remote host. Without proper SSH config setup, the tunnels may fail to establish connections.
+
+For detailed SSH config file setup instructions, please refer to: [SSH Config Configuration Guide](README_ssh_config_en.md)
+
 ### 3. Configure YAML File
+
+You have two options for configuring your SSH tunnels:
+
+#### Option A: Manual Configuration
 
 Edit the `config.yaml` file to define your SSH tunnel mappings. Each entry should specify the remote host, remote port, local port, and direction (`local_to_remote` or `remote_to_local`).
 
-Sample `config.yaml.sample` (copy it to `config.yaml` and make necessary changes):
+Sample configuration:
 
 ```yaml
 tunnels:
@@ -91,6 +126,20 @@ tunnels:
     direction: remote_to_local
   # Add more tunnels as needed
 ```
+
+#### Option B: Web Panel Configuration
+
+If you're using the web panel (included in `compose.yaml`), you can:
+
+- Start with an empty `config/config.yaml` file
+- Access the web interface at `http://localhost:5000`
+- Configure tunnels through the visual interface
+
+**Important Notes for Web Panel Users:**
+
+- The web panel automatically backs up your configuration to `config/backups/` every time you save changes
+- You may need to manually delete old backup files to prevent disk space issues
+- The `config/config.yaml` file must exist (even if empty) for the autossh tunnel service to work properly
 
 #### Advanced Configuration: Specify Bind Addresses
 
@@ -132,7 +181,34 @@ tunnels:
 
 This allows you to flexibly control the IP addresses to which tunnels bind, meeting different network environments and security needs.
 
-### 4. Build and Run the Docker Container
+### 4. Configure User Permissions (PUID/PGID)
+
+**Important**: Before running the containers, make sure to set the correct `PUID` and `PGID` values in your environment or `compose.yaml` file to match your host user's UID and GID. This ensures proper file permissions for the SSH keys and configuration files.
+
+You can check your user's UID and GID with:
+
+```sh
+id
+```
+
+To set the values, you can either:
+
+1. **Set environment variables**:
+
+   ```sh
+   export PUID=$(id -u)
+   export PGID=$(id -g)
+   ```
+
+2. **Edit the compose.yaml file directly**:
+
+   ```yaml
+   environment:
+     - PUID=1000
+     - PGID=1000
+   ```
+
+### 5. Build and Run the Docker Container
 
 #### Use Dockerhub Release Image
 
@@ -149,54 +225,30 @@ docker compose -f compose.dev.yaml build
 docker compose -f compose.dev.yaml up -d
 ```
 
-### 5. Access Services
+### 6. Access Services
 
 Once the container is running, you can access the local service via the specified port on the remote server (e.g., `remote-host1:22323`) or access the remote service through the local port (e.g., `localhost:8001`).
 
 ## Web-Based Configuration
 
-### Overview
+The project includes an optional **web-based configuration panel** for easier tunnel management. The web panel is included in the default `compose.yaml` file but can be disabled if not needed.
 
-This project now includes a **web-based configuration panel** that allows users to manage SSH tunnel configurations directly through a web interface. The web panel provides:
+### Features
 
-- A visual interface to view and edit the `config.yaml` file.
-- Automatic backup of configuration changes.
-- Real-time updates to the tunneling configuration without needing to restart the container.
+- Visual interface to view and edit the `config.yaml` file
+- Automatic backup of configuration changes to `config/backups/`
+- Real-time updates to tunneling configuration without container restart
+- Can start with an empty configuration file
 
-### Usage
+### Access
 
-1. **Start the Web Panel Service**:
-   Ensure the `web` service is running in your `docker-compose.yaml` file:
+Once the containers are running, access the web panel at: `http://localhost:5000`
 
-   ```yaml
-   services:
-     web:
-       image: oaklight/autossh-tunnel-web-panel:latest
-       ports:
-         - "5000:5000"
-       volumes:
-         - ./config:/home/myuser/config:z
-       environment:
-         - PUID=1000
-         - PGID=1000
-         - TZ=Asia/Shanghai
-       restart: always
-   ```
+![Web Panel Interface](https://github.com/user-attachments/assets/a9d7255e-77c1-4f3e-b63e-4a0e67ff4460)
 
-2. **Access the Web Panel**:
-   Open your browser and navigate to `http://localhost:5000`. You will see the web interface for managing tunnels.
+### Backup Management
 
-   ![图片](https://github.com/user-attachments/assets/a9d7255e-77c1-4f3e-b63e-4a0e67ff4460)
-
-
-
-4. **Edit Configuration**:
-
-   - Use the web interface to view and modify the `config.yaml` file.
-   - Save changes, and the system will automatically back up the previous configuration and apply the new one.
-
-5. **Verify Changes**:
-   Check the `config` directory to ensure that the new configuration is saved and that the backup files are created in the `backups` subdirectory.
+The web panel automatically creates backups in `config/backups/` every time you save changes. You may need to manually clean up old backup files to prevent disk space issues.
 
 ---
 
@@ -220,33 +272,6 @@ If you need to customize the Docker environment, you can modify the `Dockerfile`
 ### Modify Entrypoint Script
 
 The `entrypoint.sh` script is responsible for reading the `config.yaml` file and starting SSH tunnels. If you need to add extra functionality or change how tunnels are managed, you can modify this script.
-
-## Dynamic UID/GID Support
-
-To ensure that the permissions of the user inside the container match the host user permissions, you can dynamically set the UID and GID of the container user using the `PUID` and `PGID` environment variables in the `compose.yaml` file. For example:
-
-```yaml
-services:
-  autossh:
-    image: oaklight/autossh-tunnel:latest
-    volumes:
-      - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - AUTOSSH_GATETIME=0
-    network_mode: "host"
-    restart: always
-```
-
-Or use the `docker run` command with environment variables:
-
-```bash
-docker run --net host -v ~/.ssh:/home/myuser/.ssh:ro -v ./config:/etc/autossh/config:ro -e PUID=1000 -e PGID=1000 -e AUTOSSH_GATETIME=0 --restart always oaklight/autossh-tunnel:latest
-```
-
-Adjust the `PUID` and `PGID` values according to the UID and GID of the host user to ensure that the container can correctly access the host's `.ssh` directory.
 
 ## Security Considerations
 
