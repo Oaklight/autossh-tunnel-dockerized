@@ -5,30 +5,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SSH Tunnel Config</title>
+    <!-- Material Design CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
-<body>
-    <div class="container">
-        <h1>SSH Tunnel Configuration</h1>
-        <table id="tunnelTable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Remote Host</th>
-                    <th>Remote Port</th>
-                    <th>Local Port</th>
-                    <th>Direction</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows will be dynamically added here -->
-            </tbody>
-        </table>
-        <button id="addRow">Add Tunnel</button>
-        <button id="saveConfig">Save</button>
-    </div>
+<body class="mdc-typography">
+    <!-- App Bar -->
+    <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
+        <div class="mdc-top-app-bar__row">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <span class="mdc-top-app-bar__title">SSH Tunnel Configuration</span>
+            </section>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mdc-top-app-bar--fixed-adjust">
+        <div class="container">
+            <!-- Data Table Card -->
+            <div class="mdc-card tunnel-card">
+                <div class="mdc-card__primary-action">
+                    <div class="mdc-data-table">
+                        <div class="mdc-data-table__table-container">
+                            <table class="mdc-data-table__table" id="tunnelTable">
+                                <thead>
+                                    <tr class="mdc-data-table__header-row">
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Name</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Remote Host</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Remote Port</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Local Port</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Direction</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="mdc-data-table__content">
+                                    <!-- Rows will be dynamically added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="mdc-button mdc-button--raised" id="addRow">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
+                    <span class="mdc-button__label">Add Tunnel</span>
+                </button>
+                <button class="mdc-button mdc-button--unelevated" id="saveConfig">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon" aria-hidden="true">save</i>
+                    <span class="mdc-button__label">Save Configuration</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Material Design JavaScript -->
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <script src="/static/script.js"></script>
 </body>
 
