@@ -6,7 +6,7 @@ PLATFORMS_AUTOSSH = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/3
 
 IMAGE_NAME_WEB = oaklight/autossh-tunnel-web-panel
 IMAGE_TAG_WEB = latest
-ADDITIONAL_TAGS_WEB = v1.6.1
+ADDITIONAL_TAGS_WEB = v1.6.2
 PLATFORMS_WEB = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
 
 # Default target
