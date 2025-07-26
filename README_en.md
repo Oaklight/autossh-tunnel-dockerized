@@ -4,6 +4,8 @@
 
 This project provides a Docker-based solution to manage SSH tunnels using `autossh` and a YAML configuration file. This setup allows you to easily expose **local services to a remote server through an SSH tunnel** or **map remote services to a local port**, making it convenient to access services behind a firewall. Additionally, it detects changes in `config.yaml` and automatically reloads the service configuration.
 
+![Web Panel Interface](https://github.com/user-attachments/assets/a9d7255e-77c1-4f3e-b63e-4a0e67ff4460)
+
 ## Table of Contents
 
 - [Features](#features)
@@ -243,8 +245,6 @@ The project includes an optional **web-based configuration panel** for easier tu
 ### Access
 
 Once the containers are running, access the web panel at: `http://localhost:5000`
-
-![Web Panel Interface](https://github.com/user-attachments/assets/a9d7255e-77c1-4f3e-b63e-4a0e67ff4460)
 
 ### Backup Management
 
