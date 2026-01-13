@@ -3,17 +3,28 @@ FROM golang:tip-alpine AS builder
 
 WORKDIR /app
 
+# Install build dependencies
+RUN apk add --no-cache git
+
+# Copy go.mod and go.sum first (if they exist) to leverage Docker cache
+COPY web/go.* ./
+RUN if [ -f go.mod ]; then \
+        go mod download; \
+    else \
+        go mod init app && \
+        echo 'module app' > go.mod && \
+        echo 'go 1.21' >> go.mod && \
+        echo 'require gopkg.in/yaml.v3 v3.0.1' >> go.mod; \
+    fi
+
 # Copy the rest of the application code
-COPY web .
+COPY web/*.go ./
 
-# Initialize Go modules
-RUN go mod init app
-
-# Force regenerate go.sum and download dependencies
+# Tidy modules and download any missing dependencies
 RUN go mod tidy && go mod download
 
-# Build the Go binary
-RUN CGO_ENABLED=0 go build -o app .
+# Build the Go binary with optimizations
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o app .
 
 # Final stage
 FROM alpine:3.22.0

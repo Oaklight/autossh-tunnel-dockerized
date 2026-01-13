@@ -51,6 +51,8 @@ build-test-autossh:
 	@echo "Building amd64 Docker image for local testing of autossh-tunnel with tag: $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH)..."
 	docker buildx build --platform linux/amd64 \
 		-t $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH) \
+		--cache-from type=local,src=/tmp/.buildx-cache-autossh \
+		--cache-to type=local,dest=/tmp/.buildx-cache-autossh,mode=max \
 		--load .
 
 # Build a single-arch (amd64) web-panel image for local development and testing
@@ -59,6 +61,8 @@ build-test-web:
 	docker buildx build --platform linux/amd64 \
 		-f Dockerfile.web \
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
+		--cache-from type=local,src=/tmp/.buildx-cache-web \
+		--cache-to type=local,dest=/tmp/.buildx-cache-web,mode=max \
 		--load .
 
 # Clean up local Docker images for both autossh-tunnel and web-panel
@@ -67,16 +71,22 @@ clean:
 	docker rmi $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH) $(foreach tag, $(ADDITIONAL_TAGS_AUTOSSH), $(IMAGE_NAME_AUTOSSH):$(tag)) || true
 	docker rmi $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) $(foreach tag, $(ADDITIONAL_TAGS_WEB), $(IMAGE_NAME_WEB):$(tag)) || true
 
+# Clean build cache
+clean-cache:
+	@echo "Cleaning build cache..."
+	rm -rf /tmp/.buildx-cache-autossh /tmp/.buildx-cache-web
+
 # Help target to show available commands
 help:
 	@echo "Available targets:"
-	@echo "  build-autossh     - Build and push the multi-arch autossh-tunnel Docker image"
-	@echo "  build-web         - Build and push the multi-arch web-panel Docker image"
-	@echo "  push-autossh      - Push the multi-arch autossh-tunnel Docker image to Docker Hub (only if already built)"
-	@echo "  push-web          - Push the multi-arch web-panel Docker image to Docker Hub (only if already built)"
-	@echo "  build-test-autossh - Build a single-arch (amd64) autossh-tunnel Docker image for local testing"
-	@echo "  build-test-web    - Build a single-arch (amd64) web-panel Docker image for local testing"
-	@echo "  clean             - Clean up local Docker images for both autossh-tunnel and web-panel"
-	@echo "  help              - Show this help message"
+	@echo "  build-autossh      - Build and push the multi-arch autossh-tunnel Docker image"
+	@echo "  build-web          - Build and push the multi-arch web-panel Docker image"
+	@echo "  push-autossh       - Push the multi-arch autossh-tunnel Docker image to Docker Hub"
+	@echo "  push-web           - Push the multi-arch web-panel Docker image to Docker Hub"
+	@echo "  build-test-autossh - Build amd64 autossh-tunnel image for local testing (with cache)"
+	@echo "  build-test-web     - Build amd64 web-panel image for local testing (with cache)"
+	@echo "  clean              - Clean up local Docker images"
+	@echo "  clean-cache        - Clean up build cache"
+	@echo "  help               - Show this help message"
 
-.PHONY: all build-autossh build-web push-autossh push-web build-test-autossh build-test-web clean help
+.PHONY: all build-autossh build-web push-autossh push-web build-test-autossh build-test-web clean clean-cache help
