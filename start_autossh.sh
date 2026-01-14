@@ -3,6 +3,9 @@
 # Load the configuration from config.yaml
 CONFIG_FILE="/etc/autossh/config/config.yaml"
 LOG_DIR="/var/log/autossh"
+# Default log size threshold: 100KB (102400 bytes)
+# This keeps recent status entries for web monitoring while preventing log bloat
+LOG_SIZE=${LOG_SIZE:-102400}
 
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
@@ -28,6 +31,76 @@ generate_log_id() {
 
 	# Generate MD5 hash (first 8 characters for readability)
 	echo -n "$config_string" | md5sum | cut -c1-8
+}
+
+# Function to extract header block from log file
+extract_header() {
+	local log_file=$1
+	local header=""
+	local in_header=0
+
+	while IFS= read -r line; do
+		if echo "$line" | grep -q "^========================================="; then
+			if [ $in_header -eq 0 ]; then
+				in_header=1
+				header="${header}${line}\n"
+			else
+				header="${header}${line}\n"
+				break
+			fi
+		elif [ $in_header -eq 1 ]; then
+			header="${header}${line}\n"
+		fi
+	done <"$log_file"
+
+	printf "%b" "$header"
+}
+
+# Function to check and compress log if needed
+check_and_compress_log() {
+	local log_file=$1
+
+	# Check if file exists and get its size
+	if [ ! -f "$log_file" ]; then
+		return 0
+	fi
+
+	local log_size=$(stat -f%z "$log_file" 2>/dev/null || stat -c%s "$log_file" 2>/dev/null)
+
+	# Check if file size exceeds threshold
+	if [ "$log_size" -lt "$LOG_SIZE" ]; then
+		return 0
+	fi
+
+	echo "[$(date '+%Y-%m-%d %H:%M:%S')] Log file size ($log_size bytes) exceeds threshold ($LOG_SIZE bytes), compressing..."
+
+	# Extract header block
+	local header=$(extract_header "$log_file")
+
+	# Generate timestamp for compressed file
+	local timestamp=$(date '+%Y%m%d_%H%M%S')
+	local compressed_file="${log_file%.log}_${timestamp}.log.gz"
+
+	# Compress the log file
+	if gzip -c "$log_file" >"$compressed_file"; then
+		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Created compressed file: $compressed_file"
+
+		# Recreate log file with header only
+		printf "%b" "$header" >"$log_file"
+
+		# Add compression notice to the new log file
+		{
+			echo "[$(date '+%Y-%m-%d %H:%M:%S')] Previous log compressed to: $(basename "$compressed_file")"
+			echo "[$(date '+%Y-%m-%d %H:%M:%S')] Log rotation performed due to size threshold (${LOG_SIZE} bytes)"
+			echo "========================================="
+		} >>"$log_file"
+
+		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Log file reset with header preserved"
+	else
+		echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Failed to compress $log_file"
+		rm -f "$compressed_file"
+		return 1
+	fi
 }
 
 # Function to start autossh
@@ -69,6 +142,9 @@ start_autossh() {
 	else
 		local_host="localhost"
 	fi
+
+	# Check and compress log if needed before starting
+	check_and_compress_log "$log_file"
 
 	if [ "$direction" = "local_to_remote" ]; then
 		echo "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port [Log ID: ${log_id}]"

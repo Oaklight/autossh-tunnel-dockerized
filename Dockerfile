@@ -19,7 +19,8 @@ RUN mkdir -p /var/log/autossh && \
 COPY entrypoint.sh /entrypoint.sh
 COPY start_autossh.sh /start_autossh.sh
 COPY spinoff_monitor.sh /spinoff_monitor.sh
-RUN chmod +x /entrypoint.sh /start_autossh.sh /spinoff_monitor.sh
+COPY compress_logs.sh /compress_logs.sh
+RUN chmod +x /entrypoint.sh /start_autossh.sh /spinoff_monitor.sh /compress_logs.sh /tests/*.sh
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
