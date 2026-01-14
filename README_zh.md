@@ -16,7 +16,8 @@
   - [4. 配置用户权限 (PUID/PGID)](#4-配置用户权限-puidpgid)
   - [5. 构建并运行 Docker 容器](#5-构建并运行-docker-容器)
   - [6. 访问服务](#6-访问服务)
-- [SSH 配置文件配置指南](README_ssh_config_zh.md)
+- [SSH 配置文件配置指南](docs/zh/ssh_config.md)
+- [构建优化指南](docs/zh/build_optimization.md)
 - [日志系统](docs/zh/logging.md)
 - [网页配置功能](#网页配置功能)
 - [自定义](#自定义)
@@ -42,7 +43,7 @@
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 - **自动重载**：检测 `config.yaml` 变化并自动重载服务。
 - **网页配置功能**：通过网页界面管理隧道配置。
-- **独立日志系统**：为每个隧道连接创建独立的日志文件，基于配置内容生成唯一的日志ID。详见 [日志系统文档](docs/zh/logging.md)。
+- **独立日志系统**：为每个隧道连接创建独立的日志文件，基于配置内容生成唯一的日志 ID。详见 [日志系统文档](docs/zh/logging.md)。
 
 ## 先决条件
 
@@ -111,7 +112,7 @@ cd autossh-tunnel-dockerized
 
 **重要提示**：本项目严重依赖 `~/.ssh/config` 文件进行 SSH 连接配置。SSH 配置文件允许您为每个远程主机定义连接参数，如主机名、用户名、端口和密钥文件。如果没有正确的 SSH 配置设置，隧道可能无法建立连接。
 
-有关详细的 SSH 配置文件设置说明，请参阅：[SSH 配置文件配置指南](README_ssh_config_zh.md)
+有关详细的 SSH 配置文件设置说明，请参阅：[SSH 配置文件配置指南](docs/zh/ssh_config.md)
 
 ### 3. 配置 YAML 文件
 

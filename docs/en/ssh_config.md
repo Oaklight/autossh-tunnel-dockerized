@@ -1,55 +1,55 @@
-# SSH 配置文件配置指南
+# SSH Config Configuration Guide
 
-[中文版](README_ssh_config_zh.md) | [English](README_ssh_config_en.md)
+[中文版](../zh/ssh_config.md) | [English](../en/ssh_config.md)
 
-本指南说明如何配置SSH配置文件（`~/.ssh/config`）以便与autossh-tunnel-dockerized项目配合使用。SSH配置文件对于定义连接参数和确保隧道顺利建立至关重要。
+This guide explains how to configure the SSH config file (`~/.ssh/config`) for use with the autossh-tunnel-dockerized project. The SSH config file is essential for defining connection parameters and ensuring smooth tunnel establishment.
 
-## 目录
+## Table of Contents
 
-- [概述](#概述)
-- [SSH配置文件位置](#ssh配置文件位置)
-- [基础配置](#基础配置)
-- [高级配置](#高级配置)
-- [常见配置示例](#常见配置示例)
-- [安全最佳实践](#安全最佳实践)
-- [故障排除](#故障排除)
+- [Overview](#overview)
+- [SSH Config File Location](#ssh-config-file-location)
+- [Basic Configuration](#basic-configuration)
+- [Advanced Configuration](#advanced-configuration)
+- [Common Configuration Examples](#common-configuration-examples)
+- [Security Best Practices](#security-best-practices)
+- [Troubleshooting](#troubleshooting)
 
-## 概述
+## Overview
 
-SSH配置文件（`~/.ssh/config`）允许您为SSH主机定义连接参数，包括：
+The SSH config file (`~/.ssh/config`) allows you to define connection parameters for SSH hosts, including:
 
-- 主机别名和真实主机名
-- 每个主机的用户名
-- SSH端口号
-- 私钥文件
-- 连接选项和超时设置
-- 代理配置
+- Host aliases and real hostnames
+- Username for each host
+- SSH port numbers
+- Private key files
+- Connection options and timeouts
+- Proxy configurations
 
-本项目严重依赖SSH配置文件，因为：
+This project relies heavily on the SSH config file because:
 
-1. **主机识别**：`config.yaml`中的`remote_host`参数引用您SSH配置中的条目
-2. **身份验证**：SSH配置指定每个主机使用哪些私钥
-3. **连接参数**：超时、端口和其他连接设置在此定义
-4. **简化配置**：无需在每个隧道中指定完整的连接详细信息，您可以使用简单的主机别名
+1. **Host Identification**: The `remote_host` parameter in `config.yaml` references entries in your SSH config
+2. **Authentication**: SSH config specifies which private keys to use for each host
+3. **Connection Parameters**: Timeouts, ports, and other connection settings are defined here
+4. **Simplified Configuration**: Instead of specifying full connection details in each tunnel, you can use simple host aliases
 
-## SSH配置文件位置
+## SSH Config File Location
 
-SSH配置文件应位于：
+The SSH config file should be located at:
 
 ```bash
 ~/.ssh/config
 ```
 
-如果此文件不存在，请创建它：
+If this file doesn't exist, create it:
 
 ```bash
 touch ~/.ssh/config
 chmod 600 ~/.ssh/config
 ```
 
-## 基础配置
+## Basic Configuration
 
-### 简单主机配置
+### Simple Host Configuration
 
 ```ssh-config
 Host myserver
@@ -59,7 +59,7 @@ Host myserver
     IdentityFile ~/.ssh/id_ed25519
 ```
 
-### 多个主机
+### Multiple Hosts
 
 ```ssh-config
 Host server1
@@ -81,23 +81,23 @@ Host jumphost
     IdentityFile ~/.ssh/jump_key
 ```
 
-## 高级配置
+## Advanced Configuration
 
-### 连接优化
+### Connection Optimization
 
 ```ssh-config
 Host *
-    # 启用连接复用
+    # Enable connection multiplexing
     ControlMaster auto
     ControlPath ~/.ssh/sockets/ssh_mux_%h_%p_%r
     ControlPersist 600
-    
-    # 连接超时设置
+
+    # Connection timeouts
     ServerAliveInterval 60
     ServerAliveCountMax 3
     ConnectTimeout 10
-    
-    # 安全设置
+
+    # Security settings
     StrictHostKeyChecking yes
     UserKnownHostsFile ~/.ssh/known_hosts
 
@@ -106,14 +106,14 @@ Host production-server
     User deploy
     Port 22
     IdentityFile ~/.ssh/production_key
-    
-    # 此主机的特定设置
+
+    # Specific settings for this host
     ServerAliveInterval 30
     TCPKeepAlive yes
     Compression yes
 ```
 
-### 跳板机配置
+### Jump Host Configuration
 
 ```ssh-config
 Host jumphost
@@ -128,12 +128,12 @@ Host internal-server
     Port 22
     IdentityFile ~/.ssh/internal_key
     ProxyJump jumphost
-    
-    # 旧版SSH的替代语法
+
+    # Alternative syntax for older SSH versions
     # ProxyCommand ssh -W %h:%p jumphost
 ```
 
-### 通配符模式
+### Wildcard Patterns
 
 ```ssh-config
 Host *.internal
@@ -150,9 +150,9 @@ Host dev-*
     UserKnownHostsFile /dev/null
 ```
 
-## 常见配置示例
+## Common Configuration Examples
 
-### 示例1：简单VPS配置
+### Example 1: Simple VPS Configuration
 
 ```ssh-config
 Host vps1
@@ -164,7 +164,7 @@ Host vps1
     ServerAliveCountMax 3
 ```
 
-对应的`config.yaml`条目：
+Corresponding `config.yaml` entry:
 
 ```yaml
 tunnels:
@@ -174,7 +174,7 @@ tunnels:
     direction: local_to_remote
 ```
 
-### 示例2：带跳板机的企业环境
+### Example 2: Corporate Environment with Jump Host
 
 ```ssh-config
 Host corporate-jump
@@ -191,7 +191,7 @@ Host internal-db
     ProxyJump corporate-jump
 ```
 
-对应的`config.yaml`条目：
+Corresponding `config.yaml` entry:
 
 ```yaml
 tunnels:
@@ -201,7 +201,7 @@ tunnels:
     direction: remote_to_local
 ```
 
-### 示例3：多环境配置
+### Example 3: Multiple Environments
 
 ```ssh-config
 Host dev-server
@@ -224,11 +224,11 @@ Host prod-server
     StrictHostKeyChecking yes
 ```
 
-## 安全最佳实践
+## Security Best Practices
 
-### 1. 文件权限
+### 1. File Permissions
 
-确保SSH文件具有正确的权限：
+Ensure proper permissions for SSH files:
 
 ```bash
 chmod 700 ~/.ssh
@@ -238,22 +238,22 @@ chmod 644 ~/.ssh/id_*.pub
 chmod 600 ~/.ssh/known_hosts
 ```
 
-### 2. 密钥管理
+### 2. Key Management
 
 ```ssh-config
 Host *
-    # 仅使用配置中指定的密钥
+    # Only use keys specified in config
     IdentitiesOnly yes
-    
-    # 禁用密码认证
+
+    # Disable password authentication
     PasswordAuthentication no
     PubkeyAuthentication yes
-    
-    # 使用强加密算法
+
+    # Use strong ciphers
     Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
 ```
 
-### 3. 主机验证
+### 3. Host Verification
 
 ```ssh-config
 Host trusted-servers
@@ -267,24 +267,24 @@ Host dev-*
     LogLevel QUIET
 ```
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **权限被拒绝**
+1. **Permission Denied**
 
    ```bash
    chmod 600 ~/.ssh/config
    chmod 600 ~/.ssh/private_key
    ```
 
-2. **主机密钥验证失败**
+2. **Host Key Verification Failed**
 
    ```bash
    ssh-keyscan -H hostname >> ~/.ssh/known_hosts
    ```
 
-3. **连接超时**
+3. **Connection Timeout**
 
    ```ssh-config
    Host slow-server
@@ -293,24 +293,24 @@ Host dev-*
        ServerAliveCountMax 10
    ```
 
-### 测试SSH配置
+### Testing SSH Configuration
 
-在使用autossh之前测试您的SSH配置：
+Test your SSH config before using with autossh:
 
 ```bash
-# 测试连接
+# Test connection
 ssh -T hostname
 
-# 详细输出测试
+# Test with verbose output
 ssh -v hostname
 
-# 测试特定配置文件
+# Test specific config file
 ssh -F ~/.ssh/config hostname
 ```
 
-### 调试模式
+### Debug Mode
 
-在SSH配置中启用调试模式：
+Enable debug mode in your SSH config:
 
 ```ssh-config
 Host debug-server
@@ -320,18 +320,18 @@ Host debug-server
     IdentityFile ~/.ssh/debug_key
 ```
 
-## 与Autossh隧道集成
+## Integration with Autossh Tunnel
 
-在autossh-tunnel项目中使用此SSH配置时：
+When using this SSH config with the autossh-tunnel project:
 
-1. **主机引用**：使用SSH配置中的`Host`名称作为`config.yaml`中的`remote_host`值
-2. **身份验证**：确保`IdentityFile`路径正确且可从Docker容器内访问
-3. **权限**：`~/.ssh`目录在容器中以只读方式挂载
-4. **测试**：在配置隧道之前始终手动测试SSH连接
+1. **Host References**: Use the `Host` names from your SSH config as `remote_host` values in `config.yaml`
+2. **Authentication**: Ensure `IdentityFile` paths are correct and accessible from within the Docker container
+3. **Permissions**: The `~/.ssh` directory is mounted as read-only in the container
+4. **Testing**: Always test SSH connections manually before configuring tunnels
 
-### 集成示例
+### Example Integration
 
-SSH配置（`~/.ssh/config`）：
+SSH Config (`~/.ssh/config`):
 
 ```ssh-config
 Host tunnel-server
@@ -343,7 +343,7 @@ Host tunnel-server
     ServerAliveCountMax 3
 ```
 
-隧道配置（`config/config.yaml`）：
+Tunnel Config (`config/config.yaml`):
 
 ```yaml
 tunnels:
@@ -355,4 +355,4 @@ tunnels:
 
 ---
 
-有关autossh-tunnel项目的更多信息，请参阅主要的[README](README_zh.md)。
+For more information about the autossh-tunnel project, see the main [README](../../README_en.md).

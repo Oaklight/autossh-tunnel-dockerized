@@ -18,7 +18,8 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
   - [4. Configure User Permissions (PUID/PGID)](#4-configure-user-permissions-puidpgid)
   - [5. Build and Run the Docker Container](#5-build-and-run-the-docker-container)
   - [6. Access Services](#6-access-services)
-- [SSH Config Configuration Guide](README_ssh_config_en.md)
+- [SSH Config Configuration Guide](docs/en/ssh_config.md)
+- [Build Optimization Guide](docs/en/build_optimization.md)
 - [Logging System](docs/en/logging.md)
 - [Web-Based Configuration](#web-based-configuration)
 - [Customization](#customization)
@@ -107,7 +108,7 @@ Ensure your SSH keys are located in the `~/.ssh` directory. This directory shoul
 
 **Important**: This project heavily relies on the `~/.ssh/config` file for SSH connection configuration. The SSH config file allows you to define connection parameters such as hostnames, usernames, ports, and key files for each remote host. Without proper SSH config setup, the tunnels may fail to establish connections.
 
-For detailed SSH config file setup instructions, please refer to: [SSH Config Configuration Guide](README_ssh_config_en.md)
+For detailed SSH config file setup instructions, please refer to: [SSH Config Configuration Guide](docs/en/ssh_config.md)
 
 ### 3. Configure YAML File
 
