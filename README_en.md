@@ -19,6 +19,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
   - [5. Build and Run the Docker Container](#5-build-and-run-the-docker-container)
   - [6. Access Services](#6-access-services)
 - [SSH Config Configuration Guide](README_ssh_config_en.md)
+- [Logging System](docs/en/logging.md)
 - [Web-Based Configuration](#web-based-configuration)
 - [Customization](#customization)
   - [Add More Tunnels](#add-more-tunnels)
@@ -43,6 +44,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 - **Flexible Direction Configuration**: Support exposing local services to a remote server (`local_to_remote`) or mapping remote services to a local port (`remote_to_local`).
 - **Automatic Reload**: Detect changes in `config.yaml` and automatically reload the service configuration.
 - **Web-Based Configuration**: Manage tunnels and configuration updates via a web panel.
+- **Separate Logging System**: Creates separate log files for each tunnel connection with unique log IDs based on configuration content. See [Logging System Documentation](docs/en/logging.md).
 
 ## Prerequisites
 
@@ -83,6 +85,9 @@ cp config/config.yaml.sample config/config.yaml
 
 # Option 2: Create empty config (if you want to use web panel for configuration)
 touch config/config.yaml
+
+# Create logs directory
+mkdir logs
 ```
 
 **Note**: The `compose.yaml` file includes both the autossh tunnel service and the web panel service. The web panel is optional - you can disable it by commenting out the `web` service section in the compose file if you prefer manual configuration.
@@ -317,6 +322,21 @@ Check Docker container logs for any errors:
 ```sh
 docker compose logs -f
 ```
+
+View specific tunnel log files:
+
+```bash
+# List all tunnel logs
+ls -lh ./logs/
+
+# View specific log file
+cat ./logs/tunnel_<log_id>.log
+
+# Monitor logs in real-time
+tail -f ./logs/tunnel_<log_id>.log
+```
+
+For more information about logging, please refer to the [Logging System Documentation](docs/en/logging.md).
 
 ## License
 
