@@ -17,13 +17,11 @@ RUN mkdir -p /var/log/autossh && \
 
 # copy scripts and setup permssions
 COPY entrypoint.sh /entrypoint.sh
-COPY start_autossh.sh /start_autossh.sh
-COPY spinoff_monitor.sh /spinoff_monitor.sh
-COPY compress_logs.sh /compress_logs.sh
-RUN chmod +x /entrypoint.sh /start_autossh.sh /spinoff_monitor.sh /compress_logs.sh /tests/*.sh
+COPY scripts/ /scripts/
+RUN chmod +x /entrypoint.sh /scripts/*.sh
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Set the default command
-CMD ["/start_autossh.sh"]
+CMD ["/scripts/start_autossh.sh"]
