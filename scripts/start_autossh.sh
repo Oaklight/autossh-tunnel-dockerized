@@ -10,8 +10,8 @@ LOG_SIZE=${LOG_SIZE:-102400}
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-# Clear old log files for fresh start
-rm -f "$LOG_DIR"/tunnel_*.log
+# Clear old log files for fresh start (including compressed files)
+rm -f "$LOG_DIR"/tunnel_*.log "$LOG_DIR"/tunnel_*.log.gz
 
 # Function to parse YAML and extract tunnel configurations
 parse_config() {
@@ -149,11 +149,11 @@ start_autossh() {
 	if [ "$direction" = "local_to_remote" ]; then
 		echo "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port [Log ID: ${log_id}]"
 		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
-		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
+		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "LogLevel=VERBOSE" -o "ExitOnForwardFailure=yes" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
 	else
 		echo "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port [Log ID: ${log_id}]"
 		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
-		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
+		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "LogLevel=VERBOSE" -o "ExitOnForwardFailure=yes" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
 	fi
 }
 
