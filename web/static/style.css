@@ -101,12 +101,18 @@ body {
 
 .mdc-data-table__header-cell:nth-child(5),
 .mdc-data-table__cell:nth-child(5) {
-  width: 16%;
-  min-width: 140px;
+  width: 14%;
+  min-width: 130px;
 }
 
 .mdc-data-table__header-cell:nth-child(6),
 .mdc-data-table__cell:nth-child(6) {
+  width: 15%;
+  min-width: 140px;
+}
+
+.mdc-data-table__header-cell:nth-child(7),
+.mdc-data-table__cell:nth-child(7) {
   width: 6%;
   min-width: 60px;
 }
@@ -345,4 +351,135 @@ body {
 
 .new-row {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Status Indicator Styles */
+.status-cell {
+  padding: 8px 12px !important;
+}
+
+.status-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.status-icon {
+  font-size: 18px !important;
+}
+
+.status-text {
+  line-height: 1;
+}
+
+/* Status Badge Colors */
+.status-connected {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.status-disconnected {
+  background-color: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+.status-error {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.status-unknown {
+  background-color: #f5f5f5;
+  color: #757575;
+  border: 1px solid #e0e0e0;
+}
+
+/* Status Details */
+.status-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+}
+
+.status-message {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-time {
+  color: #999;
+  font-size: 10px;
+}
+
+/* Pulsing animation for connected status */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.status-connected .status-icon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Responsive adjustments for status column */
+@media (max-width: 1024px) {
+  .status-badge {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  
+  .status-icon {
+    font-size: 16px !important;
+  }
+  
+  .status-details {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  
+  .status-icon {
+    font-size: 14px !important;
+  }
+  
+  .status-text {
+    display: none;
+  }
+  
+  .status-details {
+    display: none !important;
+  }
 }
