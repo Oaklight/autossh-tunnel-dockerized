@@ -17,6 +17,7 @@
   - [5. 构建并运行 Docker 容器](#5-构建并运行-docker-容器)
   - [6. 访问服务](#6-访问服务)
 - [SSH 配置文件配置指南](README_ssh_config_zh.md)
+- [日志系统](docs/zh/logging.md)
 - [网页配置功能](#网页配置功能)
 - [自定义](#自定义)
   - [添加更多隧道](#添加更多隧道)
@@ -41,6 +42,7 @@
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 - **自动重载**：检测 `config.yaml` 变化并自动重载服务。
 - **网页配置功能**：通过网页界面管理隧道配置。
+- **独立日志系统**：为每个隧道连接创建独立的日志文件，基于配置内容生成唯一的日志ID。详见 [日志系统文档](docs/zh/logging.md)。
 
 ## 先决条件
 
@@ -87,6 +89,9 @@ cp config/config.yaml.sample config/config.yaml
 
 # 方式2：创建空配置文件（如果您想使用网页面板进行配置）
 touch config/config.yaml
+
+# 创建日志目录
+mkdir logs
 ```
 
 **注意**：`compose.yaml` 文件包含了 autossh 隧道服务和网页面板服务两个部分。网页面板是可选的 - 如果您更喜欢手动配置，可以在 compose 文件中注释掉 `web` 服务部分来禁用它。
@@ -323,6 +328,21 @@ sudo usermod -aG docker $USER
 ```sh
 docker compose logs -f
 ```
+
+查看特定隧道的日志文件：
+
+```sh
+# 列出所有隧道日志
+ls -lh ./logs/
+
+# 查看特定日志文件
+cat ./logs/tunnel_<log_id>.log
+
+# 实时监控日志
+tail -f ./logs/tunnel_<log_id>.log
+```
+
+更多日志相关信息，请参阅 [日志系统文档](docs/zh/logging.md)。
 
 ## 许可证
 
