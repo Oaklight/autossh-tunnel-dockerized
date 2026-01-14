@@ -4,6 +4,7 @@ services:
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
       - ./config:/etc/autossh/config:ro
+      - ./logs:/var/log/autossh:rw
     environment:
       - PUID=1000
       - PGID=1000

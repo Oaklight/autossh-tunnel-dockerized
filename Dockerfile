@@ -11,6 +11,10 @@ RUN apk add --no-cache \
 RUN addgroup -g 1000 mygroup && \
     adduser -D -u 1000 -G mygroup myuser
 
+# create log directory
+RUN mkdir -p /var/log/autossh && \
+    chown myuser:mygroup /var/log/autossh
+
 # copy scripts and setup permssions
 COPY entrypoint.sh /entrypoint.sh
 COPY start_autossh.sh /start_autossh.sh

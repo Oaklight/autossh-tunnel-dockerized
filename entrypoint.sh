@@ -9,8 +9,14 @@ PGID=${PGID:-1000}
 
 # Modify the existing user and group to match PUID and PGID
 if [ "$(id -u myuser)" != "$PUID" ] || [ "$(id -g myuser)" != "$PGID" ]; then
-    sed -i "s/^myuser:x:[0-9]*:[0-9]*:/myuser:x:$PUID:$PGID:/" /etc/passwd
-    sed -i "s/^mygroup:x:[0-9]*:/mygroup:x:$PGID:/" /etc/group
+	sed -i "s/^myuser:x:[0-9]*:[0-9]*:/myuser:x:$PUID:$PGID:/" /etc/passwd
+	sed -i "s/^mygroup:x:[0-9]*:/mygroup:x:$PGID:/" /etc/group
+fi
+
+# Ensure log directory has correct permissions
+if [ -d /var/log/autossh ]; then
+	chown -R myuser:mygroup /var/log/autossh
+	chmod -R 755 /var/log/autossh
 fi
 
 # Switch to myuser and execute the command passed as arguments
