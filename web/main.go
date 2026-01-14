@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -9,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -18,6 +21,7 @@ import (
 const (
 	configDir       = "/home/myuser/config"
 	configFile      = "/home/myuser/config/config.yaml"
+	logsDir         = "/home/myuser/logs"
 	staticDir       = "static"
 	templatesDir    = "templates"
 	backupDir       = "/home/myuser/config/backups"
@@ -34,6 +38,19 @@ type Tunnel struct {
 
 type Config struct {
 	Tunnels []Tunnel `yaml:"tunnels" json:"tunnels"`
+}
+
+type TunnelStatus struct {
+	Tunnel
+	LogID      string `json:"log_id"`
+	Status     string `json:"status"`      // "connected", "disconnected", "error", "unknown"
+	LastUpdate string `json:"last_update"` // Last log entry timestamp
+	Message    string `json:"message"`     // Latest status message
+}
+
+type StatusResponse struct {
+	Tunnels   []TunnelStatus `json:"tunnels"`
+	Timestamp string         `json:"timestamp"`
 }
 
 func loadConfig() (Config, error) {
@@ -205,6 +222,129 @@ func updateConfigHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status": "success"}`))
 }
 
+// generateLogID generates the same log ID as the shell script
+func generateLogID(tunnel Tunnel) string {
+	configString := fmt.Sprintf("%s:%s:%s:%s",
+		tunnel.RemoteHost,
+		tunnel.RemotePort,
+		tunnel.LocalPort,
+		tunnel.Direction)
+	hash := fmt.Sprintf("%x", md5.Sum([]byte(configString)))
+	return hash[:8]
+}
+
+// parseLogFile reads a log file and extracts status information
+func parseLogFile(logPath string) (status, lastUpdate, message string) {
+	status = "unknown"
+	lastUpdate = ""
+	message = "No log data available"
+
+	file, err := os.Open(logPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			status = "disconnected"
+			message = "Log file not found - tunnel may not be running"
+		} else {
+			status = "error"
+			message = fmt.Sprintf("Failed to read log: %v", err)
+		}
+		return
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	if len(lines) == 0 {
+		status = "disconnected"
+		message = "Log file is empty"
+		return
+	}
+
+	// Parse the last few lines to determine status
+	for i := len(lines) - 1; i >= 0 && i >= len(lines)-20; i-- {
+		line := lines[i]
+		
+		// Extract timestamp if present
+		if strings.Contains(line, "[") && strings.Contains(line, "]") {
+			start := strings.Index(line, "[")
+			end := strings.Index(line, "]")
+			if start >= 0 && end > start {
+				lastUpdate = line[start+1 : end]
+			}
+		}
+
+		// Check for connection indicators
+		if strings.Contains(line, "Starting tunnel") {
+			status = "connected"
+			message = "Tunnel is running"
+			return
+		}
+		if strings.Contains(line, "Connection established") ||
+		   strings.Contains(line, "Authenticated to") {
+			status = "connected"
+			message = "Connection established"
+			return
+		}
+		if strings.Contains(line, "Connection closed") ||
+		   strings.Contains(line, "Connection reset") {
+			status = "disconnected"
+			message = "Connection closed"
+			return
+		}
+		if strings.Contains(line, "Permission denied") ||
+		   strings.Contains(line, "Connection refused") ||
+		   strings.Contains(line, "Could not resolve hostname") {
+			status = "error"
+			message = line
+			return
+		}
+	}
+
+	// If we found a timestamp but no clear status, assume connected
+	if lastUpdate != "" {
+		status = "connected"
+		message = "Tunnel appears to be running"
+	}
+
+	return
+}
+
+func getStatusHandler(w http.ResponseWriter, r *http.Request) {
+	config, err := loadConfig()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var statuses []TunnelStatus
+	for _, tunnel := range config.Tunnels {
+		logID := generateLogID(tunnel)
+		logPath := filepath.Join(logsDir, fmt.Sprintf("tunnel_%s.log", logID))
+		
+		status, lastUpdate, message := parseLogFile(logPath)
+		
+		statuses = append(statuses, TunnelStatus{
+			Tunnel:     tunnel,
+			LogID:      logID,
+			Status:     status,
+			LastUpdate: lastUpdate,
+			Message:    message,
+		})
+	}
+
+	response := StatusResponse{
+		Tunnels:   statuses,
+		Timestamp: time.Now().Format("2006-01-02 15:04:05"),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func main() {
 	// Check if the config directory exists and has correct ownership
 	if err := checkConfigDirectory(); err != nil {
@@ -224,6 +364,13 @@ func main() {
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
+	})
+	http.HandleFunc("/api/status", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		getStatusHandler(w, r)
 	})
 
 	fmt.Printf("Starting server on %s\n", defaultPort)
