@@ -1,12 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.querySelector("#tunnelTable tbody");
     let dataTable;
+    let statusUpdateInterval;
+    let tunnelStatuses = {};
 
     // Initialize Material Design Components
     initializeMDC();
 
     // Load initial config
     loadConfiguration();
+
+    // Start status polling
+    startStatusPolling();
 
     // Initialize Material Design Components
     function initializeMDC() {
@@ -53,6 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const row = document.createElement("tr");
         row.className = "mdc-data-table__row new-row";
 
+        // Generate a unique row ID for status tracking
+        const rowId = `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        row.setAttribute('data-row-id', rowId);
+
         row.innerHTML = `
             <td class="mdc-data-table__cell">
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="Tunnel name">
@@ -71,6 +80,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""}>Remote to Local</option>
                     <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""}>Local to Remote</option>
                 </select>
+            </td>
+            <td class="mdc-data-table__cell status-cell">
+                <div class="status-indicator">
+                    <span class="status-badge status-unknown">
+                        <i class="material-icons status-icon">help_outline</i>
+                        <span class="status-text">Unknown</span>
+                    </span>
+                    <div class="status-details" style="display: none;">
+                        <small class="status-message"></small>
+                        <small class="status-time"></small>
+                    </div>
+                </div>
             </td>
             <td class="mdc-data-table__cell">
                 <button class="delete-button deleteRow" title="Delete tunnel">
@@ -173,6 +194,120 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 5000);
     }
 
+    // Load and update tunnel statuses
+    function loadTunnelStatuses() {
+        fetch("/api/status")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.tunnels && Array.isArray(data.tunnels)) {
+                    // Create a map of statuses by tunnel configuration
+                    tunnelStatuses = {};
+                    data.tunnels.forEach((tunnel) => {
+                        const key = `${tunnel.remote_host}:${tunnel.remote_port}:${tunnel.local_port}:${tunnel.direction}`;
+                        tunnelStatuses[key] = tunnel;
+                    });
+                    updateStatusDisplay();
+                }
+            })
+            .catch((error) => {
+                console.error("Error loading tunnel statuses:", error);
+            });
+    }
+
+    // Update status display for all rows
+    function updateStatusDisplay() {
+        const rows = Array.from(tableBody.rows);
+        rows.forEach((row) => {
+            const cells = row.cells;
+            if (cells.length < 6) return;
+
+            const remoteHost = cells[1].querySelector("input")?.value.trim();
+            const remotePort = cells[2].querySelector("input")?.value.trim();
+            const localPort = cells[3].querySelector("input")?.value.trim();
+            const direction = cells[4].querySelector("select")?.value;
+
+            if (!remoteHost || !remotePort || !localPort) return;
+
+            const key = `${remoteHost}:${remotePort}:${localPort}:${direction}`;
+            const statusData = tunnelStatuses[key];
+
+            const statusCell = cells[5];
+            const statusBadge = statusCell.querySelector(".status-badge");
+            const statusText = statusCell.querySelector(".status-text");
+            const statusIcon = statusCell.querySelector(".status-icon");
+            const statusDetails = statusCell.querySelector(".status-details");
+            const statusMessage = statusCell.querySelector(".status-message");
+            const statusTime = statusCell.querySelector(".status-time");
+
+            if (statusData) {
+                // Remove all status classes
+                statusBadge.className = "status-badge";
+                
+                // Add appropriate status class and update content
+                switch (statusData.status) {
+                    case "connected":
+                        statusBadge.classList.add("status-connected");
+                        statusIcon.textContent = "check_circle";
+                        statusText.textContent = "Connected";
+                        break;
+                    case "disconnected":
+                        statusBadge.classList.add("status-disconnected");
+                        statusIcon.textContent = "cancel";
+                        statusText.textContent = "Disconnected";
+                        break;
+                    case "error":
+                        statusBadge.classList.add("status-error");
+                        statusIcon.textContent = "error";
+                        statusText.textContent = "Error";
+                        break;
+                    default:
+                        statusBadge.classList.add("status-unknown");
+                        statusIcon.textContent = "help_outline";
+                        statusText.textContent = "Unknown";
+                }
+
+                // Update status details
+                if (statusData.message) {
+                    statusMessage.textContent = statusData.message;
+                    statusDetails.style.display = "block";
+                }
+                if (statusData.last_update) {
+                    statusTime.textContent = `Last update: ${statusData.last_update}`;
+                }
+            } else {
+                // No status data available
+                statusBadge.className = "status-badge status-unknown";
+                statusIcon.textContent = "help_outline";
+                statusText.textContent = "Unknown";
+                statusDetails.style.display = "none";
+            }
+        });
+    }
+
+    // Start polling for status updates
+    function startStatusPolling() {
+        // Initial load
+        loadTunnelStatuses();
+        
+        // Poll every 5 seconds
+        statusUpdateInterval = setInterval(() => {
+            loadTunnelStatuses();
+        }, 5000);
+    }
+
+    // Stop polling (cleanup)
+    function stopStatusPolling() {
+        if (statusUpdateInterval) {
+            clearInterval(statusUpdateInterval);
+            statusUpdateInterval = null;
+        }
+    }
+
     // Add new row button event
     document.getElementById("addRow").addEventListener("click", () => {
         addRow();
@@ -230,11 +365,20 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(() => {
             showMessage("Configuration saved successfully!", "success");
+            // Reload statuses after saving config
+            setTimeout(() => {
+                loadTunnelStatuses();
+            }, 1000);
         })
         .catch(error => {
             console.error("Error saving configuration:", error);
             showMessage("Failed to save configuration", "error");
         });
+    });
+
+    // Cleanup on page unload
+    window.addEventListener("beforeunload", () => {
+        stopStatusPolling();
     });
 });
 
