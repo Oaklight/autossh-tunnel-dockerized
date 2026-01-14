@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # start the configuration file monitoring in the background
-/spinoff_monitor.sh &
+/scripts/spinoff_monitor.sh &
 
 # Load PUID and PGID from environment variables
 PUID=${PUID:-1000}

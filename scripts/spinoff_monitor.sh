@@ -6,5 +6,5 @@ while true; do
 	echo "检测到配置文件变化，重启 autossh..."
 	echo "Detected configuration file changes, restarting autossh..."
 	pkill -f "autossh"
-	/start_autossh.sh &
+	/scripts/start_autossh.sh &
 done
