@@ -2,6 +2,8 @@ name: autotunnel
 services:
   autossh:
     image: oaklight/autossh-tunnel:latest
+    ports:
+      - "5002:5002" # Control API port
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
       - ./config:/etc/autossh/config:rw
@@ -10,6 +12,7 @@ services:
       - PUID=1000
       - PGID=1000
       - AUTOSSH_GATETIME=0
+      - API_PORT=5002
     network_mode: "host"
     restart: always
 
@@ -24,4 +27,6 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
+      - AUTOSSH_API_URL=http://127.0.0.1:5002
+    network_mode: "host"
     restart: always

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# start the control API server in the background
+/scripts/control_api.sh &
+
 # start the configuration file monitoring in the background
 /scripts/spinoff_monitor.sh &
 

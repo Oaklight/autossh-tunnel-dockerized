@@ -1,0 +1,138 @@
+#!/bin/sh
+
+# Simple HTTP API server for controlling autossh tunnels
+# Listens on port 5001 for control commands
+
+API_PORT=${API_PORT:-5002}
+CONFIG_FILE="/etc/autossh/config/config.yaml"
+LOG_DIR="/var/log/autossh"
+FIFO_DIR="/tmp/api_fifos"
+
+# Create FIFO directory
+mkdir -p "$FIFO_DIR"
+
+# Function to generate log ID (same as in start_autossh.sh)
+generate_log_id() {
+	local remote_host=$1
+	local remote_port=$2
+	local local_port=$3
+	local direction=$4
+	local config_string="${remote_host}:${remote_port}:${local_port}:${direction}"
+	echo -n "$config_string" | md5sum | cut -c1-8
+}
+
+# Function to find tunnel by log ID
+find_tunnel_by_log_id() {
+	local target_log_id=$1
+
+	yq e '.tunnels[] | [.remote_host, .remote_port, .local_port, .direction] | @tsv' "$CONFIG_FILE" |
+		while IFS=$'\t' read -r remote_host remote_port local_port direction; do
+			local log_id=$(generate_log_id "$remote_host" "$remote_port" "$local_port" "$direction")
+			if [ "$log_id" = "$target_log_id" ]; then
+				echo "$remote_host|$remote_port|$local_port|$direction"
+				return 0
+			fi
+		done
+}
+
+# Function to restart a specific tunnel
+restart_tunnel() {
+	local log_id=$1
+
+	# Find tunnel configuration
+	local tunnel_info=$(find_tunnel_by_log_id "$log_id")
+
+	if [ -z "$tunnel_info" ]; then
+		echo '{"success":false,"error":"Tunnel not found"}'
+		return 1
+	fi
+
+	# Parse tunnel info
+	local remote_host=$(echo "$tunnel_info" | cut -d'|' -f1)
+	local remote_port=$(echo "$tunnel_info" | cut -d'|' -f2)
+	local local_port=$(echo "$tunnel_info" | cut -d'|' -f3)
+	local direction=$(echo "$tunnel_info" | cut -d'|' -f4)
+
+	# Kill existing autossh process for this tunnel using the unique TUNNEL_ID
+	pkill -f "TUNNEL_ID=${log_id}" 2>/dev/null
+
+	# Wait for process to terminate
+	sleep 1
+
+	# Restart the tunnel using dedicated restart script as myuser
+	su myuser -c "/scripts/restart_single_tunnel.sh '$remote_host' '$remote_port' '$local_port' '$direction'" >/dev/null 2>&1
+
+	echo "{\"success\":true,\"message\":\"Tunnel restarted successfully\",\"log_id\":\"$log_id\"}"
+	return 0
+}
+
+# Function to handle HTTP request
+handle_request() {
+	local method=""
+	local path=""
+	local line
+
+	# Read request line
+	read -r line
+	method=$(echo "$line" | cut -d' ' -f1 | tr -d '\r')
+	path=$(echo "$line" | cut -d' ' -f2 | tr -d '\r')
+
+	# Read and discard headers
+	while read -r line; do
+		line=$(echo "$line" | tr -d '\r')
+		[ -z "$line" ] && break
+	done
+
+	# Route the request
+	if [ "$method" = "POST" ] && echo "$path" | grep -q "^/restart/"; then
+		local log_id=$(echo "$path" | sed 's|^/restart/||' | tr -d '\r\n')
+		local response=$(restart_tunnel "$log_id")
+
+		printf "HTTP/1.1 200 OK\r\n"
+		printf "Content-Type: application/json\r\n"
+		printf "Access-Control-Allow-Origin: *\r\n"
+		printf "Connection: close\r\n"
+		printf "\r\n"
+		printf "%s\r\n" "$response"
+
+	elif [ "$method" = "OPTIONS" ]; then
+		printf "HTTP/1.1 204 No Content\r\n"
+		printf "Access-Control-Allow-Origin: *\r\n"
+		printf "Access-Control-Allow-Methods: POST, OPTIONS\r\n"
+		printf "Access-Control-Allow-Headers: Content-Type\r\n"
+		printf "Connection: close\r\n"
+		printf "\r\n"
+
+	elif [ "$method" = "GET" ] && [ "$path" = "/health" ]; then
+		printf "HTTP/1.1 200 OK\r\n"
+		printf "Content-Type: application/json\r\n"
+		printf "Connection: close\r\n"
+		printf "\r\n"
+		printf '{"status":"ok"}\r\n'
+
+	else
+		printf "HTTP/1.1 404 Not Found\r\n"
+		printf "Content-Type: application/json\r\n"
+		printf "Connection: close\r\n"
+		printf "\r\n"
+		printf '{"error":"Not found"}\r\n'
+	fi
+}
+
+# Start the server
+echo "Starting control API server on port $API_PORT..."
+
+while true; do
+	# Create unique FIFO for this request
+	FIFO="$FIFO_DIR/req_$$_$(date +%s)"
+	mkfifo "$FIFO" 2>/dev/null
+
+	# Handle request using FIFO
+	nc -l -p "$API_PORT" <"$FIFO" | handle_request >"$FIFO" 2>/dev/null
+
+	# Clean up FIFO
+	rm -f "$FIFO"
+
+	# Small delay to prevent tight loop on error
+	sleep 0.1
+done

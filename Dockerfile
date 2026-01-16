@@ -5,7 +5,8 @@ FROM alpine:3.22.0 AS base
 RUN apk add --no-cache \
     autossh \
     inotify-tools \
-    yq
+    yq \
+    netcat-openbsd
 
 # create user and group
 RUN addgroup -g 1000 mygroup && \

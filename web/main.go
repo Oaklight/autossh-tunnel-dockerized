@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -20,14 +19,25 @@ import (
 )
 
 const (
-	configDir       = "/home/myuser/config"
-	configFile      = "/home/myuser/config/config.yaml"
-	logsDir         = "/home/myuser/logs"
-	staticDir       = "static"
-	templatesDir    = "templates"
-	backupDir       = "/home/myuser/config/backups"
-	defaultPort     = ":5000"
+	configDir    = "/home/myuser/config"
+	configFile   = "/home/myuser/config/config.yaml"
+	logsDir      = "/home/myuser/logs"
+	staticDir    = "static"
+	templatesDir = "templates"
+	backupDir    = "/home/myuser/config/backups"
+	defaultPort  = ":5000"
 )
+
+var (
+	autosshAPIURL = getEnv("AUTOSSH_API_URL", "http://127.0.0.1:5002")
+)
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
 
 type Tunnel struct {
 	Name        string `yaml:"name" json:"name"`
@@ -300,6 +310,14 @@ func parseLogFile(logPath string) (status, lastUpdate, message string) {
 			}
 		}
 
+		// Check for restart indicators (highest priority)
+		if strings.Contains(line, "Restarting tunnel") ||
+		   strings.Contains(line, "Tunnel restart requested") {
+			status = "connected"
+			message = "Tunnel restarting"
+			return
+		}
+
 		// Check for connection indicators
 		if strings.Contains(line, "Starting tunnel") {
 			status = "connected"
@@ -312,18 +330,23 @@ func parseLogFile(logPath string) (status, lastUpdate, message string) {
 			message = "Connected"
 			return
 		}
-		if strings.Contains(line, "Connection closed") ||
-		   strings.Contains(line, "Connection reset") {
-			status = "disconnected"
-			message = "Disconnected"
-			return
-		}
+		
+		// Check for error conditions (before disconnection)
 		if strings.Contains(line, "Permission denied") ||
 		   strings.Contains(line, "Connection refused") ||
 		   strings.Contains(line, "Could not resolve hostname") {
 			status = "error"
 			message = line
 			return
+		}
+		
+		// Check for disconnection (lowest priority)
+		if strings.Contains(line, "Connection closed") ||
+		   strings.Contains(line, "Connection reset") {
+			status = "disconnected"
+			message = "Disconnected"
+			// Don't return immediately - continue checking for restart messages
+			continue
 		}
 	}
 
@@ -497,75 +520,50 @@ func reconnectTunnelHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	logID := parts[3]
 
-	// Find the tunnel configuration for this log ID
-	config, err := loadConfig()
+	// Forward the request to autossh container's control API
+	apiURL := fmt.Sprintf("%s/restart/%s", autosshAPIURL, logID)
+	
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	
+	req, err := http.NewRequest("POST", apiURL, nil)
 	if err != nil {
 		response := ReconnectResponse{
 			Success: false,
-			Error:   fmt.Sprintf("Failed to load config: %v", err),
+			Error:   fmt.Sprintf("Failed to create request: %v", err),
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	var targetTunnel *Tunnel
-	for _, t := range config.Tunnels {
-		if generateLogID(t) == logID {
-			targetTunnel = &t
-			break
-		}
-	}
-
-	if targetTunnel == nil {
+	resp, err := client.Do(req)
+	if err != nil {
 		response := ReconnectResponse{
 			Success: false,
-			Error:   "Tunnel not found",
+			Error:   fmt.Sprintf("Failed to connect to autossh API: %v", err),
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	defer resp.Body.Close()
 
-	// Kill existing autossh processes for this specific tunnel
-	// We need to find the process by matching the tunnel parameters
-	killCmd := fmt.Sprintf("pkill -f 'autossh.*%s.*%s.*%s'",
-		targetTunnel.RemoteHost,
-		targetTunnel.RemotePort,
-		targetTunnel.LocalPort)
-	
-	cmd := exec.Command("sh", "-c", killCmd)
-	if err := cmd.Run(); err != nil {
-		log.Printf("Warning: Failed to kill existing tunnel process: %v", err)
-	}
-
-	// Wait a moment for the process to terminate
-	time.Sleep(500 * time.Millisecond)
-
-	// Restart the tunnel by calling the start script with specific parameters
-	restartCmd := fmt.Sprintf("/scripts/start_autossh.sh '%s' '%s' '%s' '%s' &",
-		targetTunnel.RemoteHost,
-		targetTunnel.RemotePort,
-		targetTunnel.LocalPort,
-		targetTunnel.Direction)
-	
-	cmd = exec.Command("sh", "-c", restartCmd)
-	if err := cmd.Start(); err != nil {
+	// Read and forward the response from autossh API
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		response := ReconnectResponse{
 			Success: false,
-			Error:   fmt.Sprintf("Failed to restart tunnel: %v", err),
+			Error:   fmt.Sprintf("Failed to read response: %v", err),
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	response := ReconnectResponse{
-		Success: true,
-		Message: "Tunnel reconnection initiated successfully",
-	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	w.Write(body)
 }
 
 func main() {
