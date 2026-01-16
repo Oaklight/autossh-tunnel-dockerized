@@ -61,6 +61,10 @@ build-test-web:
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
 		--load .
 
+# Build both autossh and web test images for local development
+build-test: build-test-autossh build-test-web
+	@echo "Both autossh-tunnel and web-panel test images built successfully!"
+
 # Clean up local Docker images for both autossh-tunnel and web-panel
 clean:
 	@echo "Cleaning up local Docker images..."
@@ -70,13 +74,15 @@ clean:
 # Help target to show available commands
 help:
 	@echo "Available targets:"
-	@echo "  build-autossh     - Build and push the multi-arch autossh-tunnel Docker image"
-	@echo "  build-web         - Build and push the multi-arch web-panel Docker image"
-	@echo "  push-autossh      - Push the multi-arch autossh-tunnel Docker image to Docker Hub (only if already built)"
-	@echo "  push-web          - Push the multi-arch web-panel Docker image to Docker Hub (only if already built)"
-	@echo "  build-test-autossh - Build a single-arch (amd64) autossh-tunnel Docker image for local testing"
-	@echo "  build-test-web    - Build a single-arch (amd64) web-panel Docker image for local testing"
-	@echo "  clean             - Clean up local Docker images for both autossh-tunnel and web-panel"
-	@echo "  help              - Show this help message"
+	@echo "  build-autossh      - Build and push the multi-arch autossh-tunnel Docker image"
+	@echo "  build-web          - Build and push the multi-arch web-panel Docker image"
+	@echo "  push-autossh       - Push the multi-arch autossh-tunnel Docker image to Docker Hub"
+	@echo "  push-web           - Push the multi-arch web-panel Docker image to Docker Hub"
+	@echo "  build-test-autossh - Build amd64 autossh-tunnel image for local testing (with cache)"
+	@echo "  build-test-web     - Build amd64 web-panel image for local testing (with cache)"
+	@echo "  build-test         - Build both autossh and web test images for local testing"
+	@echo "  clean              - Clean up local Docker images"
+	@echo "  clean-cache        - Clean up build cache"
+	@echo "  help               - Show this help message"
 
-.PHONY: all build-autossh build-web push-autossh push-web build-test-autossh build-test-web clean help
+.PHONY: all build-autossh build-web push-autossh push-web build-test-autossh build-test-web build-test clean clean-cache help
