@@ -18,9 +18,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
   - [4. Configure User Permissions (PUID/PGID)](#4-configure-user-permissions-puidpgid)
   - [5. Build and Run the Docker Container](#5-build-and-run-the-docker-container)
   - [6. Access Services](#6-access-services)
-- [SSH Config Configuration Guide](docs/en/ssh_config.md)
-- [Build Optimization Guide](docs/en/build_optimization.md)
-- [Logging System](docs/en/logging.md)
+- [Documentation](#documentation)
 - [Web-Based Configuration](#web-based-configuration)
 - [Customization](#customization)
   - [Add More Tunnels](#add-more-tunnels)
@@ -33,6 +31,26 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
   - [Logs](#logs)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
+
+## Documentation
+
+### Core Documentation
+
+- [SSH Config Configuration Guide](docs/en/ssh_config.md) - How to configure SSH connections
+- [Logging System](docs/en/logging.md) - Log management and compression
+- [Build Optimization Guide](docs/en/build_optimization.md) - Speed up Docker builds
+- [Parallel Optimization](docs/en/parallel_optimization.md) - Improve startup performance
+
+### Technical Documentation
+
+- [Configuration Monitor Fix](docs/en/config_monitor_fix.md) - How config file monitoring works
+- [Process Cleanup Refactoring](docs/en/refactoring_process_cleanup.md) - Process management improvements
+- [Restart Issue Fix](docs/en/restart_issue.md) - Port occupation issue resolution
+
+### Additional Resources
+
+- [Scripts Documentation](scripts/README.md) - Script usage and details
+- [Testing Documentation](tests/README.md) - How to run tests
 
 ## Features
 
