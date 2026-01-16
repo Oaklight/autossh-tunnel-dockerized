@@ -10,8 +10,12 @@ LOG_SIZE=${LOG_SIZE:-102400}
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-# Clear old log files for fresh start (including compressed files)
-rm -f "$LOG_DIR"/tunnel_*.log "$LOG_DIR"/tunnel_*.log.gz
+# Only clear old log files on initial startup (not on restart)
+# Check if this is being called with parameters (single tunnel restart)
+if [ $# -eq 0 ]; then
+	# Full startup - clear old log files (including compressed files)
+	rm -f "$LOG_DIR"/tunnel_*.log "$LOG_DIR"/tunnel_*.log.gz
+fi
 
 # Function to parse YAML and extract tunnel configurations
 parse_config() {
@@ -149,29 +153,26 @@ start_autossh() {
 	if [ "$direction" = "local_to_remote" ]; then
 		echo "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port [Log ID: ${log_id}]"
 		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
-		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
+		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
 	else
 		echo "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port [Log ID: ${log_id}]"
 		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
-		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
+		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
 	fi
 }
 
 # clear old autossh processes if any
 pkill -f "autossh"
 
-# Store PIDs of background processes
-pids=""
-
 # Read the config.yaml file and start autossh for each entry
 while IFS=$'\t' read -r remote_host remote_port local_port direction; do
 	start_autossh "$remote_host" "$remote_port" "$local_port" "$direction" &
-	pids="$pids $!"
 done <<EOF
 $(parse_config "$CONFIG_FILE")
 EOF
 
-# Wait for all background processes to finish
-for pid in $pids; do
-	wait "$pid"
+# Keep the script running indefinitely
+# This prevents the container from exiting when individual tunnels are restarted
+while true; do
+	sleep 3600
 done
