@@ -78,7 +78,7 @@ parse_log_status() {
 		fi
 
 		# Check for error conditions
-		if echo "$line" | grep -q "Permission denied\|Connection refused\|Could not resolve hostname"; then
+		if echo "$line" | grep -q "Permission denied\|Connection refused\|Could not resolve hostname\|Address in use\|cannot listen to port"; then
 			if [ ! -s "$temp_result" ]; then
 				message=$(echo "$line" | sed 's/^[^]]*] //')
 				echo "error|$message|$last_update" >"$temp_result"
