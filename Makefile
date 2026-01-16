@@ -65,6 +65,10 @@ build-test-web:
 		--cache-to type=local,dest=/tmp/.buildx-cache-web,mode=max \
 		--load .
 
+# Build both autossh and web test images for local development
+build-test: build-test-autossh build-test-web
+	@echo "Both autossh-tunnel and web-panel test images built successfully!"
+
 # Clean up local Docker images for both autossh-tunnel and web-panel
 clean:
 	@echo "Cleaning up local Docker images..."
@@ -85,8 +89,9 @@ help:
 	@echo "  push-web           - Push the multi-arch web-panel Docker image to Docker Hub"
 	@echo "  build-test-autossh - Build amd64 autossh-tunnel image for local testing (with cache)"
 	@echo "  build-test-web     - Build amd64 web-panel image for local testing (with cache)"
+	@echo "  build-test         - Build both autossh and web test images for local testing"
 	@echo "  clean              - Clean up local Docker images"
 	@echo "  clean-cache        - Clean up build cache"
 	@echo "  help               - Show this help message"
 
-.PHONY: all build-autossh build-web push-autossh push-web build-test-autossh build-test-web clean clean-cache help
+.PHONY: all build-autossh build-web push-autossh push-web build-test-autossh build-test-web build-test clean clean-cache help
