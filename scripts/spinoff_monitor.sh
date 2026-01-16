@@ -48,14 +48,18 @@ stop_tunnel() {
 get_current_tunnel_ids >"$STATE_FILE"
 
 while true; do
-	# Monitor the config directory for any changes to config.yaml
-	inotifywait -e modify,create,move,delete,moved_to,moved_from "$(dirname "$CONFIG_FILE")" | grep -q "config.yaml"
+	# Monitor the config directory for changes to config.yaml
+	# We monitor the directory instead of the file directly because:
+	# 1. Some editors (VSCode, etc.) delete and recreate files on save
+	# 2. Docker volume mounts may not propagate inode changes correctly
+	# 3. Monitoring the directory catches all types of file modifications
+	inotifywait -e modify,create,move,delete,moved_to,moved_from,close_write,attrib "$(dirname "$CONFIG_FILE")" 2>/dev/null | grep -q "config.yaml"
 	echo "检测到配置文件变化，分析差异..."
 	echo "Detected configuration file changes, analyzing differences..."
 
 	# Consume any additional events within a short time window
 	sleep 3
-	while inotifywait -t 1 -e modify,create,move,delete,moved_to,moved_from "$(dirname "$CONFIG_FILE")" 2>/dev/null | grep -q "config.yaml"; do
+	while inotifywait -t 1 -e modify,create,move,delete,moved_to,moved_from,close_write,attrib "$(dirname "$CONFIG_FILE")" 2>/dev/null | grep -q "config.yaml"; do
 		echo "Consuming additional config change event..."
 		sleep 1
 	done
