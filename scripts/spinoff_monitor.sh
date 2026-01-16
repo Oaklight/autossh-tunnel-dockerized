@@ -2,8 +2,8 @@
 
 # 监控配置文件变化并智能增量重启 autossh
 
-# Source shared log utilities
-. /scripts/log_utils.sh
+# Source shared tunnel utilities
+. /scripts/tunnel_utils.sh
 
 CONFIG_FILE="/etc/autossh/config/config.yaml"
 STATE_FILE="/tmp/.tunnel_state"

@@ -3,8 +3,8 @@
 # Refactored startup script that uses the unified start_single_tunnel.sh
 # This script initializes the environment and starts all configured tunnels
 
-# Source shared log utilities
-. /scripts/log_utils.sh
+# Source shared tunnel utilities
+. /scripts/tunnel_utils.sh
 
 CONFIG_FILE="/etc/autossh/config/config.yaml"
 LOG_SIZE=${LOG_SIZE:-102400}
@@ -29,8 +29,30 @@ parse_config() {
 	yq e '.tunnels[] | [.remote_host, .remote_port, .local_port, .direction] | @tsv' "$config_file"
 }
 
-# Clear old autossh processes if any
-pkill -f "autossh"
+# Use shared cleanup function to clear old processes
+cleanup_all_autossh_processes
+
+# Additional cleanup: kill any processes holding the ports we need
+echo "Checking and cleaning up ports..."
+parse_config "$CONFIG_FILE" | while IFS=$'\t' read -r remote_host remote_port local_port direction; do
+	# Extract actual port number
+	actual_port="$local_port"
+	if echo "$local_port" | grep -q ":"; then
+		actual_port=$(echo "$local_port" | cut -d: -f2)
+	fi
+
+	# Kill any process using this port
+	pids=$(lsof -ti :${actual_port} 2>/dev/null)
+	if [ -n "$pids" ]; then
+		echo "Cleaning up processes on port ${actual_port}..."
+		echo "$pids" | xargs kill -9 2>/dev/null
+	fi
+done
+
+# Final wait for ports to be released
+sleep 2
+
+echo "Cleanup complete. Starting tunnels..."
 
 # Read the config.yaml file and start each tunnel using the unified script
 while IFS=$'\t' read -r remote_host remote_port local_port direction; do

@@ -3,8 +3,8 @@
 # Unified script to start a single SSH tunnel
 # Usage: start_single_tunnel.sh <remote_host> <remote_port> <local_port> <direction>
 
-# Source shared log utilities
-. /scripts/log_utils.sh
+# Source shared tunnel utilities
+. /scripts/tunnel_utils.sh
 
 remote_host=$1
 remote_port=$2
