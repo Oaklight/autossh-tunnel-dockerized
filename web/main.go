@@ -65,14 +65,17 @@ type StatusResponse struct {
 }
 
 type LogPageData struct {
-	TunnelName string
-	RemoteHost string
-	RemotePort string
-	LocalPort  string
-	Direction  string
-	LogID      string
-	LogContent string
-	LogLines   []string
+	TunnelName    string
+	RemoteHost    string
+	RemotePort    string
+	LocalPort     string
+	Direction     string
+	LogID         string
+	LogContent    string
+	LogLines      []string
+	Status        string
+	StatusMessage string
+	LastUpdate    string
 }
 
 type LogResponse struct {
@@ -443,16 +446,32 @@ func logsPageHandler(w http.ResponseWriter, r *http.Request) {
 		directionText = "Local to Remote"
 	}
 
+	// Get initial status for this tunnel
+	logPath := filepath.Join(logsDir, fmt.Sprintf("tunnel_%s.log", logID))
+	status, lastUpdate, message := parseLogFile(logPath)
+
+	// Extract only time part (HH:MM:SS) from timestamp if present
+	timeOnly := lastUpdate
+	if lastUpdate != "" {
+		parts := strings.Split(lastUpdate, " ")
+		if len(parts) > 1 {
+			timeOnly = parts[1]
+		}
+	}
+
 	// Don't read logs here - let JavaScript fetch them via API
 	data := LogPageData{
-		TunnelName: tunnel.Name,
-		RemoteHost: tunnel.RemoteHost,
-		RemotePort: tunnel.RemotePort,
-		LocalPort:  tunnel.LocalPort,
-		Direction:  directionText,
-		LogID:      logID,
-		LogContent: "",      // Will be loaded via JavaScript
-		LogLines:   []string{}, // Will be loaded via JavaScript
+		TunnelName:    tunnel.Name,
+		RemoteHost:    tunnel.RemoteHost,
+		RemotePort:    tunnel.RemotePort,
+		LocalPort:     tunnel.LocalPort,
+		Direction:     directionText,
+		LogID:         logID,
+		LogContent:    "",           // Will be loaded via JavaScript
+		LogLines:      []string{},   // Will be loaded via JavaScript
+		Status:        status,
+		StatusMessage: message,
+		LastUpdate:    timeOnly,
 	}
 
 	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "logs.html")))

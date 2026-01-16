@@ -347,13 +347,35 @@
                 <div class="log-header-top">
                     <h2>{{.TunnelName}}</h2>
                     <div class="status-indicator-large" id="statusIndicator">
+                        {{if eq .Status "connected"}}
+                        <div class="status-badge-large status-connected">
+                            <i class="material-icons status-icon-large">check_circle</i>
+                            <span class="status-text-large">Connected</span>
+                        </div>
+                        {{else if eq .Status "disconnected"}}
+                        <div class="status-badge-large status-disconnected">
+                            <i class="material-icons status-icon-large">cancel</i>
+                            <span class="status-text-large">Disconnected</span>
+                        </div>
+                        {{else if eq .Status "error"}}
+                        <div class="status-badge-large status-error">
+                            <i class="material-icons status-icon-large">error</i>
+                            <span class="status-text-large">Error</span>
+                        </div>
+                        {{else}}
                         <div class="status-badge-large status-unknown">
                             <i class="material-icons status-icon-large">help_outline</i>
                             <span class="status-text-large">Unknown</span>
                         </div>
-                        <div class="status-details-large" style="display: none;">
-                            <small class="status-message-large"></small>
-                            <small class="status-time-large"></small>
+                        {{end}}
+                        <div class="status-details-large" {{if or .StatusMessage .LastUpdate}}style="display: flex;"
+                            {{else}}style="display: none;" {{end}}>
+                            {{if .StatusMessage}}
+                            <small class="status-message-large">{{.StatusMessage}}</small>
+                            {{end}}
+                            {{if .LastUpdate}}
+                            <small class="status-time-large">Last update: {{.LastUpdate}}</small>
+                            {{end}}
                         </div>
                     </div>
                 </div>
