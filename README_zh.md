@@ -16,9 +16,7 @@
   - [4. 配置用户权限 (PUID/PGID)](#4-配置用户权限-puidpgid)
   - [5. 构建并运行 Docker 容器](#5-构建并运行-docker-容器)
   - [6. 访问服务](#6-访问服务)
-- [SSH 配置文件配置指南](docs/zh/ssh_config.md)
-- [构建优化指南](docs/zh/build_optimization.md)
-- [日志系统](docs/zh/logging.md)
+- [文档](#文档)
 - [网页配置功能](#网页配置功能)
 - [自定义](#自定义)
   - [添加更多隧道](#添加更多隧道)
@@ -31,6 +29,26 @@
   - [日志](#日志)
 - [许可证](#许可证)
 - [致谢](#致谢)
+
+## 文档
+
+### 核心文档
+
+- [SSH 配置文件配置指南](docs/zh/ssh_config.md) - 如何配置 SSH 连接
+- [日志系统](docs/zh/logging.md) - 日志管理和压缩
+- [构建优化指南](docs/zh/build_optimization.md) - 加速 Docker 构建
+- [并行化优化](docs/zh/parallel_optimization.md) - 提升启动性能
+
+### 技术文档
+
+- [配置文件监控修复说明](docs/zh/config_monitor_fix.md) - 配置文件监控工作原理
+- [进程清理重构说明](docs/zh/refactoring_process_cleanup.md) - 进程管理改进
+- [重启问题修复说明](docs/zh/restart_issue.md) - 端口占用问题解决
+
+### 其他资源
+
+- [脚本说明](scripts/README.md) - 脚本使用和详情
+- [测试说明](tests/README.md) - 如何运行测试
 
 ## 功能
 
