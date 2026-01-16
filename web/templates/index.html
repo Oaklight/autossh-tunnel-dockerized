@@ -19,6 +19,13 @@
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
                 <span class="mdc-top-app-bar__title">SSH Tunnel Configuration</span>
             </section>
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+                <button class="mdc-button mdc-button--raised refresh-button-header" id="refreshStatus">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon" aria-hidden="true">refresh</i>
+                    <span class="mdc-button__label">Refresh Status</span>
+                </button>
+            </section>
         </div>
     </header>
 
@@ -33,13 +40,20 @@
                             <table class="mdc-data-table__table" id="tunnelTable">
                                 <thead>
                                     <tr class="mdc-data-table__header-row">
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Name</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Remote Host</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Remote Port</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Local Port</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Direction</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Status</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Action</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Name
+                                        </th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Remote
+                                            Host</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Remote
+                                            Port</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Local
+                                            Port</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">
+                                            Direction</th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Status
+                                        </th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Action
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody class="mdc-data-table__content">

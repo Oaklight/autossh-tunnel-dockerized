@@ -194,6 +194,16 @@ body {
   color: var(--mdc-theme-on-primary);
 }
 
+.refresh-button-header {
+  background-color: #03dac6 !important;
+  color: white !important;
+  margin-right: 16px;
+}
+
+.refresh-button-header:hover {
+  background-color: #00bfa5 !important;
+}
+
 /* Delete Button */
 .delete-button {
   background: none;
