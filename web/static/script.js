@@ -83,10 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
             <td class="mdc-data-table__cell status-cell">
                 <div class="status-indicator">
-                    <span class="status-badge status-unknown">
+                    <a href="#" class="status-badge status-unknown status-link" data-log-id="">
                         <i class="material-icons status-icon">help_outline</i>
                         <span class="status-text">Unknown</span>
-                    </span>
+                    </a>
                     <div class="status-details" style="display: none;">
                         <small class="status-message"></small>
                         <small class="status-time"></small>
@@ -246,7 +246,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (statusData) {
                 // Remove all status classes
-                statusBadge.className = "status-badge";
+                statusBadge.className = "status-badge status-link";
+                
+                // Set log ID for the link
+                statusBadge.setAttribute('data-log-id', statusData.log_id);
                 
                 // Add appropriate status class and update content
                 switch (statusData.status) {
@@ -281,7 +284,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } else {
                 // No status data available
-                statusBadge.className = "status-badge status-unknown";
+                statusBadge.className = "status-badge status-link status-unknown";
+                statusBadge.setAttribute('data-log-id', '');
                 statusIcon.textContent = "help_outline";
                 statusText.textContent = "Unknown";
                 statusDetails.style.display = "none";
@@ -374,6 +378,18 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error saving configuration:", error);
             showMessage("Failed to save configuration", "error");
         });
+    });
+
+    // Handle status badge clicks
+    document.addEventListener('click', (e) => {
+        const statusLink = e.target.closest('.status-link');
+        if (statusLink) {
+            e.preventDefault();
+            const logID = statusLink.getAttribute('data-log-id');
+            if (logID) {
+                window.location.href = `/logs?id=${logID}`;
+            }
+        }
     });
 
     // Cleanup on page unload

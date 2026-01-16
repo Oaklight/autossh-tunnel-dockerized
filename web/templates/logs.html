@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunnel Logs - {{.TunnelName}}</title>
+    <!-- Material Design CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .log-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .log-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-header h2 {
+            margin: 0 0 12px 0;
+            color: #1976d2;
+            font-size: 1.5rem;
+        }
+
+        .log-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .log-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .log-info-item .material-icons {
+            font-size: 18px;
+            color: #1976d2;
+        }
+
+        .log-content-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .log-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .log-toolbar-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .log-content {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 20px;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .log-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 2px 0;
+        }
+
+        .log-line:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .log-timestamp {
+            color: #4ec9b0;
+        }
+
+        .log-error {
+            color: #f48771;
+        }
+
+        .log-success {
+            color: #b5cea8;
+        }
+
+        .log-warning {
+            color: #dcdcaa;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #1976d2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: #1565c0;
+        }
+
+        .refresh-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #03dac6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .refresh-button:hover {
+            background: #00bfa5;
+        }
+
+        .auto-refresh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .empty-log {
+            padding: 60px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-log .material-icons {
+            font-size: 64px;
+            color: #ccc;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .log-container {
+                padding: 12px;
+            }
+
+            .log-toolbar {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .log-toolbar-left {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .log-content {
+                font-size: 12px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body class="mdc-typography">
+    <!-- App Bar -->
+    <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
+        <div class="mdc-top-app-bar__row">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <span class="mdc-top-app-bar__title">Tunnel Logs</span>
+            </section>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mdc-top-app-bar--fixed-adjust">
+        <div class="log-container">
+            <!-- Log Header -->
+            <div class="log-header">
+                <h2>{{.TunnelName}}</h2>
+                <div class="log-info">
+                    <div class="log-info-item">
+                        <i class="material-icons">dns</i>
+                        <span>{{.RemoteHost}}:{{.RemotePort}}</span>
+                    </div>
+                    <div class="log-info-item">
+                        <i class="material-icons">computer</i>
+                        <span>Local Port: {{.LocalPort}}</span>
+                    </div>
+                    <div class="log-info-item">
+                        <i class="material-icons">swap_horiz</i>
+                        <span>{{.Direction}}</span>
+                    </div>
+                    <div class="log-info-item">
+                        <i class="material-icons">fingerprint</i>
+                        <span>Log ID: {{.LogID}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Content -->
+            <div class="log-content-card">
+                <div class="log-toolbar">
+                    <div class="log-toolbar-left">
+                        <a href="/" class="back-button">
+                            <i class="material-icons">arrow_back</i>
+                            <span>Back to Dashboard</span>
+                        </a>
+                        <button class="refresh-button" onclick="refreshLogs()">
+                            <i class="material-icons">refresh</i>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+                    <div class="auto-refresh-toggle">
+                        <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh(this.checked)">
+                        <label for="autoRefresh">Auto-refresh (5s)</label>
+                    </div>
+                </div>
+                <div class="log-content" id="logContent">
+                    {{if .LogContent}}
+                    {{range .LogLines}}
+                    <div class="log-line">{{.}}</div>
+                    {{end}}
+                    {{else}}
+                    <div class="empty-log">
+                        <i class="material-icons">description</i>
+                        <p>No log data available</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let autoRefreshInterval = null;
+        const logID = '{{.LogID}}';
+
+        function refreshLogs() {
+            fetch(`/api/logs/${logID}`)
+                .then(response => response.json())
+                .then(data => {
+                    const logContent = document.getElementById('logContent');
+                    if (data.lines && data.lines.length > 0) {
+                        logContent.innerHTML = data.lines.map(line => {
+                            let className = 'log-line';
+                            if (line.includes('error') || line.includes('Error') || line.includes('ERROR')) {
+                                className += ' log-error';
+                            } else if (line.includes('success') || line.includes('Success') || line.includes('established')) {
+                                className += ' log-success';
+                            } else if (line.includes('warning') || line.includes('Warning') || line.includes('WARN')) {
+                                className += ' log-warning';
+                            }
+                            return `<div class="${className}">${escapeHtml(line)}</div>`;
+                        }).join('');
+                        // Auto-scroll to bottom
+                        logContent.scrollTop = logContent.scrollHeight;
+                    } else {
+                        logContent.innerHTML = '<div class="empty-log"><i class="material-icons">description</i><p>No log data available</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing logs:', error);
+                });
+        }
+
+        function toggleAutoRefresh(enabled) {
+            if (enabled) {
+                autoRefreshInterval = setInterval(refreshLogs, 5000);
+            } else {
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-scroll to bottom on load
+        window.addEventListener('load', () => {
+            const logContent = document.getElementById('logContent');
+            logContent.scrollTop = logContent.scrollHeight;
+        });
+    </script>
+
+    <!-- Material Design JavaScript -->
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+</body>
+
+</html>

@@ -53,6 +53,22 @@ type StatusResponse struct {
 	Timestamp string         `json:"timestamp"`
 }
 
+type LogPageData struct {
+	TunnelName string
+	RemoteHost string
+	RemotePort string
+	LocalPort  string
+	Direction  string
+	LogID      string
+	LogContent string
+	LogLines   []string
+}
+
+type LogResponse struct {
+	Lines []string `json:"lines"`
+	LogID string   `json:"log_id"`
+}
+
 func loadConfig() (Config, error) {
 	var config Config
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
@@ -345,6 +361,121 @@ func getStatusHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// readLogLines reads the last N lines from a log file
+func readLogLines(logPath string, maxLines int) ([]string, error) {
+	file, err := os.Open(logPath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	// Return last maxLines
+	if len(lines) > maxLines {
+		return lines[len(lines)-maxLines:], nil
+	}
+	return lines, nil
+}
+
+func logsPageHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract log_id from URL path
+	logID := r.URL.Query().Get("id")
+	if logID == "" {
+		http.Error(w, "Missing log ID", http.StatusBadRequest)
+		return
+	}
+
+	// Find the tunnel configuration for this log ID
+	config, err := loadConfig()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var tunnel *Tunnel
+	for _, t := range config.Tunnels {
+		if generateLogID(t) == logID {
+			tunnel = &t
+			break
+		}
+	}
+
+	if tunnel == nil {
+		http.Error(w, "Tunnel not found", http.StatusNotFound)
+		return
+	}
+
+	// Read log file
+	logPath := filepath.Join(logsDir, fmt.Sprintf("tunnel_%s.log", logID))
+	logLines, err := readLogLines(logPath, 500) // Last 500 lines
+	if err != nil && !os.IsNotExist(err) {
+		log.Printf("Error reading log file: %v", err)
+	}
+
+	logContent := ""
+	if len(logLines) > 0 {
+		logContent = "available"
+	}
+
+	directionText := "Remote to Local"
+	if tunnel.Direction == "local_to_remote" {
+		directionText = "Local to Remote"
+	}
+
+	data := LogPageData{
+		TunnelName: tunnel.Name,
+		RemoteHost: tunnel.RemoteHost,
+		RemotePort: tunnel.RemotePort,
+		LocalPort:  tunnel.LocalPort,
+		Direction:  directionText,
+		LogID:      logID,
+		LogContent: logContent,
+		LogLines:   logLines,
+	}
+
+	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "logs.html")))
+	tmpl.Execute(w, data)
+}
+
+func getLogsAPIHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract log_id from URL path
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+	logID := parts[3]
+
+	// Read log file
+	logPath := filepath.Join(logsDir, fmt.Sprintf("tunnel_%s.log", logID))
+	logLines, err := readLogLines(logPath, 500) // Last 500 lines
+	if err != nil {
+		if os.IsNotExist(err) {
+			logLines = []string{}
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	response := LogResponse{
+		Lines: logLines,
+		LogID: logID,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func main() {
 	// Check if the config directory exists and has correct ownership
 	if err := checkConfigDirectory(); err != nil {
@@ -372,6 +503,8 @@ func main() {
 		}
 		getStatusHandler(w, r)
 	})
+	http.HandleFunc("/logs", logsPageHandler)
+	http.HandleFunc("/api/logs/", getLogsAPIHandler)
 
 	fmt.Printf("Starting server on %s\n", defaultPort)
 	log.Fatal(http.ListenAndServe(defaultPort, nil))
