@@ -1,6 +1,6 @@
 # SSH Config Configuration Guide
 
-[中文版](../zh/ssh_config.md) | [English](../en/ssh_config.md)
+[中文版](../zh/ssh_config.md) | **English**
 
 This guide explains how to configure the SSH config file (`~/.ssh/config`) for use with the autossh-tunnel-dockerized project. The SSH config file is essential for defining connection parameters and ensuring smooth tunnel establishment.
 

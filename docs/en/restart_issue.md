@@ -13,6 +13,7 @@ Could not request local forwarding.
 ```
 
 This may be accompanied by API request timeout:
+
 ```
 Failed to connect to autossh API: context deadline exceeded (Client.Timeout exceeded while awaiting headers)
 ```
@@ -53,6 +54,7 @@ Could not request local forwarding.
 Implemented more aggressive cleanup strategy in `scripts/control_api.sh`'s `restart_tunnel()` function:
 
 #### 1. Multi-level Process Cleanup
+
 ```bash
 # Kill autossh process
 pkill -9 -f "TUNNEL_ID=${log_id}"
@@ -65,6 +67,7 @@ pkill -9 -f "ssh.*${remote_host}"
 ```
 
 #### 2. Shortened Wait Time
+
 ```bash
 # Only wait 2 seconds for basic cleanup
 sleep 2
@@ -81,6 +84,7 @@ done
 ```
 
 #### 3. Use lsof for Precise Targeting
+
 Using `lsof` tool to directly find and forcefully terminate processes occupying ports is more reliable than relying on process names.
 
 ### Solution 2: Container Startup (start_autossh.sh)
@@ -88,6 +92,7 @@ Using `lsof` tool to directly find and forcefully terminate processes occupying 
 Enhanced pre-startup cleanup logic in `scripts/start_autossh.sh`:
 
 #### 1. Thorough Old Process Cleanup
+
 ```bash
 # Force kill all autossh processes
 pkill -9 -f "autossh"
@@ -100,6 +105,7 @@ sleep 2
 ```
 
 #### 2. Verify Process Termination
+
 ```bash
 # Wait maximum 5 seconds to confirm process exit
 while pgrep -f "autossh" >/dev/null 2>&1 && [ $waited -lt 5 ]; do
@@ -109,6 +115,7 @@ done
 ```
 
 #### 3. Clean Occupied Ports
+
 ```bash
 # Iterate through all configured ports
 parse_config "$CONFIG_FILE" | while read ...; do
@@ -118,14 +125,55 @@ done
 ```
 
 #### 4. Final Wait
+
 ```bash
 # Ensure ports fully released
 sleep 2
 ```
 
+## Workflow
+
+### API Restart Workflow
+
+1.  **Extract Port Information**
+    - Handle `host:port` format to extract the actual port number.
+2.  **Multi-level Process Cleanup** (parallel execution for quick cleanup)
+    - Force kill autossh process (by TUNNEL_ID).
+    - Force kill all processes occupying the local port (using lsof).
+    - Force kill SSH processes connected to the remote host.
+3.  **Short Wait**
+    - Wait 2 seconds for the system to complete cleanup.
+4.  **Quick Port Check**
+    - Check for a maximum of 3 seconds.
+    - Use `netstat` to verify the port is released.
+    - Continue immediately if the port is free.
+5.  **Start New Tunnel**
+    - Create a new log file.
+    - Start a new autossh process.
+
+### Container Startup Workflow
+
+1.  **Clean All Old Processes**
+    - Force kill all autossh processes.
+    - Force kill all SSH processes.
+    - Wait for 2 seconds.
+2.  **Verify Process Termination**
+    - Check if autossh processes are still running.
+    - Wait for a maximum of 5 seconds.
+3.  **Clean Occupied Ports**
+    - Iterate through all ports in the configuration file.
+    - Use lsof to find and kill processes occupying the ports.
+4.  **Final Wait**
+    - Wait 2 seconds to ensure ports are released.
+5.  **Start All Tunnels**
+    - Create log files for each tunnel.
+    - Start autossh processes.
+    - 0.5-second interval between each tunnel.
+
 ## Expected Behavior
 
 After fix, restarting tunnel should:
+
 - ✅ Only start new connection once
 - ✅ No "Address in use" errors
 - ✅ Logs show only one startup message
@@ -134,31 +182,35 @@ After fix, restarting tunnel should:
 
 ## Related Files
 
-- `scripts/control_api.sh` - API control script (handles restart requests)
-- `scripts/start_autossh.sh` - Container startup script (initializes all tunnels)
-- `scripts/start_single_tunnel.sh` - Single tunnel startup script
-- `scripts/tunnel_utils.sh` - Tunnel management utility functions (logging, process cleanup)
+- [`scripts/control_api.sh`](../../scripts/control_api.sh) - API control script (handles restart requests)
+- [`scripts/start_autossh.sh`](../../scripts/start_autossh.sh) - Container startup script (initializes all tunnels)
+- [`scripts/start_single_tunnel.sh`](../../scripts/start_single_tunnel.sh) - Single tunnel startup script
+- [`scripts/tunnel_utils.sh`](../../scripts/tunnel_utils.sh) - Tunnel management utility functions (logging, process cleanup)
 
 ## Monitoring Recommendations
 
 If still encountering issues, you can:
 
 1. Check processes occupying port:
+
    ```bash
    lsof -i :9443
    ```
 
 2. View specific port status:
+
    ```bash
    netstat -tuln | grep :9443
    ```
 
 3. Check all SSH-related processes:
+
    ```bash
    ps aux | grep ssh
    ```
 
 4. View tunnel logs:
+
    ```bash
    tail -f /var/log/autossh/tunnel_*.log
    ```
@@ -181,6 +233,7 @@ If still encountering issues, you can:
 ### Why Multi-level Cleanup Needed?
 
 autossh process structure:
+
 ```
 autossh (parent process)
   └── ssh (child process, actually establishes tunnel)
@@ -188,6 +241,7 @@ autossh (parent process)
 ```
 
 Simply killing autossh may not immediately clean all child processes, especially when SSH connection is in certain special states. Therefore need:
+
 - Kill autossh via TUNNEL_ID
 - Kill processes occupying port via port number
 - Kill related SSH connections via remote hostname
@@ -195,6 +249,7 @@ Simply killing autossh may not immediately clean all child processes, especially
 ### Why Use kill -9?
 
 In restart scenarios, we need:
+
 - **Quick Response**: Avoid API timeout
 - **Thorough Cleanup**: Ensure port release
 - **Reliability**: Don't rely on process's graceful exit logic
