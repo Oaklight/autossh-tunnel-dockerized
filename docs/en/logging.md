@@ -126,7 +126,7 @@ You can customize the compression threshold using the `LOG_SIZE` environment var
 services:
   autossh:
     environment:
-      - LOG_SIZE=204800  # 200KB
+      - LOG_SIZE=204800 # 200KB
 ```
 
 Or when starting the container:
@@ -136,6 +136,7 @@ docker compose run -e LOG_SIZE=204800 autossh  # 200KB
 ```
 
 **Recommended Values**:
+
 - **100KB (default)**: Suitable for status monitoring, keeps recent 600-800 entries
 - **200KB**: When more history is needed
 - **500KB**: For debugging scenarios requiring detailed logs
@@ -149,6 +150,7 @@ tunnel_a1b2c3d4_20260114_143000.log.gz
 ```
 
 Where:
+
 - `a1b2c3d4`: Log ID
 - `20260114_143000`: Compression timestamp (YYYYMMDD_HHMMSS)
 
@@ -168,6 +170,7 @@ gunzip ./logs/tunnel_a1b2c3d4_20260114_143000.log.gz
 ### Active Log After Compression
 
 After compression, the original log file is reset and contains only:
+
 1. Original configuration header block
 2. Compression notification
 3. Subsequent new log entries

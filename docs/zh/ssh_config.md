@@ -1,13 +1,13 @@
 # SSH 配置文件配置指南
 
-[中文版](../zh/ssh_config.md) | [English](../en/ssh_config.md)
+**中文版** | [English](../en/ssh_config.md)
 
 本指南说明如何配置 SSH 配置文件（`~/.ssh/config`）以便与 autossh-tunnel-dockerized 项目配合使用。SSH 配置文件对于定义连接参数和确保隧道顺利建立至关重要。
 
 ## 目录
 
 - [概述](#概述)
-- [SSH 配置文件位置](#ssh配置文件位置)
+- [SSH 配置文件位置](#ssh-配置文件位置)
 - [基础配置](#基础配置)
 - [高级配置](#高级配置)
 - [常见配置示例](#常见配置示例)

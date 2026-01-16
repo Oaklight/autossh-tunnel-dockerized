@@ -13,6 +13,7 @@ Could not request local forwarding.
 ```
 
 同时可能伴随 API 请求超时：
+
 ```
 Failed to connect to autossh API: context deadline exceeded (Client.Timeout exceeded while awaiting headers)
 ```
@@ -53,6 +54,7 @@ Could not request local forwarding.
 在 [`scripts/control_api.sh`](../../scripts/control_api.sh) 的 `restart_tunnel()` 函数中实施了更激进的清理策略：
 
 ### 1. 多层次进程清理
+
 ```bash
 # 杀死 autossh 进程
 pkill -9 -f "TUNNEL_ID=${log_id}"
@@ -65,6 +67,7 @@ pkill -9 -f "ssh.*${remote_host}"
 ```
 
 ### 2. 缩短等待时间
+
 ```bash
 # 只等待 2 秒进行基本清理
 sleep 2
@@ -81,6 +84,7 @@ done
 ```
 
 ### 3. 使用 lsof 精确定位
+
 使用 `lsof` 工具直接找到占用端口的进程并强制终止，比依赖进程名更可靠。
 
 ### 方案 2：容器启动（start_autossh.sh）
@@ -88,6 +92,7 @@ done
 在 [`scripts/start_autossh.sh`](../../scripts/start_autossh.sh) 中增强了启动前的清理逻辑：
 
 #### 1. 彻底清理旧进程
+
 ```bash
 # 强制杀死所有 autossh 进程
 pkill -9 -f "autossh"
@@ -100,6 +105,7 @@ sleep 2
 ```
 
 #### 2. 验证进程已终止
+
 ```bash
 # 最多等待 5 秒确认进程退出
 while pgrep -f "autossh" >/dev/null 2>&1 && [ $waited -lt 5 ]; do
@@ -109,6 +115,7 @@ done
 ```
 
 #### 3. 清理占用的端口
+
 ```bash
 # 遍历所有配置的端口
 parse_config "$CONFIG_FILE" | while read ...; do
@@ -118,6 +125,7 @@ done
 ```
 
 #### 4. 最终等待
+
 ```bash
 # 确保端口完全释放
 sleep 2
@@ -128,17 +136,21 @@ sleep 2
 ### API 重启流程
 
 1. **提取端口信息**
+
    - 处理 `host:port` 格式，提取实际端口号
 
 2. **多层次进程清理**（并行执行，快速清理）
+
    - 强制杀死 autossh 进程（通过 TUNNEL_ID）
    - 强制杀死占用本地端口的所有进程（通过 lsof）
    - 强制杀死连接到远程主机的 SSH 进程
 
 3. **短暂等待**
+
    - 等待 2 秒让系统完成清理
 
 4. **快速端口检查**
+
    - 最多检查 3 秒
    - 使用 `netstat` 验证端口已释放
    - 如果端口已释放则立即继续
@@ -150,19 +162,23 @@ sleep 2
 ### 容器启动流程
 
 1. **清理所有旧进程**
+
    - 强制杀死所有 autossh 进程
    - 强制杀死所有 SSH 进程
    - 等待 2 秒
 
 2. **验证进程终止**
+
    - 检查 autossh 进程是否还在运行
    - 最多等待 5 秒
 
 3. **清理占用端口**
+
    - 遍历配置文件中的所有端口
    - 使用 lsof 找到并杀死占用端口的进程
 
 4. **最终等待**
+
    - 等待 2 秒确保端口释放
 
 5. **启动所有隧道**
@@ -173,6 +189,7 @@ sleep 2
 ## 预期行为
 
 修复后，重启隧道应该：
+
 - ✅ 只启动一次新连接
 - ✅ 不会出现 "Address in use" 错误
 - ✅ 日志中只显示一次启动消息
@@ -191,21 +208,25 @@ sleep 2
 如果仍然遇到问题，可以：
 
 1. 检查占用端口的进程：
+
    ```bash
    lsof -i :9443
    ```
 
 2. 查看特定端口的状态：
+
    ```bash
    netstat -tuln | grep :9443
    ```
 
 3. 检查所有 SSH 相关进程：
+
    ```bash
    ps aux | grep ssh
    ```
 
 4. 查看隧道日志：
+
    ```bash
    tail -f /var/log/autossh/tunnel_*.log
    ```
@@ -228,6 +249,7 @@ sleep 2
 ### 为什么需要多层清理？
 
 autossh 的进程结构：
+
 ```
 autossh (父进程)
   └── ssh (子进程，实际建立隧道)
@@ -235,6 +257,7 @@ autossh (父进程)
 ```
 
 单纯杀死 autossh 可能不会立即清理所有子进程，特别是当 SSH 连接处于某些特殊状态时。因此需要：
+
 - 通过 TUNNEL_ID 杀死 autossh
 - 通过端口号杀死占用端口的进程
 - 通过远程主机名杀死相关 SSH 连接
@@ -242,6 +265,7 @@ autossh (父进程)
 ### 为什么使用 kill -9？
 
 在重启场景下，我们需要：
+
 - **快速响应**：避免 API 超时
 - **彻底清理**：确保端口释放
 - **可靠性**：不依赖进程的优雅退出逻辑
