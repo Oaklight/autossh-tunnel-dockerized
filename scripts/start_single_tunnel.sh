@@ -33,13 +33,13 @@ else
 	local_host="localhost"
 fi
 
-# Start the tunnel using setsid and nohup to ensure it survives parent process exit
+# Start the tunnel in background (removed setsid/nohup to keep it in container's process tree)
 if [ "$direction" = "local_to_remote" ]; then
 	echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
-	setsid nohup autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1 &
+	autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1 &
 else
 	echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
-	setsid nohup autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1 &
+	autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1 &
 fi
 
 echo "Tunnel ${log_id} started successfully"

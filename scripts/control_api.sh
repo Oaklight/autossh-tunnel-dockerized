@@ -47,10 +47,23 @@ restart_tunnel() {
 	local direction=$(echo "$tunnel_info" | cut -d'|' -f4)
 
 	# Kill existing autossh process for this tunnel using the unique TUNNEL_ID
+	# First try graceful termination
 	pkill -f "TUNNEL_ID=${log_id}" 2>/dev/null
-
-	# Wait for process to terminate
 	sleep 1
+	
+	# Force kill if still running
+	pkill -9 -f "TUNNEL_ID=${log_id}" 2>/dev/null
+	
+	# Wait for process to terminate and port to be released
+	sleep 3
+	
+	# Verify process is gone
+	local max_wait=5
+	local waited=0
+	while pgrep -f "TUNNEL_ID=${log_id}" >/dev/null 2>&1 && [ $waited -lt $max_wait ]; do
+		sleep 1
+		waited=$((waited + 1))
+	done
 
 	# Create fresh log file with header (overwrite old content)
 	log_id=$(create_fresh_log "$remote_host" "$remote_port" "$local_port" "$direction" "Restarted")
