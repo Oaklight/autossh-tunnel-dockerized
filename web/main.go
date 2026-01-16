@@ -280,19 +280,19 @@ func parseLogFile(logPath string) (status, lastUpdate, message string) {
 		// Check for connection indicators
 		if strings.Contains(line, "Starting tunnel") {
 			status = "connected"
-			message = "Tunnel is running"
+			message = "Tunnel running"
 			return
 		}
 		if strings.Contains(line, "Connection established") ||
 		   strings.Contains(line, "Authenticated to") {
 			status = "connected"
-			message = "Connection established"
+			message = "Connected"
 			return
 		}
 		if strings.Contains(line, "Connection closed") ||
 		   strings.Contains(line, "Connection reset") {
 			status = "disconnected"
-			message = "Connection closed"
+			message = "Disconnected"
 			return
 		}
 		if strings.Contains(line, "Permission denied") ||
@@ -307,7 +307,7 @@ func parseLogFile(logPath string) (status, lastUpdate, message string) {
 	// If we found a timestamp but no clear status, assume connected
 	if lastUpdate != "" {
 		status = "connected"
-		message = "Tunnel appears to be running"
+		message = "Tunnel running"
 	}
 
 	return
