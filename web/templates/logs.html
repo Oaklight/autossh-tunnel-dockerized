@@ -146,6 +146,23 @@
             background: #00bfa5;
         }
 
+        .reconnect-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reconnect-button:hover {
+            background: #f57c00;
+        }
+
         .auto-refresh-toggle {
             display: flex;
             align-items: center;
@@ -238,6 +255,10 @@
                             <i class="material-icons">refresh</i>
                             <span>Refresh</span>
                         </button>
+                        <button class="reconnect-button" onclick="reconnectTunnel()">
+                            <i class="material-icons">sync</i>
+                            <span>Reconnect</span>
+                        </button>
                     </div>
                     <div class="auto-refresh-toggle">
                         <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh(this.checked)">
@@ -263,6 +284,30 @@
     <script>
         let autoRefreshInterval = null;
         const logID = '{{.LogID}}';
+
+        function reconnectTunnel() {
+            if (!confirm('Are you sure you want to reconnect this tunnel? This will restart the SSH connection.')) {
+                return;
+            }
+
+            fetch(`/api/reconnect/${logID}`, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Tunnel reconnection initiated. Please wait a few seconds for the connection to re-establish.');
+                        // Refresh logs after a short delay
+                        setTimeout(refreshLogs, 2000);
+                    } else {
+                        alert('Failed to reconnect tunnel: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error reconnecting tunnel:', error);
+                    alert('Failed to reconnect tunnel. Please try again.');
+                });
+        }
 
         function refreshLogs() {
             fetch(`/api/logs/${logID}`)
