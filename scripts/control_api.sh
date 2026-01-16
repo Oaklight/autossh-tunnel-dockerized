@@ -3,24 +3,16 @@
 # Simple HTTP API server for controlling autossh tunnels
 # Listens on port 5001 for control commands
 
+# Source shared log utilities
+. /scripts/log_utils.sh
+
 API_PORT=${API_PORT:-5002}
 CONFIG_FILE="/etc/autossh/config/config.yaml"
-LOG_DIR="/var/log/autossh"
 STATUS_FILE="/tmp/tunnel_status.json"
 FIFO_DIR="/tmp/api_fifos"
 
 # Create FIFO directory
 mkdir -p "$FIFO_DIR"
-
-# Function to generate log ID (same as in start_autossh.sh)
-generate_log_id() {
-	local remote_host=$1
-	local remote_port=$2
-	local local_port=$3
-	local direction=$4
-	local config_string="${remote_host}:${remote_port}:${local_port}:${direction}"
-	echo -n "$config_string" | md5sum | cut -c1-8
-}
 
 # Function to find tunnel by log ID
 find_tunnel_by_log_id() {
@@ -60,10 +52,8 @@ restart_tunnel() {
 	# Wait for process to terminate
 	sleep 1
 
-	# Add restart notice to log
-	log_id=$(generate_log_id "$remote_host" "$remote_port" "$local_port" "$direction")
-	log_file="${LOG_DIR}/tunnel_${log_id}.log"
-	echo "[$(date '+%Y-%m-%d %H:%M:%S')] Tunnel restart requested via API" >>"$log_file"
+	# Create fresh log file with header (overwrite old content)
+	log_id=$(create_fresh_log "$remote_host" "$remote_port" "$local_port" "$direction" "Restarted")
 
 	# Restart the tunnel using unified start script as myuser
 	su myuser -c "/scripts/start_single_tunnel.sh '$remote_host' '$remote_port' '$local_port' '$direction'" >/dev/null 2>&1

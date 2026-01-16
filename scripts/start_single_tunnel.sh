@@ -3,23 +3,15 @@
 # Unified script to start a single SSH tunnel
 # Usage: start_single_tunnel.sh <remote_host> <remote_port> <local_port> <direction>
 
+# Source shared log utilities
+. /scripts/log_utils.sh
+
 remote_host=$1
 remote_port=$2
 local_port=$3
 direction=${4:-remote_to_local}
 
-LOG_DIR="/var/log/autossh"
 LOG_SIZE=${LOG_SIZE:-102400}
-
-# Function to generate log ID (same as in start_autossh.sh)
-generate_log_id() {
-	local remote_host=$1
-	local remote_port=$2
-	local local_port=$3
-	local direction=$4
-	local config_string="${remote_host}:${remote_port}:${local_port}:${direction}"
-	echo -n "$config_string" | md5sum | cut -c1-8
-}
 
 # Generate unique log ID
 log_id=$(generate_log_id "$remote_host" "$remote_port" "$local_port" "$direction")
