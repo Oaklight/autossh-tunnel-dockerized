@@ -41,22 +41,22 @@ start_new_tunnel() {
 stop_tunnel() {
 	local log_id=$1
 	echo "Stopping removed tunnel ${log_id}"
-	
+
 	# Kill the tunnel process
 	pkill -f "TUNNEL_ID=${log_id}" 2>/dev/null
-	
+
 	# Archive the log file before removal
 	local log_file="${LOG_DIR}/tunnel_${log_id}.log"
 	if [ -f "$log_file" ]; then
 		# Add final entry to log
-		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Tunnel removed from configuration" >> "$log_file"
-		
+		echo "[$(date '+%Y-%m-%d %H:%M:%S')] Tunnel removed from configuration" >>"$log_file"
+
 		# Compress and archive the log
-		gzip -c "$log_file" > "${log_file}.removed_$(date '+%Y%m%d_%H%M%S').gz"
-		
+		gzip -c "$log_file" >"${log_file}.removed_$(date '+%Y%m%d_%H%M%S').gz"
+
 		# Remove the original log file
 		rm -f "$log_file"
-		
+
 		echo "Archived log file to ${log_file}.removed_$(date '+%Y%m%d_%H%M%S').gz"
 	fi
 }
