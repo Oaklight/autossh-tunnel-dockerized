@@ -2,8 +2,6 @@ name: autotunnel
 services:
   autossh:
     image: oaklight/autossh-tunnel:latest
-    ports:
-      - "5002:5002" # Control API port
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
       - ./config:/etc/autossh/config:rw
@@ -18,8 +16,6 @@ services:
 
   web:
     image: oaklight/autossh-tunnel-web-panel:latest
-    ports:
-      - "5000:5000"
     volumes:
       - ./config:/home/myuser/config
     environment:
