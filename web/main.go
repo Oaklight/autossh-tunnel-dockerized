@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -67,6 +68,12 @@ type LogPageData struct {
 type LogResponse struct {
 	Lines []string `json:"lines"`
 	LogID string   `json:"log_id"`
+}
+
+type ReconnectResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 func loadConfig() (Config, error) {
@@ -476,6 +483,91 @@ func getLogsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func reconnectTunnelHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract log_id from URL path
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+	logID := parts[3]
+
+	// Find the tunnel configuration for this log ID
+	config, err := loadConfig()
+	if err != nil {
+		response := ReconnectResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to load config: %v", err),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	var targetTunnel *Tunnel
+	for _, t := range config.Tunnels {
+		if generateLogID(t) == logID {
+			targetTunnel = &t
+			break
+		}
+	}
+
+	if targetTunnel == nil {
+		response := ReconnectResponse{
+			Success: false,
+			Error:   "Tunnel not found",
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// Kill existing autossh processes for this specific tunnel
+	// We need to find the process by matching the tunnel parameters
+	killCmd := fmt.Sprintf("pkill -f 'autossh.*%s.*%s.*%s'",
+		targetTunnel.RemoteHost,
+		targetTunnel.RemotePort,
+		targetTunnel.LocalPort)
+	
+	cmd := exec.Command("sh", "-c", killCmd)
+	if err := cmd.Run(); err != nil {
+		log.Printf("Warning: Failed to kill existing tunnel process: %v", err)
+	}
+
+	// Wait a moment for the process to terminate
+	time.Sleep(500 * time.Millisecond)
+
+	// Restart the tunnel by calling the start script with specific parameters
+	restartCmd := fmt.Sprintf("/scripts/start_autossh.sh '%s' '%s' '%s' '%s' &",
+		targetTunnel.RemoteHost,
+		targetTunnel.RemotePort,
+		targetTunnel.LocalPort,
+		targetTunnel.Direction)
+	
+	cmd = exec.Command("sh", "-c", restartCmd)
+	if err := cmd.Start(); err != nil {
+		response := ReconnectResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to restart tunnel: %v", err),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	response := ReconnectResponse{
+		Success: true,
+		Message: "Tunnel reconnection initiated successfully",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func main() {
 	// Check if the config directory exists and has correct ownership
 	if err := checkConfigDirectory(); err != nil {
@@ -505,6 +597,7 @@ func main() {
 	})
 	http.HandleFunc("/logs", logsPageHandler)
 	http.HandleFunc("/api/logs/", getLogsAPIHandler)
+	http.HandleFunc("/api/reconnect/", reconnectTunnelHandler)
 
 	fmt.Printf("Starting server on %s\n", defaultPort)
 	log.Fatal(http.ListenAndServe(defaultPort, nil))
