@@ -277,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     statusDetails.style.display = "block";
                 }
                 if (statusData.last_update) {
-                    statusTime.textContent = `Last update: ${statusData.last_update}`;
+                    statusTime.textContent = `Updated: ${statusData.last_update}`;
                 }
             } else {
                 // No status data available
