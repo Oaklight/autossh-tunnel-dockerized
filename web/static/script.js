@@ -317,6 +317,12 @@ document.addEventListener("DOMContentLoaded", () => {
         addRow();
     });
 
+    // Refresh status button event
+    document.getElementById("refreshStatus").addEventListener("click", () => {
+        loadTunnelStatuses();
+        showMessage("Status refreshed", "success");
+    });
+
     // Save config button event
     document.getElementById("saveConfig").addEventListener("click", () => {
         const rows = Array.from(tableBody.rows);
