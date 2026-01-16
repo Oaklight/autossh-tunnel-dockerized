@@ -121,6 +121,40 @@
 - 不受单个文件删除/创建的影响
 - 通过 `grep` 过滤只处理目标文件的事件
 
+## 日志管理
+
+### 隧道移除时的日志处理
+
+当从配置中移除隧道时，系统会自动：
+
+1. **记录移除事件**：在日志文件中添加最后一条记录
+2. **压缩归档**：将日志文件压缩为 `.gz` 格式
+3. **添加时间戳**：归档文件名包含移除时间，格式为 `tunnel_<log_id>.log.removed_YYYYMMDD_HHMMSS.gz`
+4. **清理原文件**：删除原始日志文件
+
+示例归档文件名：
+```
+tunnel_a1b2c3d4.log.removed_20260116_193045.gz
+```
+
+这样可以：
+- 保留历史记录以供审计
+- 避免日志文件累积占用空间
+- 清晰标识已移除的隧道
+
+### 查看归档日志
+
+```bash
+# 列出所有归档日志
+ls -lh ./logs/*.removed_*.gz
+
+# 查看归档日志内容
+zcat ./logs/tunnel_a1b2c3d4.log.removed_20260116_193045.gz
+
+# 搜索归档日志
+zgrep "error" ./logs/*.removed_*.gz
+```
+
 ## 相关文件
 
 - [`scripts/spinoff_monitor.sh`](../../scripts/spinoff_monitor.sh) - 配置监控脚本
