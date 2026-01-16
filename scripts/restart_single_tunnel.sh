@@ -48,13 +48,17 @@ fi
 # No need for -F option as it prevents ~ expansion in Include directives
 SSH_OPTS=""
 
-# Start the tunnel
+# Start the tunnel in a new session to prevent it from being killed when this script exits
+# Use setsid to create a new session and nohup to ignore hangup signals
 if [ "$direction" = "local_to_remote" ]; then
 	echo "[$(date '+%Y-%m-%d %H:%M:%S')] Restarting tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
-	autossh -M 0 ${SSH_OPTS} -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1 &
+	setsid nohup autossh -M 0 ${SSH_OPTS} -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1 &
 else
 	echo "[$(date '+%Y-%m-%d %H:%M:%S')] Restarting tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
-	autossh -M 0 ${SSH_OPTS} -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1 &
+	setsid nohup autossh -M 0 ${SSH_OPTS} -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -o "ExitOnForwardFailure=yes" -o "SetEnv TUNNEL_ID=${log_id}" -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1 &
 fi
+
+# Wait a moment to ensure the process starts
+sleep 1
 
 echo "Tunnel ${log_id} restarted successfully"
