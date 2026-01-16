@@ -41,7 +41,7 @@
 - **动态 UID/GID 支持**：通过 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户的权限。
 - **多架构支持**：现已支持所有 Alpine 的底层架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
-- **自动重载**：检测 `config.yaml` 变化并自动重载服务。
+- **自动重载**：智能检测 `config.yaml` 变化并自动重载服务，支持各种编辑器的保存方式。详见 [配置文件监控修复说明](docs/zh/config_monitor_fix.md)。
 - **网页配置功能**：通过网页界面管理隧道配置。
 - **独立日志系统**：为每个隧道连接创建独立的日志文件，基于配置内容生成唯一的日志 ID。详见 [日志系统文档](docs/zh/logging.md)。
 
