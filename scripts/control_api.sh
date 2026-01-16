@@ -6,6 +6,7 @@
 API_PORT=${API_PORT:-5002}
 CONFIG_FILE="/etc/autossh/config/config.yaml"
 LOG_DIR="/var/log/autossh"
+STATUS_FILE="/tmp/tunnel_status.json"
 FIFO_DIR="/tmp/api_fifos"
 
 # Create FIFO directory
@@ -59,8 +60,13 @@ restart_tunnel() {
 	# Wait for process to terminate
 	sleep 1
 
-	# Restart the tunnel using dedicated restart script as myuser
-	su myuser -c "/scripts/restart_single_tunnel.sh '$remote_host' '$remote_port' '$local_port' '$direction'" >/dev/null 2>&1
+	# Add restart notice to log
+	log_id=$(generate_log_id "$remote_host" "$remote_port" "$local_port" "$direction")
+	log_file="${LOG_DIR}/tunnel_${log_id}.log"
+	echo "[$(date '+%Y-%m-%d %H:%M:%S')] Tunnel restart requested via API" >>"$log_file"
+
+	# Restart the tunnel using unified start script as myuser
+	su myuser -c "/scripts/start_single_tunnel.sh '$remote_host' '$remote_port' '$local_port' '$direction'" >/dev/null 2>&1
 
 	echo "{\"success\":true,\"message\":\"Tunnel restarted successfully\",\"log_id\":\"$log_id\"}"
 	return 0
@@ -102,6 +108,58 @@ handle_request() {
 		printf "Access-Control-Allow-Headers: Content-Type\r\n"
 		printf "Connection: close\r\n"
 		printf "\r\n"
+
+	elif [ "$method" = "GET" ] && [ "$path" = "/status" ]; then
+		# Return status from monitor daemon's status file
+		if [ -f "$STATUS_FILE" ]; then
+			local status_content=$(cat "$STATUS_FILE")
+			printf "HTTP/1.1 200 OK\r\n"
+			printf "Content-Type: application/json\r\n"
+			printf "Access-Control-Allow-Origin: *\r\n"
+			printf "Connection: close\r\n"
+			printf "\r\n"
+			printf "%s\r\n" "$status_content"
+		else
+			printf "HTTP/1.1 503 Service Unavailable\r\n"
+			printf "Content-Type: application/json\r\n"
+			printf "Access-Control-Allow-Origin: *\r\n"
+			printf "Connection: close\r\n"
+			printf "\r\n"
+			printf '{"error":"Status not available yet"}\r\n'
+		fi
+
+	elif [ "$method" = "GET" ] && echo "$path" | grep -q "^/logs/"; then
+		# Return log content for specific tunnel
+		local log_id=$(echo "$path" | sed 's|^/logs/||' | tr -d '\r\n')
+		local log_file="${LOG_DIR}/tunnel_${log_id}.log"
+
+		if [ -f "$log_file" ]; then
+			# Return last 500 lines as JSON array
+			printf "HTTP/1.1 200 OK\r\n"
+			printf "Content-Type: application/json\r\n"
+			printf "Access-Control-Allow-Origin: *\r\n"
+			printf "Connection: close\r\n"
+			printf "\r\n"
+			printf '{"lines":['
+			tail -n 500 "$log_file" | while IFS= read -r line; do
+				# Escape backslashes, quotes, and control characters
+				escaped=$(echo "$line" | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g; s/\r/\\r/g')
+				if [ "$first_line" != "done" ]; then
+					printf '"%s"' "$escaped"
+					first_line="done"
+				else
+					printf ',"%s"' "$escaped"
+				fi
+			done
+			printf '],"log_id":"%s"}\r\n' "$log_id"
+		else
+			printf "HTTP/1.1 404 Not Found\r\n"
+			printf "Content-Type: application/json\r\n"
+			printf "Access-Control-Allow-Origin: *\r\n"
+			printf "Connection: close\r\n"
+			printf "\r\n"
+			printf '{"error":"Log file not found"}\r\n'
+		fi
 
 	elif [ "$method" = "GET" ] && [ "$path" = "/health" ]; then
 		printf "HTTP/1.1 200 OK\r\n"

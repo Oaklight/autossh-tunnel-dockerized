@@ -15,11 +15,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    ports:
-      - "5000:5000"
+    network_mode: "host"
     volumes:
       - ./config:/home/myuser/config
-      - ./logs:/home/myuser/logs:ro
     environment:
       - PUID=1000
       - PGID=1000

@@ -130,10 +130,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function validateInput(event) {
         const input = event.target;
         const value = input.value.trim();
-        
+
         // Remove existing error styling
         input.classList.remove('error');
-        
+
         // Validate based on input type and requirements
         if (input.type === 'number') {
             const num = parseInt(value);
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function showLoading(show) {
         const container = document.querySelector('.container');
         let loadingEl = document.querySelector('.loading');
-        
+
         if (show && !loadingEl) {
             loadingEl = document.createElement('div');
             loadingEl.className = 'loading';
@@ -181,10 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const message = document.createElement('div');
         message.className = `message ${type}`;
         message.textContent = text;
-        
+
         const container = document.querySelector('.container');
         container.insertBefore(message, container.firstChild);
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (message.parentNode) {
@@ -247,10 +247,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (statusData) {
                 // Remove all status classes
                 statusBadge.className = "status-badge status-link";
-                
+
                 // Set log ID for the link
                 statusBadge.setAttribute('data-log-id', statusData.log_id);
-                
+
                 // Add appropriate status class and update content
                 switch (statusData.status) {
                     case "connected":
@@ -280,7 +280,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     statusDetails.style.display = "block";
                 }
                 if (statusData.last_update) {
-                    statusTime.textContent = `Updated: ${statusData.last_update}`;
+                    // Extract only time part (HH:MM:SS) from timestamp
+                    const timeOnly = statusData.last_update.split(' ')[1] || statusData.last_update;
+                    statusTime.textContent = timeOnly;
                 }
             } else {
                 // No status data available
@@ -297,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function startStatusPolling() {
         // Initial load
         loadTunnelStatuses();
-        
+
         // Poll every 5 seconds
         statusUpdateInterval = setInterval(() => {
             loadTunnelStatuses();
@@ -326,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Save config button event
     document.getElementById("saveConfig").addEventListener("click", () => {
         const rows = Array.from(tableBody.rows);
-        
+
         // Validate all inputs before saving
         let hasErrors = false;
         rows.forEach(row => {
@@ -355,9 +357,9 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         });
 
-        // Filter out empty rows
+        // Filter out empty rows (name is optional, but host and ports are required)
         const validTunnels = updatedData.filter(tunnel =>
-            tunnel.name && tunnel.remote_host && tunnel.remote_port && tunnel.local_port
+            tunnel.remote_host && tunnel.remote_port && tunnel.local_port
         );
 
         showLoading(true);
@@ -366,24 +368,24 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tunnels: validTunnels }),
         })
-        .then(response => {
-            showLoading(false);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(() => {
-            showMessage("Configuration saved successfully!", "success");
-            // Reload statuses after saving config
-            setTimeout(() => {
-                loadTunnelStatuses();
-            }, 1000);
-        })
-        .catch(error => {
-            console.error("Error saving configuration:", error);
-            showMessage("Failed to save configuration", "error");
-        });
+            .then(response => {
+                showLoading(false);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(() => {
+                showMessage("Configuration saved successfully!", "success");
+                // Reload statuses after saving config
+                setTimeout(() => {
+                    loadTunnelStatuses();
+                }, 1000);
+            })
+            .catch(error => {
+                console.error("Error saving configuration:", error);
+                showMessage("Failed to save configuration", "error");
+            });
     });
 
     // Handle status badge clicks

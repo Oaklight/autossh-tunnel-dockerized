@@ -3,6 +3,9 @@
 # start the control API server in the background
 /scripts/control_api.sh &
 
+# start the monitor daemon in the background
+/scripts/monitor_daemon.sh &
+
 # start the configuration file monitoring in the background
 /scripts/spinoff_monitor.sh &
 

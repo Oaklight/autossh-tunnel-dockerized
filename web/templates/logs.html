@@ -266,16 +266,10 @@
                     </div>
                 </div>
                 <div class="log-content" id="logContent">
-                    {{if .LogContent}}
-                    {{range .LogLines}}
-                    <div class="log-line">{{.}}</div>
-                    {{end}}
-                    {{else}}
                     <div class="empty-log">
-                        <i class="material-icons">description</i>
-                        <p>No log data available</p>
+                        <i class="material-icons">hourglass_empty</i>
+                        <p>Loading logs...</p>
                     </div>
-                    {{end}}
                 </div>
             </div>
         </div>
@@ -354,10 +348,9 @@
             return div.innerHTML;
         }
 
-        // Auto-scroll to bottom on load
+        // Load logs on page load
         window.addEventListener('load', () => {
-            const logContent = document.getElementById('logContent');
-            logContent.scrollTop = logContent.scrollHeight;
+            refreshLogs();
         });
     </script>
 

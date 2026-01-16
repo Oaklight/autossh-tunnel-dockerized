@@ -360,35 +360,29 @@ func parseLogFile(logPath string) (status, lastUpdate, message string) {
 }
 
 func getStatusHandler(w http.ResponseWriter, r *http.Request) {
-	config, err := loadConfig()
+	// Forward the request to autossh container's status API
+	apiURL := fmt.Sprintf("%s/status", autosshAPIURL)
+	
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	
+	resp, err := client.Get(apiURL)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to get status from autossh: %v", err), http.StatusServiceUnavailable)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read and forward the response
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to read response: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	var statuses []TunnelStatus
-	for _, tunnel := range config.Tunnels {
-		logID := generateLogID(tunnel)
-		logPath := filepath.Join(logsDir, fmt.Sprintf("tunnel_%s.log", logID))
-		
-		status, lastUpdate, message := parseLogFile(logPath)
-		
-		statuses = append(statuses, TunnelStatus{
-			Tunnel:     tunnel,
-			LogID:      logID,
-			Status:     status,
-			LastUpdate: lastUpdate,
-			Message:    message,
-		})
-	}
-
-	response := StatusResponse{
-		Tunnels:   statuses,
-		Timestamp: time.Now().Format("2006-01-02 15:04:05"),
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	w.Write(body)
 }
 
 // readLogLines reads the last N lines from a log file
@@ -444,23 +438,12 @@ func logsPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Read log file
-	logPath := filepath.Join(logsDir, fmt.Sprintf("tunnel_%s.log", logID))
-	logLines, err := readLogLines(logPath, 500) // Last 500 lines
-	if err != nil && !os.IsNotExist(err) {
-		log.Printf("Error reading log file: %v", err)
-	}
-
-	logContent := ""
-	if len(logLines) > 0 {
-		logContent = "available"
-	}
-
 	directionText := "Remote to Local"
 	if tunnel.Direction == "local_to_remote" {
 		directionText = "Local to Remote"
 	}
 
+	// Don't read logs here - let JavaScript fetch them via API
 	data := LogPageData{
 		TunnelName: tunnel.Name,
 		RemoteHost: tunnel.RemoteHost,
@@ -468,8 +451,8 @@ func logsPageHandler(w http.ResponseWriter, r *http.Request) {
 		LocalPort:  tunnel.LocalPort,
 		Direction:  directionText,
 		LogID:      logID,
-		LogContent: logContent,
-		LogLines:   logLines,
+		LogContent: "",      // Will be loaded via JavaScript
+		LogLines:   []string{}, // Will be loaded via JavaScript
 	}
 
 	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "logs.html")))
@@ -485,25 +468,29 @@ func getLogsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	logID := parts[3]
 
-	// Read log file
-	logPath := filepath.Join(logsDir, fmt.Sprintf("tunnel_%s.log", logID))
-	logLines, err := readLogLines(logPath, 500) // Last 500 lines
-	if err != nil {
-		if os.IsNotExist(err) {
-			logLines = []string{}
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	// Forward the request to autossh container's logs API
+	apiURL := fmt.Sprintf("%s/logs/%s", autosshAPIURL, logID)
+	
+	client := &http.Client{
+		Timeout: 10 * time.Second,
 	}
+	
+	resp, err := client.Get(apiURL)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get logs from autossh: %v", err), http.StatusServiceUnavailable)
+		return
+	}
+	defer resp.Body.Close()
 
-	response := LogResponse{
-		Lines: logLines,
-		LogID: logID,
+	// Read and forward the response
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to read response: %v", err), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	w.Write(body)
 }
 
 func reconnectTunnelHandler(w http.ResponseWriter, r *http.Request) {
