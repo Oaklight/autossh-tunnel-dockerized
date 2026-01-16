@@ -343,6 +343,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -375,6 +376,16 @@ body {
   font-weight: 500;
   white-space: nowrap;
   transition: all 0.3s ease;
+}
+
+.status-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.status-link:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .status-icon {
@@ -441,9 +452,12 @@ body {
 
 /* Pulsing animation for connected status */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.7;
   }
@@ -459,11 +473,11 @@ body {
     padding: 5px 10px;
     font-size: 12px;
   }
-  
+
   .status-icon {
     font-size: 16px !important;
   }
-  
+
   .status-details {
     font-size: 10px;
   }
@@ -475,15 +489,15 @@ body {
     font-size: 11px;
     gap: 4px;
   }
-  
+
   .status-icon {
     font-size: 14px !important;
   }
-  
+
   .status-text {
     display: none;
   }
-  
+
   .status-details {
     display: none !important;
   }
