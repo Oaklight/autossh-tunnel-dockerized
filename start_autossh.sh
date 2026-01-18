@@ -1,7 +1,9 @@
 #!/bin/sh
 
 # Load the configuration from config.yaml
-CONFIG_FILE="/etc/autossh/config/config.yaml"
+# Allow customization via environment variables
+CONFIG_FILE="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
+SSH_CONFIG_DIR="${SSH_CONFIG_DIR:-/home/myuser/.ssh}"
 
 # Function to parse YAML and extract tunnel configurations
 parse_config() {
@@ -32,19 +34,34 @@ start_single_tunnel() {
 		local_host="localhost"
 	fi
 
+	# Build SSH options
+	ssh_opts="-M 0 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+	# Add SSH config directory if it exists
+	if [ -d "$SSH_CONFIG_DIR" ]; then
+		ssh_opts="$ssh_opts -F $SSH_CONFIG_DIR/config"
+	fi
+
 	if [ "$direction" = "local_to_remote" ]; then
 		echo "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port"
-		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -R $target_host:$target_port:$local_host:$local_port $remote_host
+		autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host
 	else
 		echo "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port"
-		autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -N -L $local_host:$local_port:$target_host:$target_port $remote_host
+		autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host
 	fi
 }
 
 # Function to cleanup old autossh processes
 cleanup_old_tunnels() {
 	echo "Cleaning up old autossh processes..."
-	pkill -f "autossh"
+	# Use more specific pattern to avoid killing this script
+	if pgrep -f "autossh.*-M.*-o" >/dev/null 2>&1; then
+		pkill -f "autossh.*-M.*-o"
+		echo "Old autossh processes terminated"
+		sleep 2
+	else
+		echo "No existing autossh processes found"
+	fi
 }
 
 # Function to start all tunnels from configuration
@@ -71,6 +88,22 @@ start_all_tunnels() {
 
 # Main function to orchestrate the tunnel startup process
 main() {
+	echo "Using config file: $CONFIG_FILE"
+	echo "Using SSH config dir: $SSH_CONFIG_DIR"
+
+	# Check if config file exists
+	if [ ! -f "$CONFIG_FILE" ]; then
+		echo "Error: Config file not found: $CONFIG_FILE"
+		echo "Please ensure the config file exists or set AUTOSSH_CONFIG_FILE environment variable"
+		exit 1
+	fi
+
+	# Check if yq is available
+	if ! command -v yq >/dev/null 2>&1; then
+		echo "Error: yq command not found. Please install yq to parse YAML files"
+		exit 1
+	fi
+
 	cleanup_old_tunnels
 	start_all_tunnels "$CONFIG_FILE"
 }
