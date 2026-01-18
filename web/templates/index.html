@@ -42,11 +42,17 @@
                                             Port</th>
                                         <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Local
                                             Port</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">
-                                            Interactive</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">
-                                            Direction</th>
-                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Action
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col"
+                                            title="Interactive Auth">
+                                            <i class="material-icons">fingerprint</i>
+                                        </th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col"
+                                            title="Direction">
+                                            <i class="material-icons">swap_horiz</i>
+                                        </th>
+                                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col"
+                                            title="Actions">
+                                            <i class="material-icons">settings</i>
                                         </th>
                                     </tr>
                                 </thead>
@@ -61,15 +67,15 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="mdc-button mdc-button--raised" id="addRow">
+                <button class="mdc-button mdc-button--raised" id="addRow" title="Add Tunnel">
                     <span class="mdc-button__ripple"></span>
                     <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
-                    <span class="mdc-button__label">Add Tunnel</span>
+                    <span class="mdc-button__label">Add</span>
                 </button>
-                <button class="mdc-button mdc-button--unelevated" id="saveConfig">
+                <button class="mdc-button mdc-button--unelevated" id="saveConfig" title="Save Configuration">
                     <span class="mdc-button__ripple"></span>
                     <i class="material-icons mdc-button__icon" aria-hidden="true">save</i>
-                    <span class="mdc-button__label">Save Configuration</span>
+                    <span class="mdc-button__label">Save</span>
                 </button>
             </div>
         </div>
