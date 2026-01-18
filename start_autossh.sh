@@ -5,11 +5,11 @@
 CONFIG_FILE="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
 SSH_CONFIG_DIR="${SSH_CONFIG_DIR:-/home/myuser/.ssh}"
 
-# Function to parse YAML and extract tunnel configurations
-parse_config() {
-	local config_file=$1
-	yq e '.tunnels[] | [.remote_host, .remote_port, .local_port, .direction] | @tsv' "$config_file"
-}
+# Get the directory where this script is located
+SCRIPT_DIR="$(dirname "$0")"
+
+# Source the configuration parser module
+. "$SCRIPT_DIR/config_parser.sh"
 
 # Function to start a single autossh tunnel
 start_single_tunnel() {
@@ -75,7 +75,8 @@ start_all_tunnels() {
 	parse_config "$config_file" >"$temp_file"
 
 	# Read from the temporary file using POSIX-compatible syntax
-	while IFS='	' read -r remote_host remote_port local_port direction; do
+	while IFS='	' read -r remote_host remote_port local_port direction name; do
+		echo "Starting tunnel: ${name}"
 		start_single_tunnel "$remote_host" "$remote_port" "$local_port" "$direction" &
 	done <"$temp_file"
 
@@ -95,12 +96,6 @@ main() {
 	if [ ! -f "$CONFIG_FILE" ]; then
 		echo "Error: Config file not found: $CONFIG_FILE"
 		echo "Please ensure the config file exists or set AUTOSSH_CONFIG_FILE environment variable"
-		exit 1
-	fi
-
-	# Check if yq is available
-	if ! command -v yq >/dev/null 2>&1; then
-		echo "Error: yq command not found. Please install yq to parse YAML files"
 		exit 1
 	fi
 
