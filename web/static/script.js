@@ -20,7 +20,54 @@ document.addEventListener("DOMContentLoaded", () => {
         const dataTableEl = document.querySelector('.mdc-data-table');
         if (dataTableEl) {
             dataTable = new mdc.dataTable.MDCDataTable(dataTableEl);
+            initResizableColumns();
         }
+    }
+
+    // Initialize Resizable Columns
+    function initResizableColumns() {
+        const table = document.getElementById('tunnelTable');
+        const headerRow = table.querySelector('thead tr');
+        const cols = headerRow.querySelectorAll('th');
+
+        cols.forEach((col, index) => {
+            // Don't add resizer to the last column (Action)
+            if (index === cols.length - 1) return;
+
+            const resizer = document.createElement('div');
+            resizer.classList.add('resizer');
+            col.appendChild(resizer);
+
+            createResizableColumn(col, resizer);
+        });
+    }
+
+    function createResizableColumn(col, resizer) {
+        let x = 0;
+        let w = 0;
+
+        const mouseDownHandler = function (e) {
+            x = e.clientX;
+            const styles = window.getComputedStyle(col);
+            w = parseInt(styles.width, 10);
+
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+            document.body.classList.add('resizing');
+        };
+
+        const mouseMoveHandler = function (e) {
+            const dx = e.clientX - x;
+            col.style.width = `${w + dx}px`;
+        };
+
+        const mouseUpHandler = function () {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+            document.body.classList.remove('resizing');
+        };
+
+        resizer.addEventListener('mousedown', mouseDownHandler);
     }
 
     // Load configuration from server
@@ -49,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Add row function with Material Design styling
-    function addRow(tunnel = { name: "", remote_host: "", remote_port: "", local_port: "", direction: "remote_to_local" }) {
+    function addRow(tunnel = { name: "", remote_host: "", remote_port: "", local_port: "", interactive: false, direction: "remote_to_local" }) {
         const row = document.createElement("tr");
         row.className = "mdc-data-table__row new-row";
 
@@ -65,6 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
             <td class="mdc-data-table__cell">
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="Local port (e.g., 55001 or 192.168.1.100:55001)">
+            </td>
+            <td class="mdc-data-table__cell">
+                <input type="checkbox" class="table-checkbox" ${tunnel.interactive ? "checked" : ""}>
             </td>
             <td class="mdc-data-table__cell">
                 <select class="table-select">
@@ -98,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add input validation
     function addInputValidation(row) {
-        const inputs = row.querySelectorAll('input');
+        const inputs = row.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('blur', validateInput);
             input.addEventListener('input', clearValidationError);
@@ -109,10 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function validateInput(event) {
         const input = event.target;
         const value = input.value.trim();
-        
+
         // Remove existing error styling
         input.classList.remove('error');
-        
+
         // Validate based on input type and requirements
         if (input.type === 'number') {
             const num = parseInt(value);
@@ -158,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function showLoading(show) {
         const container = document.querySelector('.container');
         let loadingEl = document.querySelector('.loading');
-        
+
         if (show && !loadingEl) {
             loadingEl = document.createElement('div');
             loadingEl.className = 'loading';
@@ -178,10 +228,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const message = document.createElement('div');
         message.className = `message ${type}`;
         message.textContent = text;
-        
+
         const container = document.querySelector('.container');
         container.insertBefore(message, container.firstChild);
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (message.parentNode) {
@@ -199,11 +249,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Save config button event
     document.getElementById("saveConfig").addEventListener("click", () => {
         const rows = Array.from(tableBody.rows);
-        
+
         // Validate all inputs before saving
         let hasErrors = false;
         rows.forEach(row => {
-            const inputs = row.querySelectorAll('input');
+            const inputs = row.querySelectorAll('input, textarea');
             inputs.forEach(input => {
                 validateInput({ target: input });
                 if (input.classList.contains('error')) {
@@ -224,7 +274,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 remote_host: cells[1].querySelector("input").value.trim(),
                 remote_port: cells[2].querySelector("input").value.trim(),
                 local_port: cells[3].querySelector("input").value.trim(),
-                direction: cells[4].querySelector("select").value,
+                interactive: cells[4].querySelector("input[type='checkbox']").checked,
+                direction: cells[5].querySelector("select").value,
             };
         });
 
@@ -239,20 +290,20 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tunnels: validTunnels }),
         })
-        .then(response => {
-            showLoading(false);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(() => {
-            showMessage("Configuration saved successfully!", "success");
-        })
-        .catch(error => {
-            console.error("Error saving configuration:", error);
-            showMessage("Failed to save configuration", "error");
-        });
+            .then(response => {
+                showLoading(false);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(() => {
+                showMessage("Configuration saved successfully!", "success");
+            })
+            .catch(error => {
+                console.error("Error saving configuration:", error);
+                showMessage("Failed to save configuration", "error");
+            });
     });
 });
 

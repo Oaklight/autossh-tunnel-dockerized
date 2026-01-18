@@ -29,6 +29,7 @@ type Tunnel struct {
 	RemoteHost  string `yaml:"remote_host" json:"remote_host"`
 	RemotePort  string `yaml:"remote_port" json:"remote_port"`
 	LocalPort   string `yaml:"local_port" json:"local_port"`
+	Interactive bool   `yaml:"interactive" json:"interactive"`
 	Direction   string `yaml:"direction" json:"direction"`
 }
 

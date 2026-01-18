@@ -75,40 +75,47 @@ body {
 }
 
 /* Column width distribution */
+/* Column width distribution (2:2:1.5:1.5:1:2:0.5) Total: 10.5 */
 .mdc-data-table__header-cell:nth-child(1),
 .mdc-data-table__cell:nth-child(1) {
-  width: 20%;
-  min-width: 130px;
+  width: 19%;
+  min-width: 100px;
 }
 
 .mdc-data-table__header-cell:nth-child(2),
 .mdc-data-table__cell:nth-child(2) {
-  width: 25%;
-  min-width: 150px;
+  width: 19%;
+  min-width: 100px;
 }
 
 .mdc-data-table__header-cell:nth-child(3),
 .mdc-data-table__cell:nth-child(3) {
-  width: 13%;
-  min-width: 110px;
+  width: 14%;
+  min-width: 80px;
 }
 
 .mdc-data-table__header-cell:nth-child(4),
 .mdc-data-table__cell:nth-child(4) {
-  width: 13%;
-  min-width: 110px;
+  width: 14%;
+  min-width: 80px;
 }
 
 .mdc-data-table__header-cell:nth-child(5),
 .mdc-data-table__cell:nth-child(5) {
-  width: 16%;
-  min-width: 140px;
+  width: 10%;
+  min-width: 80px;
 }
 
 .mdc-data-table__header-cell:nth-child(6),
 .mdc-data-table__cell:nth-child(6) {
-  width: 6%;
-  min-width: 60px;
+  width: 20%;
+  min-width: 120px;
+}
+
+.mdc-data-table__header-cell:nth-child(7),
+.mdc-data-table__cell:nth-child(7) {
+  width: 5%;
+  min-width: 50px;
 }
 
 /* Input Fields in Table */
@@ -131,6 +138,13 @@ body {
   outline: none;
   border-color: var(--mdc-theme-primary);
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.table-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  vertical-align: middle;
 }
 
 /* Select Fields in Table */
@@ -301,6 +315,34 @@ body {
 .mdc-data-table__table-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* Resizable Columns */
+.mdc-data-table__header-cell {
+  position: relative;
+}
+
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 5px;
+  background: rgba(0, 0, 0, 0.05);
+  cursor: col-resize;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.resizer:hover,
+.resizing .resizer {
+  background: var(--mdc-theme-primary);
+  width: 2px;
+}
+
+.resizing {
+  cursor: col-resize;
 }
 
 /* Loading State */
@@ -337,6 +379,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
