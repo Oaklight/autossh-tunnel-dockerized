@@ -3,6 +3,22 @@
 # config_parser.sh - YAML configuration parser for autossh tunnels
 # This module provides functions to parse YAML configuration files using pure shell
 
+# Function to calculate MD5 hash for tunnel configuration
+calculate_tunnel_hash() {
+	local name="$1"
+	local remote_host="$2"
+	local remote_port="$3"
+	local local_port="$4"
+	local direction="$5"
+	local interactive="$6"
+
+	# Create a consistent string for hashing
+	local hash_input="${name}|${remote_host}|${remote_port}|${local_port}|${direction}|${interactive}"
+
+	# Calculate MD5 hash
+	echo "$hash_input" | md5sum | cut -d' ' -f1
+}
+
 # Function to parse YAML and extract tunnel configurations using pure shell
 parse_config() {
 	local config_file=$1
@@ -36,12 +52,8 @@ parse_config() {
 			if [ "${line#- }" != "$line" ] || [ "${line#-}" != "$line" ]; then
 				# Output previous tunnel if complete
 				if [ -n "$remote_host" ] && [ -n "$remote_port" ] && [ -n "$local_port" ]; then
-					# Skip interactive tunnels for now (they need special handling)
-					if [ "$interactive" != "true" ]; then
-						printf "%s\t%s\t%s\t%s\t%s\n" "$remote_host" "$remote_port" "$local_port" "${direction:-remote_to_local}" "${name:-unnamed}"
-					else
-						echo "Skipping interactive tunnel: ${name:-unnamed}" >&2
-					fi
+					local tunnel_hash=$(calculate_tunnel_hash "${name:-unnamed}" "$remote_host" "$remote_port" "$local_port" "${direction:-remote_to_local}" "${interactive:-false}")
+					printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$remote_host" "$remote_port" "$local_port" "${direction:-remote_to_local}" "${name:-unnamed}" "$tunnel_hash" "${interactive:-false}"
 				fi
 				# Reset for new tunnel
 				name=""
@@ -93,11 +105,8 @@ parse_config() {
 
 	# Output the last tunnel if complete
 	if [ -n "$remote_host" ] && [ -n "$remote_port" ] && [ -n "$local_port" ]; then
-		if [ "$interactive" != "true" ]; then
-			printf "%s\t%s\t%s\t%s\t%s\n" "$remote_host" "$remote_port" "$local_port" "${direction:-remote_to_local}" "${name:-unnamed}"
-		else
-			echo "Skipping interactive tunnel: ${name:-unnamed}" >&2
-		fi
+		local tunnel_hash=$(calculate_tunnel_hash "${name:-unnamed}" "$remote_host" "$remote_port" "$local_port" "${direction:-remote_to_local}" "${interactive:-false}")
+		printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$remote_host" "$remote_port" "$local_port" "${direction:-remote_to_local}" "${name:-unnamed}" "$tunnel_hash" "${interactive:-false}"
 	fi
 }
 
@@ -129,4 +138,46 @@ count_tunnels() {
 list_tunnel_names() {
 	local config_file=$1
 	parse_config "$config_file" | cut -f5
+}
+
+# Function to get tunnel hashes
+get_tunnel_hashes() {
+	local config_file=$1
+	parse_config "$config_file" | cut -f6
+}
+
+# Function to get tunnel by hash
+get_tunnel_by_hash() {
+	local config_file=$1
+	local target_hash=$2
+	parse_config "$config_file" | while IFS=$'\t' read -r remote_host remote_port local_port direction name hash; do
+		if [ "$hash" = "$target_hash" ]; then
+			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$remote_host" "$remote_port" "$local_port" "$direction" "$name" "$hash"
+			break
+		fi
+	done
+}
+
+# Function to compare two config files and find differences
+compare_configs() {
+	local old_config=$1
+	local new_config=$2
+	local temp_old=$(mktemp)
+	local temp_new=$(mktemp)
+
+	# Get hashes from both configs
+	get_tunnel_hashes "$old_config" | sort >"$temp_old"
+	get_tunnel_hashes "$new_config" | sort >"$temp_new"
+
+	echo "=== Removed tunnels ==="
+	comm -23 "$temp_old" "$temp_new"
+
+	echo "=== Added tunnels ==="
+	comm -13 "$temp_old" "$temp_new"
+
+	echo "=== Unchanged tunnels ==="
+	comm -12 "$temp_old" "$temp_new"
+
+	# Cleanup
+	rm -f "$temp_old" "$temp_new"
 }
