@@ -61,10 +61,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="Remote host">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="number" class="table-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="Remote port" min="1" max="65535">
+                <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="Remote port (e.g., 44497 or hostname:44497)">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="number" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="Local port" min="1" max="65535">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="Local port (e.g., 55001 or 192.168.1.100:55001)">
             </td>
             <td class="mdc-data-table__cell">
                 <select class="table-select">
@@ -119,6 +119,24 @@ document.addEventListener("DOMContentLoaded", () => {
             if (value && (isNaN(num) || num < 1 || num > 65535)) {
                 input.classList.add('error');
                 input.title = 'Port must be between 1 and 65535';
+            }
+        } else if (input.classList.contains('remote-port-input') || input.placeholder && input.placeholder.includes('Remote port')) {
+            // Validate remote_port which can be "port" or "hostname:port" format
+            if (value) {
+                const portPattern = /^[\w.-]+:\d{1,5}$|^\d{1,5}$/;
+                if (!portPattern.test(value)) {
+                    input.classList.add('error');
+                    input.title = 'Invalid port format. Use "port" or "hostname:port" (e.g., 44497 or lambda5:44497)';
+                }
+            }
+        } else if (input.placeholder && input.placeholder.includes('Local port')) {
+            // Validate local_port which can be "port" or "ip:port" format
+            if (value) {
+                const portPattern = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$|^\d{1,5}$/;
+                if (!portPattern.test(value)) {
+                    input.classList.add('error');
+                    input.title = 'Invalid port format. Use "port" or "ip:port" (e.g., 55001 or 192.168.1.100:55001)';
+                }
             }
         }
     }
