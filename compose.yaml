@@ -9,6 +9,8 @@ services:
       - PUID=1000
       - PGID=1000
       - AUTOSSH_GATETIME=0
+      - API_ENABLE=true
+      - API_PORT=8080
     network_mode: "host"
     restart: always
 

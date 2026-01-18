@@ -10,11 +10,22 @@ CONFIG_DIR=$(dirname "$CONFIG_FILE")
 cleanup() {
 	echo "Stopping autossh tunnels..."
 	autossh-cli stop
+	if [ -n "$API_PID" ]; then
+		echo "Stopping API server..."
+		kill "$API_PID" 2>/dev/null
+	fi
 	exit 0
 }
 
 # Trap signals
 trap cleanup TERM INT
+
+# Start API server if enabled
+if [ "${API_ENABLE:-false}" = "true" ]; then
+	echo "Starting API server..."
+	/usr/local/bin/scripts/api_server.sh &
+	API_PID=$!
+fi
 
 # Initial start
 echo "Starting autossh tunnels..."
