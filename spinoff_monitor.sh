@@ -1,10 +1,38 @@
 #!/bin/sh
 
 # 监控配置文件变化并重启 autossh
+# Monitor configuration file changes and restart autossh
+
+CONFIG_FILE="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
+CONFIG_DIR=$(dirname "$CONFIG_FILE")
+
+# Function to handle shutdown
+cleanup() {
+	echo "Stopping autossh tunnels..."
+	autossh-cli stop
+	exit 0
+}
+
+# Trap signals
+trap cleanup TERM INT
+
+# Initial start
+echo "Starting autossh tunnels..."
+autossh-cli start
+
+# Monitor loop
+echo "Monitoring configuration file: $CONFIG_FILE"
 while true; do
-    inotifywait -r -e modify,create,delete /etc/autossh/config
-    echo "检测到配置文件变化，重启 autossh..."
-    echo "Detected configuration file changes, restarting autossh..."
-    pkill -f "autossh"
-    /start_autossh.sh &
+	# Wait for changes
+	# We monitor the directory to catch file replacements (e.g. atomic saves by editors)
+	if inotifywait -r -e modify,create,delete,move "$CONFIG_DIR" 2>/dev/null; then
+		echo "Detected configuration file changes, applying updates..."
+		# Give a small buffer for file write completion
+		sleep 2
+		autossh-cli start
+	else
+		# If inotifywait fails (e.g. directory doesn't exist yet), sleep and retry
+		echo "Monitor failed or directory missing, retrying in 5s..."
+		sleep 5
+	fi
 done
