@@ -65,6 +65,7 @@ $(print_color "$CYAN" "COMMANDS:")
   validate                 Validate configuration file
   cleanup                  Clean up dead processes from state file
   stats                    Show tunnel statistics
+  logs [hash]              Show tunnel logs (all tunnels or specific tunnel by hash)
   
 $(print_color "$CYAN" "TUNNEL MANAGEMENT:")
   start-tunnel <hash>      Start a specific tunnel by hash
@@ -208,6 +209,14 @@ parse_args() {
 				tunnel_arg="$2"
 				shift 2
 				;;
+			logs)
+				command="$1"
+				shift
+				if [ -n "$1" ]; then
+					tunnel_arg="$1"
+					shift
+				fi
+				;;
 			hash)
 				command="$1"
 				hash_name="$2"
@@ -326,6 +335,47 @@ execute_command() {
 			fi
 			hash_result=$(calculate_tunnel_hash "$hash_name" "$hash_host" "$hash_port" "$hash_local" "$hash_dir" "${hash_interactive:-false}")
 			print_info "MD5 Hash: $hash_result"
+			;;
+		logs)
+			print_header "Tunnel Logs"
+			log_dir="/tmp/autossh-logs"
+			if [ ! -d "$log_dir" ]; then
+				print_warning "No log directory found at $log_dir"
+				exit 0
+			fi
+			
+			if [ -n "$tunnel_arg" ]; then
+				# Show logs for specific tunnel
+				log_file="$log_dir/tunnel-${tunnel_arg}.log"
+				if [ -f "$log_file" ]; then
+					print_info "Showing logs for tunnel: $tunnel_arg"
+					echo "Log file: $log_file"
+					echo "----------------------------------------"
+					tail -50 "$log_file"
+				else
+					print_error "Log file not found for tunnel: $tunnel_arg"
+					print_info "Available log files:"
+					ls -la "$log_dir"/tunnel-*.log 2>/dev/null || echo "No log files found"
+				fi
+			else
+				# Show all tunnel logs
+				print_info "Available tunnel log files:"
+				if ls "$log_dir"/tunnel-*.log >/dev/null 2>&1; then
+					for log_file in "$log_dir"/tunnel-*.log; do
+						filename=$(basename "$log_file")
+						size=$(du -h "$log_file" | cut -f1)
+						mtime=$(stat -c %y "$log_file" 2>/dev/null || stat -f %Sm "$log_file" 2>/dev/null || echo "unknown")
+						echo "  $filename (${size}, modified: $mtime)"
+					done
+					echo ""
+					print_info "Use 'autossh-cli logs <hash>' to view specific tunnel logs"
+					print_info "Recent activity from all tunnels:"
+					echo "----------------------------------------"
+					tail -20 "$log_dir"/tunnel-*.log 2>/dev/null | head -50
+				else
+					print_warning "No tunnel log files found"
+				fi
+			fi
 			;;
 		"")
 			print_error "No command specified"
