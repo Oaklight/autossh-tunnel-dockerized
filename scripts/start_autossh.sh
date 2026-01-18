@@ -130,7 +130,10 @@ start_all_tunnels() {
 	# Start new tunnels
 	if [ -n "$to_start" ]; then
 		echo "Starting new tunnels..."
-		while IFS='	' read -r remote_host remote_port local_port direction name hash; do
+		while IFS='	' read -r remote_host remote_port local_port direction name hash interactive; do
+			if [ "$interactive" = "true" ]; then
+				continue
+			fi
 			if echo "$to_start" | grep -q "^$hash$"; then
 				echo "Starting new tunnel: ${name} (${hash})"
 				start_single_tunnel "$remote_host" "$remote_port" "$local_port" "$direction" "$hash" &
