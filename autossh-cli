@@ -1,0 +1,362 @@
+#!/bin/sh
+
+# autossh-cli - Unified CLI for AutoSSH Tunnel Management
+# A comprehensive command-line interface for managing SSH tunnels with smart restart capabilities
+
+VERSION="1.0.0"
+SCRIPT_DIR="$(dirname "$0")"
+SCRIPTS_DIR="$SCRIPT_DIR/scripts"
+
+# Default configuration
+DEFAULT_CONFIG_FILE="/etc/autossh/config/config.yaml"
+DEFAULT_SSH_CONFIG_DIR="/home/myuser/.ssh"
+DEFAULT_STATE_FILE="/tmp/autossh_tunnels.state"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Print colored output
+print_color() {
+	local color=$1
+	shift
+	printf "${color}%s${NC}\n" "$*"
+}
+
+print_error() {
+	print_color "$RED" "ERROR: $*" >&2
+}
+
+print_success() {
+	print_color "$GREEN" "SUCCESS: $*"
+}
+
+print_warning() {
+	print_color "$YELLOW" "WARNING: $*"
+}
+
+print_info() {
+	print_color "$BLUE" "INFO: $*"
+}
+
+print_header() {
+	print_color "$PURPLE" "$*"
+}
+
+# Show help information
+show_help() {
+	cat << EOF
+$(print_header "AutoSSH Tunnel Management CLI v$VERSION")
+
+$(print_color "$CYAN" "USAGE:")
+  autossh-cli [COMMAND] [OPTIONS]
+
+$(print_color "$CYAN" "COMMANDS:")
+  start [--full]           Start tunnels (smart restart by default, --full for complete restart)
+  stop                     Stop all managed tunnels
+  restart [--full]         Restart tunnels (smart restart by default)
+  status                   Show status of all managed tunnels
+  list                     List all configured tunnels from config file
+  validate                 Validate configuration file
+  cleanup                  Clean up dead processes from state file
+  stats                    Show tunnel statistics
+  
+$(print_color "$CYAN" "TUNNEL MANAGEMENT:")
+  start-tunnel <hash>      Start a specific tunnel by hash
+  stop-tunnel <hash>       Stop a specific tunnel by hash
+  show-tunnel <hash>       Show details of a specific tunnel
+  
+$(print_color "$CYAN" "CONFIGURATION:")
+  config                   Show current configuration paths
+  parse                    Parse and display configuration file content
+  hash <name> <host> <port> <local> <dir> <interactive>
+                          Calculate MD5 hash for tunnel configuration
+
+$(print_color "$CYAN" "OPTIONS:")
+  -c, --config FILE        Configuration file path (default: $DEFAULT_CONFIG_FILE)
+  -s, --ssh-config DIR     SSH config directory (default: $DEFAULT_SSH_CONFIG_DIR)
+  -f, --state-file FILE    State file path (default: $DEFAULT_STATE_FILE)
+  -h, --help              Show this help message
+  -v, --version           Show version information
+
+$(print_color "$CYAN" "ENVIRONMENT VARIABLES:")
+  AUTOSSH_CONFIG_FILE      Override default config file path
+  SSH_CONFIG_DIR           Override default SSH config directory
+  AUTOSSH_STATE_FILE       Override default state file path
+
+$(print_color "$CYAN" "EXAMPLES:")
+  autossh-cli start                    # Smart restart (default)
+  autossh-cli start --full             # Complete restart
+  autossh-cli status                   # Show tunnel status
+  autossh-cli stop                     # Stop all tunnels
+  autossh-cli list                     # List configured tunnels
+  autossh-cli validate                 # Validate config file
+  
+  # Using custom config
+  autossh-cli -c ./config/config.yaml start
+  
+  # Environment variable usage
+  export AUTOSSH_CONFIG_FILE="./config/config.yaml"
+  autossh-cli start
+
+$(print_color "$CYAN" "FILES:")
+  scripts/start_autossh.sh             Main tunnel management script
+  scripts/config_parser.sh             Configuration parser module
+  scripts/state_manager.sh             State management module
+
+For more information, visit: https://github.com/your-repo/autossh-tunnel-dockerized
+EOF
+}
+
+# Show version information
+show_version() {
+	cat << EOF
+$(print_header "AutoSSH Tunnel Management CLI")
+Version: $VERSION
+Scripts Directory: $SCRIPTS_DIR
+
+Components:
+- Main Script: scripts/start_autossh.sh
+- Config Parser: scripts/config_parser.sh  
+- State Manager: scripts/state_manager.sh
+EOF
+}
+
+# Set environment variables from options
+set_env_vars() {
+	export AUTOSSH_CONFIG_FILE="${config_file:-${AUTOSSH_CONFIG_FILE:-$DEFAULT_CONFIG_FILE}}"
+	export SSH_CONFIG_DIR="${ssh_config_dir:-${SSH_CONFIG_DIR:-$DEFAULT_SSH_CONFIG_DIR}}"
+	export AUTOSSH_STATE_FILE="${state_file:-${AUTOSSH_STATE_FILE:-$DEFAULT_STATE_FILE}}"
+}
+
+# Check if scripts exist
+check_scripts() {
+	local missing=0
+	
+	if [ ! -f "$SCRIPTS_DIR/start_autossh.sh" ]; then
+		print_error "Missing: $SCRIPTS_DIR/start_autossh.sh"
+		missing=1
+	fi
+	
+	if [ ! -f "$SCRIPTS_DIR/config_parser.sh" ]; then
+		print_error "Missing: $SCRIPTS_DIR/config_parser.sh"
+		missing=1
+	fi
+	
+	if [ ! -f "$SCRIPTS_DIR/state_manager.sh" ]; then
+		print_error "Missing: $SCRIPTS_DIR/state_manager.sh"
+		missing=1
+	fi
+	
+	if [ $missing -eq 1 ]; then
+		print_error "Required script files are missing. Please ensure all scripts are in the scripts/ directory."
+		exit 1
+	fi
+}
+
+# Source required modules
+source_modules() {
+	. "$SCRIPTS_DIR/config_parser.sh"
+	. "$SCRIPTS_DIR/state_manager.sh"
+}
+
+# Parse command line arguments
+parse_args() {
+	config_file=""
+	ssh_config_dir=""
+	state_file=""
+	command=""
+	full_restart="false"
+	
+	while [ $# -gt 0 ]; do
+		case $1 in
+			-h|--help)
+				show_help
+				exit 0
+				;;
+			-v|--version)
+				show_version
+				exit 0
+				;;
+			-c|--config)
+				config_file="$2"
+				shift 2
+				;;
+			-s|--ssh-config)
+				ssh_config_dir="$2"
+				shift 2
+				;;
+			-f|--state-file)
+				state_file="$2"
+				shift 2
+				;;
+			--full)
+				full_restart="true"
+				shift
+				;;
+			start|stop|restart|status|list|validate|cleanup|stats|config|parse)
+				command="$1"
+				shift
+				;;
+			start-tunnel|stop-tunnel|show-tunnel)
+				command="$1"
+				tunnel_arg="$2"
+				shift 2
+				;;
+			hash)
+				command="$1"
+				hash_name="$2"
+				hash_host="$3"
+				hash_port="$4"
+				hash_local="$5"
+				hash_dir="$6"
+				hash_interactive="$7"
+				shift 7
+				;;
+			*)
+				print_error "Unknown option: $1"
+				print_info "Use 'autossh-cli --help' for usage information."
+				exit 1
+				;;
+		esac
+	done
+}
+
+# Execute commands
+execute_command() {
+	case $command in
+		start)
+			print_info "Starting tunnels..."
+			if [ "$full_restart" = "true" ]; then
+				"$SCRIPTS_DIR/start_autossh.sh" false
+			else
+				"$SCRIPTS_DIR/start_autossh.sh"
+			fi
+			;;
+		stop)
+			print_info "Stopping all managed tunnels..."
+			cleanup_managed_tunnels
+			;;
+		restart)
+			print_info "Restarting tunnels..."
+			if [ "$full_restart" = "true" ]; then
+				"$SCRIPTS_DIR/start_autossh.sh" false
+			else
+				"$SCRIPTS_DIR/start_autossh.sh"
+			fi
+			;;
+		status)
+			print_header "Tunnel Status"
+			list_managed_tunnels
+			;;
+		list)
+			print_header "Configured Tunnels"
+			parse_config "$AUTOSSH_CONFIG_FILE" | while IFS=$'\t' read -r remote_host remote_port local_port direction name hash interactive; do
+				if [ "$interactive" = "true" ]; then
+					status="INTERACTIVE"
+				else
+					status="NORMAL"
+				fi
+				printf "  %-20s %-12s %s -> %s:%s (%s)\n" "$name" "$status" "$local_port" "$remote_host" "$remote_port" "$hash"
+			done
+			;;
+		validate)
+			print_info "Validating configuration file: $AUTOSSH_CONFIG_FILE"
+			if validate_config "$AUTOSSH_CONFIG_FILE"; then
+				print_success "Configuration file is valid"
+			else
+				print_error "Configuration file validation failed"
+				exit 1
+			fi
+			;;
+		cleanup)
+			print_info "Cleaning up dead processes..."
+			cleanup_dead_processes
+			print_success "Cleanup completed"
+			;;
+		stats)
+			print_header "Tunnel Statistics"
+			get_tunnel_stats
+			;;
+		config)
+			print_header "Current Configuration"
+			echo "Config File: $AUTOSSH_CONFIG_FILE"
+			echo "SSH Config Dir: $SSH_CONFIG_DIR"
+			echo "State File: $AUTOSSH_STATE_FILE"
+			echo "Scripts Dir: $SCRIPTS_DIR"
+			;;
+		parse)
+			print_header "Parsed Configuration"
+			parse_config "$AUTOSSH_CONFIG_FILE"
+			;;
+		start-tunnel)
+			if [ -z "$tunnel_arg" ]; then
+				print_error "Tunnel hash required for start-tunnel command"
+				exit 1
+			fi
+			print_info "Starting tunnel: $tunnel_arg"
+			# Implementation would need to be added to start specific tunnel
+			print_warning "start-tunnel command not yet implemented"
+			;;
+		stop-tunnel)
+			if [ -z "$tunnel_arg" ]; then
+				print_error "Tunnel hash required for stop-tunnel command"
+				exit 1
+			fi
+			print_info "Stopping tunnel: $tunnel_arg"
+			stop_tunnel_by_hash "$tunnel_arg"
+			;;
+		show-tunnel)
+			if [ -z "$tunnel_arg" ]; then
+				print_error "Tunnel hash required for show-tunnel command"
+				exit 1
+			fi
+			print_header "Tunnel Details: $tunnel_arg"
+			get_tunnel_info "$tunnel_arg"
+			;;
+		hash)
+			if [ -z "$hash_name" ] || [ -z "$hash_host" ] || [ -z "$hash_port" ] || [ -z "$hash_local" ] || [ -z "$hash_dir" ]; then
+				print_error "All parameters required for hash calculation: name host port local direction interactive"
+				exit 1
+			fi
+			hash_result=$(calculate_tunnel_hash "$hash_name" "$hash_host" "$hash_port" "$hash_local" "$hash_dir" "${hash_interactive:-false}")
+			print_info "MD5 Hash: $hash_result"
+			;;
+		"")
+			print_error "No command specified"
+			print_info "Use 'autossh-cli --help' for usage information."
+			exit 1
+			;;
+		*)
+			print_error "Unknown command: $command"
+			print_info "Use 'autossh-cli --help' for usage information."
+			exit 1
+			;;
+	esac
+}
+
+# Main function
+main() {
+	# Check if scripts exist
+	check_scripts
+	
+	# Parse command line arguments
+	parse_args "$@"
+	
+	# Set environment variables
+	set_env_vars
+	
+	# Source required modules
+	source_modules
+	
+	# Execute the command
+	execute_command
+}
+
+# Run main function
+main "$@"
