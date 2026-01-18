@@ -13,11 +13,85 @@ response() {
 	local length=$(echo -n "$body" | wc -c)
 
 	echo "HTTP/1.1 $status"
-	echo "Content-Type: text/plain; charset=utf-8"
+	echo "Content-Type: application/json; charset=utf-8"
 	echo "Content-Length: $length"
 	echo "Connection: close"
 	echo ""
 	echo -n "$body"
+}
+
+# Function to convert list output to JSON
+list_to_json() {
+	echo "["
+	first=true
+	# Skip header line
+	autossh-cli list | tail -n +2 | while read -r line; do
+		if [ -z "$line" ]; then continue; fi
+
+		# Parse line: name status local -> remote:port (hash)
+		# Example: my-tunnel NORMAL 8080 -> example.com:80 (abc123hash)
+
+		name=$(echo "$line" | awk '{print $1}')
+		status=$(echo "$line" | awk '{print $2}')
+		local_port=$(echo "$line" | awk '{print $3}')
+		remote_host=$(echo "$line" | awk '{print $5}' | cut -d: -f1)
+		remote_port=$(echo "$line" | awk '{print $5}' | cut -d: -f2)
+		hash=$(echo "$line" | awk '{print $6}' | tr -d '()')
+
+		if [ "$first" = "true" ]; then
+			first=false
+		else
+			echo ","
+		fi
+
+		printf '  {
+    "name": "%s",
+    "status": "%s",
+    "local_port": "%s",
+    "remote_host": "%s",
+    "remote_port": "%s",
+    "hash": "%s"
+  }' "$name" "$status" "$local_port" "$remote_host" "$remote_port" "$hash"
+	done
+	echo ""
+	echo "]"
+}
+
+# Function to convert status output to JSON
+status_to_json() {
+	echo "["
+	first=true
+	# Skip header line and "Managed tunnels:" line if present
+	autossh-cli status | grep -v "Tunnel Status" | grep -v "Managed tunnels:" | while read -r line; do
+		if [ -z "$line" ]; then continue; fi
+		if echo "$line" | grep -q "No managed tunnels found"; then continue; fi
+
+		# Parse line: name status local -> remote:port (hash)
+
+		name=$(echo "$line" | awk '{print $1}')
+		status=$(echo "$line" | awk '{print $2}')
+		local_port=$(echo "$line" | awk '{print $3}')
+		remote_host=$(echo "$line" | awk '{print $5}' | cut -d: -f1)
+		remote_port=$(echo "$line" | awk '{print $5}' | cut -d: -f2)
+		hash=$(echo "$line" | awk '{print $6}' | tr -d '()')
+
+		if [ "$first" = "true" ]; then
+			first=false
+		else
+			echo ","
+		fi
+
+		printf '  {
+    "name": "%s",
+    "status": "%s",
+    "local_port": "%s",
+    "remote_host": "%s",
+    "remote_port": "%s",
+    "hash": "%s"
+  }' "$name" "$status" "$local_port" "$remote_host" "$remote_port" "$hash"
+	done
+	echo ""
+	echo "]"
 }
 
 # Function to handle incoming requests
@@ -40,27 +114,30 @@ handle_request() {
 	case "$path" in
 	"/list")
 		if [ "$method" = "GET" ]; then
-			autossh-cli list | response "200 OK"
+			list_to_json | response "200 OK"
 		else
-			echo "Method not allowed" | response "405 Method Not Allowed"
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
 		fi
 		;;
 	"/status")
 		if [ "$method" = "GET" ]; then
-			autossh-cli status | response "200 OK"
+			status_to_json | response "200 OK"
 		else
-			echo "Method not allowed" | response "405 Method Not Allowed"
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
 		fi
 		;;
 	"/start")
 		if [ "$method" = "POST" ]; then
-			autossh-cli start | response "200 OK"
+			output=$(autossh-cli start 2>&1)
+			# Escape quotes and newlines for JSON
+			json_output=$(echo "$output" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+			echo "{\"status\": \"success\", \"output\": \"$json_output\"}" | response "200 OK"
 		else
-			echo "Method not allowed" | response "405 Method Not Allowed"
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
 		fi
 		;;
 	*)
-		echo "Not Found" | response "404 Not Found"
+		echo '{"error": "Not Found"}' | response "404 Not Found"
 		;;
 	esac
 }
