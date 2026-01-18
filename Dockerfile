@@ -1,5 +1,6 @@
 # Use an official lightweight Linux image
-FROM alpine:3.22.0 AS base
+ARG REGISTRY_MIRROR=docker.io
+FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0 AS base
 
 # install dependencies
 RUN apk add --no-cache \
