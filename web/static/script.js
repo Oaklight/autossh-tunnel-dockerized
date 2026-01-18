@@ -307,23 +307,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Add fadeOut animation to CSS
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-    }
-    
-    .table-input.error {
-        border-color: #d32f2f;
-        box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
-    }
-`;
-document.head.appendChild(style);

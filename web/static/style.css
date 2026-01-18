@@ -1,11 +1,14 @@
 /* Material Design Custom Styles */
 :root {
-  --mdc-theme-primary: #1976d2;
-  --mdc-theme-secondary: #03dac6;
+  --mdc-theme-primary: #2196f3;
+  --mdc-theme-secondary: #ff4081;
   --mdc-theme-surface: #ffffff;
-  --mdc-theme-background: #f5f5f5;
-  --mdc-theme-on-surface: #000000;
+  --mdc-theme-background: #fafafa;
+  --mdc-theme-on-surface: rgba(0, 0, 0, 0.87);
   --mdc-theme-on-primary: #ffffff;
+  --table-header-bg: #ffffff;
+  --input-focus-color: #2196f3;
+  --border-color: #e0e0e0;
 }
 
 body {
@@ -25,53 +28,77 @@ body {
 /* Top App Bar Customization */
 .mdc-top-app-bar {
   background-color: var(--mdc-theme-primary);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .mdc-top-app-bar__title {
-  font-weight: 500;
-  font-size: 1.25rem;
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+}
+
+.mdc-top-app-bar__navigation-icon {
+  margin-right: 12px;
+  margin-left: 4px;
 }
 
 /* Card Styling */
 .tunnel-card {
-  margin-bottom: 24px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: none;
+  background-color: var(--mdc-theme-surface);
 }
 
 /* Data Table Customization */
 .mdc-data-table {
-  border-radius: 8px;
-  overflow: hidden;
+  border-radius: 12px;
+  border: none;
   width: 100%;
 }
 
 .mdc-data-table__table {
   width: 100%;
   table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .mdc-data-table__header-cell {
-  background-color: #f8f9fa;
-  font-weight: 500;
-  color: var(--mdc-theme-on-surface);
-  border-bottom: 1px solid #e0e0e0;
-  padding: 16px 12px;
+  background-color: var(--table-header-bg);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(0, 0, 0, 0.6);
+  border-bottom: 2px solid var(--border-color);
+  padding: 20px 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
+  transition: background-color 0.2s;
 }
 
 .mdc-data-table__cell {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 12px;
   vertical-align: middle;
   text-align: center;
+  font-size: 0.9rem;
+}
+
+.mdc-data-table__row {
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 .mdc-data-table__row:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(33, 150, 243, 0.04) !important;
+}
+
+.mdc-data-table__row:last-child .mdc-data-table__cell {
+  border-bottom: none;
 }
 
 /* Column width distribution */
@@ -123,28 +150,42 @@ body {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   font-family: "Roboto", sans-serif;
   font-size: 14px;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
-  background-color: white;
+  background-color: #fcfcfc;
   text-align: center;
+  color: var(--mdc-theme-on-surface);
+}
+
+.table-input:hover {
+  border-color: #bdbdbd;
+  background-color: #ffffff;
 }
 
 .table-input:focus {
   outline: none;
   border-color: var(--mdc-theme-primary);
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
 }
 
+/* Custom Checkbox Styling */
 .table-checkbox {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   vertical-align: middle;
+  accent-color: var(--mdc-theme-primary);
+  transition: transform 0.1s ease;
+}
+
+.table-checkbox:active {
+  transform: scale(0.9);
 }
 
 /* Select Fields in Table */
@@ -152,29 +193,36 @@ body {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   font-family: "Roboto", sans-serif;
   font-size: 14px;
-  background-color: white;
+  background-color: #fcfcfc;
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23757575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 8px center;
+  background-position: right 10px center;
   background-size: 16px;
-  padding-right: 32px;
+  padding-right: 36px;
   text-align: center;
   text-align-last: center;
+  color: var(--mdc-theme-on-surface);
+}
+
+.table-select:hover {
+  border-color: #bdbdbd;
+  background-color: #ffffff;
 }
 
 .table-select:focus {
   outline: none;
   border-color: var(--mdc-theme-primary);
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
 }
 
 /* Action Buttons */
@@ -190,37 +238,55 @@ body {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.0892857143em;
+  border-radius: 8px;
+  padding: 0 24px;
+  height: 44px;
+  transition: all 0.2s ease;
 }
 
 .mdc-button--raised {
   background-color: var(--mdc-theme-primary);
   color: var(--mdc-theme-on-primary);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.mdc-button--raised:hover {
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+  transform: translateY(-1px);
 }
 
 .mdc-button--unelevated {
   background-color: var(--mdc-theme-secondary);
   color: var(--mdc-theme-on-primary);
+  box-shadow: 0 4px 12px rgba(255, 64, 129, 0.3);
+}
+
+.mdc-button--unelevated:hover {
+  box-shadow: 0 6px 16px rgba(255, 64, 129, 0.4);
+  transform: translateY(-1px);
 }
 
 /* Delete Button */
 .delete-button {
   background: none;
   border: none;
-  color: #d32f2f;
+  color: #757575;
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
 }
 
 .delete-button:hover {
-  background-color: rgba(211, 47, 47, 0.1);
+  background-color: rgba(211, 47, 47, 0.08);
+  color: #d32f2f;
+  transform: rotate(90deg);
 }
 
 .delete-button .material-icons {
@@ -355,22 +421,26 @@ body {
 
 /* Success/Error Messages */
 .message {
-  padding: 16px;
-  border-radius: 4px;
+  padding: 16px 20px;
+  border-radius: 8px;
   margin: 16px 0;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .message.success {
-  background-color: #e8f5e8;
+  background-color: #e8f5e9;
   color: #2e7d32;
-  border: 1px solid #c8e6c9;
+  border: 1px solid #a5d6a7;
 }
 
 .message.error {
   background-color: #ffebee;
   color: #c62828;
-  border: 1px solid #ffcdd2;
+  border: 1px solid #ef9a9a;
 }
 
 /* Animation for new rows */
@@ -388,4 +458,42 @@ body {
 
 .new-row {
   animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.table-input.error {
+  border-color: #d32f2f !important;
+  background-color: #fff8f8 !important;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.15) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
 }
