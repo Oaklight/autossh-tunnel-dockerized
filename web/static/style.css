@@ -102,45 +102,51 @@ body {
 }
 
 /* Column width distribution */
-/* Column width distribution (2:2:1.5:1.5:1:2:0.5) Total: 10.5 */
+/* Column width distribution (Name, Status, Remote Host, Remote Port, Local Port, Interactive, Direction, Actions) */
 .mdc-data-table__header-cell:nth-child(1),
 .mdc-data-table__cell:nth-child(1) {
-  width: 19%;
+  width: 15%;
   min-width: 100px;
 }
 
 .mdc-data-table__header-cell:nth-child(2),
 .mdc-data-table__cell:nth-child(2) {
-  width: 19%;
-  min-width: 100px;
+  width: 10%;
+  min-width: 80px;
 }
 
 .mdc-data-table__header-cell:nth-child(3),
 .mdc-data-table__cell:nth-child(3) {
-  width: 14%;
-  min-width: 80px;
+  width: 15%;
+  min-width: 100px;
 }
 
 .mdc-data-table__header-cell:nth-child(4),
 .mdc-data-table__cell:nth-child(4) {
-  width: 14%;
+  width: 12%;
   min-width: 80px;
 }
 
 .mdc-data-table__header-cell:nth-child(5),
 .mdc-data-table__cell:nth-child(5) {
-  width: 10%;
+  width: 12%;
   min-width: 80px;
 }
 
 .mdc-data-table__header-cell:nth-child(6),
 .mdc-data-table__cell:nth-child(6) {
-  width: 20%;
-  min-width: 120px;
+  width: 8%;
+  min-width: 60px;
 }
 
 .mdc-data-table__header-cell:nth-child(7),
 .mdc-data-table__cell:nth-child(7) {
+  width: 23%;
+  min-width: 120px;
+}
+
+.mdc-data-table__header-cell:nth-child(8),
+.mdc-data-table__cell:nth-child(8) {
   width: 5%;
   min-width: 50px;
 }

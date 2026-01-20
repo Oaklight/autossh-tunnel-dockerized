@@ -16,13 +16,15 @@ import (
 )
 
 const (
-	configDir       = "/home/myuser/config"
-	configFile      = "/home/myuser/config/config.yaml"
-	staticDir       = "static"
-	templatesDir    = "templates"
-	backupDir       = "/home/myuser/config/backups"
-	defaultPort     = ":5000"
+	configDir    = "/home/myuser/config"
+	configFile   = "/home/myuser/config/config.yaml"
+	staticDir    = "static"
+	templatesDir = "templates"
+	backupDir    = "/home/myuser/config/backups"
+	defaultPort  = ":5000"
 )
+
+var apiBaseURL string
 
 type Tunnel struct {
 	Name        string `yaml:"name" json:"name"`
@@ -31,6 +33,12 @@ type Tunnel struct {
 	LocalPort   string `yaml:"local_port" json:"local_port"`
 	Interactive bool   `yaml:"interactive" json:"interactive"`
 	Direction   string `yaml:"direction" json:"direction"`
+	Status      string `yaml:"-" json:"status,omitempty"`
+}
+
+type TunnelStatus struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
 }
 
 type Config struct {
@@ -180,12 +188,50 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
+func fetchTunnelStatuses() (map[string]string, error) {
+	if apiBaseURL == "" {
+		return nil, nil
+	}
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Get(apiBaseURL + "/status")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var statuses []TunnelStatus
+	if err := json.NewDecoder(resp.Body).Decode(&statuses); err != nil {
+		return nil, err
+	}
+
+	statusMap := make(map[string]string)
+	for _, s := range statuses {
+		statusMap[s.Name] = s.Status
+	}
+	return statusMap, nil
+}
+
 func getConfigHandler(w http.ResponseWriter, r *http.Request) {
 	config, err := loadConfig()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Fetch statuses
+	statuses, err := fetchTunnelStatuses()
+	if err != nil {
+		log.Printf("Error fetching statuses: %v", err)
+	} else if statuses != nil {
+		for i := range config.Tunnels {
+			if status, ok := statuses[config.Tunnels[i].Name]; ok {
+				config.Tunnels[i].Status = status
+			} else {
+				config.Tunnels[i].Status = "STOPPED"
+			}
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(config)
 }
@@ -207,6 +253,8 @@ func updateConfigHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	apiBaseURL = os.Getenv("API_BASE_URL")
+
 	// Check if the config directory exists and has correct ownership
 	if err := checkConfigDirectory(); err != nil {
 		log.Fatalf("Configuration error: %v\n", err)

@@ -96,13 +96,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Add row function with Material Design styling
-    function addRow(tunnel = { name: "", remote_host: "", remote_port: "", local_port: "", interactive: false, direction: "remote_to_local" }) {
+    function addRow(tunnel = { name: "", remote_host: "", remote_port: "", local_port: "", interactive: false, direction: "remote_to_local", status: "STOPPED" }) {
         const row = document.createElement("tr");
         row.className = "mdc-data-table__row new-row";
+
+        let statusColor = "grey";
+        if (tunnel.status === "NORMAL") statusColor = "green";
+        else if (tunnel.status === "DEAD") statusColor = "red";
+        else if (tunnel.status === "STARTING") statusColor = "orange";
 
         row.innerHTML = `
             <td class="mdc-data-table__cell">
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="Tunnel name">
+            </td>
+            <td class="mdc-data-table__cell">
+                <span style="color: ${statusColor}; font-weight: bold;">${escapeHtml(tunnel.status || "STOPPED")}</span>
             </td>
             <td class="mdc-data-table__cell">
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="Remote host">
@@ -271,11 +279,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const cells = row.cells;
             return {
                 name: cells[0].querySelector("input").value.trim(),
-                remote_host: cells[1].querySelector("input").value.trim(),
-                remote_port: cells[2].querySelector("input").value.trim(),
-                local_port: cells[3].querySelector("input").value.trim(),
-                interactive: cells[4].querySelector("input[type='checkbox']").checked,
-                direction: cells[5].querySelector("select").value,
+                remote_host: cells[2].querySelector("input").value.trim(),
+                remote_port: cells[3].querySelector("input").value.trim(),
+                local_port: cells[4].querySelector("input").value.trim(),
+                interactive: cells[5].querySelector("input[type='checkbox']").checked,
+                direction: cells[6].querySelector("select").value,
             };
         });
 
@@ -305,5 +313,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 showMessage("Failed to save configuration", "error");
             });
     });
+
 });
 
