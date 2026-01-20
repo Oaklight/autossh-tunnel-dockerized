@@ -222,13 +222,15 @@ func getConfigHandler(w http.ResponseWriter, r *http.Request) {
 	statuses, err := fetchTunnelStatuses()
 	if err != nil {
 		log.Printf("Error fetching statuses: %v", err)
-	} else if statuses != nil {
-		for i := range config.Tunnels {
-			if status, ok := statuses[config.Tunnels[i].Name]; ok {
-				config.Tunnels[i].Status = status
-			} else {
-				config.Tunnels[i].Status = "STOPPED"
-			}
+	}
+
+	for i := range config.Tunnels {
+		if statuses == nil {
+			config.Tunnels[i].Status = "N/A"
+		} else if status, ok := statuses[config.Tunnels[i].Name]; ok {
+			config.Tunnels[i].Status = status
+		} else {
+			config.Tunnels[i].Status = "STOPPED"
 		}
 	}
 

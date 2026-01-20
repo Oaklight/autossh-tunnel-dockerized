@@ -101,9 +101,11 @@ document.addEventListener("DOMContentLoaded", () => {
         row.className = "mdc-data-table__row new-row";
 
         let statusColor = "grey";
-        if (tunnel.status === "NORMAL") statusColor = "green";
+        if (tunnel.status === "RUNNING" || tunnel.status === "NORMAL") statusColor = "green";
         else if (tunnel.status === "DEAD") statusColor = "red";
         else if (tunnel.status === "STARTING") statusColor = "orange";
+        else if (tunnel.status === "STOPPED") statusColor = "grey";
+        else if (tunnel.status === "N/A") statusColor = "grey";
 
         row.innerHTML = `
             <td class="mdc-data-table__cell">
