@@ -89,23 +89,23 @@ stop_tunnel_by_hash() {
 	local name=$(get_tunnel_name "$hash")
 
 	if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-		echo "Stopping tunnel: $name ($hash, PID: $pid)"
+		log_info "STATE" "Stopping tunnel: $name ($hash, PID: $pid)"
 		kill "$pid" 2>/dev/null || true
 		sleep 1
 		# Force kill if still running
 		if kill -0 "$pid" 2>/dev/null; then
-			echo "Force stopping tunnel: $name ($hash)"
+			log_info "STATE" "Force stopping tunnel: $name ($hash)"
 			kill -9 "$pid" 2>/dev/null || true
 		fi
 	fi
 
 	# Remove tunnel from state
 	remove_tunnel_from_state "$hash"
-	
+
 	# Clean up log file
 	local log_file="/tmp/autossh-logs/tunnel-${hash}.log"
 	if [ -f "$log_file" ]; then
-		echo "Removing log file: $log_file"
+		log_info "STATE" "Removing log file: $log_file"
 		rm -f "$log_file"
 	fi
 }
@@ -113,12 +113,12 @@ stop_tunnel_by_hash() {
 # Function to cleanup all managed tunnels
 cleanup_managed_tunnels() {
 	local state_file=$(get_state_file)
-	echo "Cleaning up managed tunnels..."
+	log_info "STATE" "Cleaning up managed tunnels..."
 
 	if [ -f "$state_file" ]; then
 		while IFS=$'\t' read -r remote_host remote_port local_port direction name hash pid; do
 			if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-				echo "Stopping tunnel: $name ($hash)"
+				log_info "STATE" "Stopping tunnel: $name ($hash)"
 				kill "$pid" 2>/dev/null || true
 			fi
 		done <"$state_file"
@@ -129,14 +129,14 @@ cleanup_managed_tunnels() {
 		# Force kill any remaining processes and clean up log files
 		while IFS=$'\t' read -r remote_host remote_port local_port direction name hash pid; do
 			if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-				echo "Force stopping tunnel: $name ($hash)"
+				log_info "STATE" "Force stopping tunnel: $name ($hash)"
 				kill -9 "$pid" 2>/dev/null || true
 			fi
-			
+
 			# Clean up log file for this tunnel
 			local log_file="/tmp/autossh-logs/tunnel-${hash}.log"
 			if [ -f "$log_file" ]; then
-				echo "Removing log file: $log_file"
+				log_info "STATE" "Removing log file: $log_file"
 				rm -f "$log_file"
 			fi
 		done <"$state_file"
@@ -144,10 +144,10 @@ cleanup_managed_tunnels() {
 
 	# Clear state file
 	>"$state_file"
-	
+
 	# Clean up any remaining log files (in case of orphaned logs)
 	if [ -d "/tmp/autossh-logs" ]; then
-		echo "Cleaning up any remaining log files..."
+		log_info "STATE" "Cleaning up any remaining log files..."
 		rm -f /tmp/autossh-logs/tunnel-*.log 2>/dev/null || true
 		# Remove directory if empty
 		rmdir /tmp/autossh-logs 2>/dev/null || true
@@ -183,11 +183,11 @@ cleanup_dead_processes() {
 				# Process is still running, keep it
 				echo "$remote_host	$remote_port	$local_port	$direction	$name	$hash	$pid" >>"$temp_file"
 			else
-				echo "Removing dead process from state: $name ($hash, PID: $pid)"
+				log_info "STATE" "Removing dead process from state: $name ($hash, PID: $pid)"
 				# Clean up log file for dead process
 				local log_file="/tmp/autossh-logs/tunnel-${hash}.log"
 				if [ -f "$log_file" ]; then
-					echo "Removing log file for dead process: $log_file"
+					log_info "STATE" "Removing log file for dead process: $log_file"
 					rm -f "$log_file"
 				fi
 			fi

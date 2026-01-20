@@ -3,6 +3,10 @@
 # Simple API Server using netcat
 # Exposes autossh-cli functionality via HTTP
 
+# Source the logger module
+SCRIPT_DIR="$(dirname "$0")"
+. "$SCRIPT_DIR/logger.sh"
+
 PORT="${API_PORT:-8080}"
 PIPE="/tmp/autossh_api_pipe"
 
@@ -109,7 +113,7 @@ handle_request() {
 	done
 
 	# Log request
-	echo "[$(date '+%Y-%m-%d %H:%M:%S')] $method $path" >&2
+	log_info "API" "$method $path" >&2
 
 	case "$path" in
 	"/list")
@@ -142,7 +146,7 @@ handle_request() {
 	esac
 }
 
-echo "Starting API server on port $PORT..."
+log_info "API" "Starting API server on port $PORT..."
 
 # Main loop
 while true; do

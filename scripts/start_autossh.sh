@@ -14,6 +14,9 @@ SCRIPT_DIR="$(dirname "$0")"
 # Source the state manager module
 . "$SCRIPT_DIR/state_manager.sh"
 
+# Source the logger module
+. "$SCRIPT_DIR/logger.sh"
+
 # Function to start a single autossh tunnel
 start_single_tunnel() {
 	local remote_host=$1
@@ -54,7 +57,7 @@ start_single_tunnel() {
 	# Create log directory if it doesn't exist
 	log_dir="/tmp/autossh-logs"
 	mkdir -p "$log_dir"
-	
+
 	# Generate log file name based on tunnel hash or connection info
 	if [ -n "$tunnel_hash" ]; then
 		log_file="$log_dir/tunnel-${tunnel_hash}.log"
@@ -63,24 +66,24 @@ start_single_tunnel() {
 	fi
 
 	if [ "$direction" = "local_to_remote" ]; then
-		echo "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
+		log_info "AUTOSSH" "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
 		exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
 	else
-		echo "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
+		log_info "AUTOSSH" "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
 		exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
 	fi
 }
 
 # Function to cleanup old autossh processes (legacy mode)
 cleanup_old_tunnels() {
-	echo "Cleaning up old autossh processes..."
+	log_info "AUTOSSH" "Cleaning up old autossh processes..."
 	# Use more specific pattern to avoid killing this script
 	if pgrep -f "autossh.*-M.*-o" >/dev/null 2>&1; then
 		pkill -f "autossh.*-M.*-o"
-		echo "Old autossh processes terminated"
+		log_info "AUTOSSH" "Old autossh processes terminated"
 		sleep 2
 	else
-		echo "No existing autossh processes found"
+		log_info "AUTOSSH" "No existing autossh processes found"
 	fi
 
 	# Clear state file for fresh start
@@ -92,7 +95,7 @@ cleanup_old_tunnels() {
 start_all_tunnels() {
 	local config_file=$1
 
-	echo "Starting tunnels with smart restart..."
+	log_info "AUTOSSH" "Starting tunnels with smart restart..."
 
 	# Create a temporary file to store the parsed config
 	temp_file=$(mktemp)
@@ -119,7 +122,7 @@ start_all_tunnels() {
 
 	# Stop removed tunnels
 	if [ -n "$to_stop" ]; then
-		echo "Stopping removed tunnels..."
+		log_info "AUTOSSH" "Stopping removed tunnels..."
 		echo "$to_stop" | while read -r hash; do
 			if [ -n "$hash" ]; then
 				stop_tunnel_by_hash "$hash"
@@ -129,13 +132,13 @@ start_all_tunnels() {
 
 	# Start new tunnels
 	if [ -n "$to_start" ]; then
-		echo "Starting new tunnels..."
+		log_info "AUTOSSH" "Starting new tunnels..."
 		while IFS='	' read -r remote_host remote_port local_port direction name hash interactive; do
 			if [ "$interactive" = "true" ]; then
 				continue
 			fi
 			if echo "$to_start" | grep -q "^$hash$"; then
-				echo "Starting new tunnel: ${name} (${hash})"
+				log_info "AUTOSSH" "Starting new tunnel: ${name} (${hash})"
 				start_single_tunnel "$remote_host" "$remote_port" "$local_port" "$direction" "$hash" &
 				tunnel_pid=$!
 				save_tunnel_state "$remote_host" "$remote_port" "$local_port" "$direction" "$name" "$hash" "$tunnel_pid"
@@ -145,11 +148,11 @@ start_all_tunnels() {
 
 	# Report unchanged tunnels
 	if [ -n "$unchanged" ]; then
-		echo "Keeping existing tunnels:"
+		log_info "AUTOSSH" "Keeping existing tunnels:"
 		echo "$unchanged" | while read -r hash; do
 			if [ -n "$hash" ]; then
 				tunnel_info=$(grep "	$hash	" "$STATE_FILE" 2>/dev/null | cut -f5 || echo "unknown")
-				echo "  - $tunnel_info ($hash)"
+				log_info "AUTOSSH" "  - $tunnel_info ($hash)"
 			fi
 		done
 	fi
@@ -157,7 +160,7 @@ start_all_tunnels() {
 	# Clean up temporary files
 	rm -f "$temp_file" "$temp_running" "$temp_new"
 
-	echo "Smart restart completed."
+	log_info "AUTOSSH" "Smart restart completed."
 }
 
 # Main function to orchestrate the tunnel startup process
@@ -165,19 +168,19 @@ main() {
 	local smart_restart=${1:-"true"} # Default to smart restart
 	local state_file=$(get_state_file)
 
-	echo "Using config file: $CONFIG_FILE"
-	echo "Using SSH config dir: $SSH_CONFIG_DIR"
-	echo "Using state file: $state_file"
+	log_info "AUTOSSH" "Using config file: $CONFIG_FILE"
+	log_info "AUTOSSH" "Using SSH config dir: $SSH_CONFIG_DIR"
+	log_info "AUTOSSH" "Using state file: $state_file"
 
 	# Check if config file exists
 	if [ ! -f "$CONFIG_FILE" ]; then
-		echo "Error: Config file not found: $CONFIG_FILE"
-		echo "Please ensure the config file exists or set AUTOSSH_CONFIG_FILE environment variable"
+		log_error "AUTOSSH" "Config file not found: $CONFIG_FILE"
+		log_error "AUTOSSH" "Please ensure the config file exists or set AUTOSSH_CONFIG_FILE environment variable"
 		exit 1
 	fi
 
 	if [ "$smart_restart" = "false" ] || [ ! -f "$state_file" ]; then
-		echo "Performing full restart..."
+		log_info "AUTOSSH" "Performing full restart..."
 		cleanup_old_tunnels
 		# Initialize state file and start all tunnels
 		>"$state_file"
@@ -185,17 +188,17 @@ main() {
 		parse_config "$CONFIG_FILE" >"$temp_file"
 		while IFS='	' read -r remote_host remote_port local_port direction name hash interactive; do
 			if [ "$interactive" = "true" ]; then
-				echo "Skipping interactive tunnel: ${name} (${hash})"
+				log_info "AUTOSSH" "Skipping interactive tunnel: ${name} (${hash})"
 				continue
 			fi
-			echo "Starting tunnel: ${name} (${hash})"
+			log_info "AUTOSSH" "Starting tunnel: ${name} (${hash})"
 			start_single_tunnel "$remote_host" "$remote_port" "$local_port" "$direction" "$hash" &
 			tunnel_pid=$!
 			save_tunnel_state "$remote_host" "$remote_port" "$local_port" "$direction" "$name" "$hash" "$tunnel_pid"
 		done <"$temp_file"
 		rm -f "$temp_file"
 	else
-		echo "Performing smart restart..."
+		log_info "AUTOSSH" "Performing smart restart..."
 		start_all_tunnels "$CONFIG_FILE"
 	fi
 }
