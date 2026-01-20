@@ -19,4 +19,4 @@ if [ ! -d "$CONFIG_DIR" ]; then
 fi
 
 # Switch to myuser and execute the command passed as arguments
-exec su myuser -c "$@"
+exec su-exec myuser "$@"

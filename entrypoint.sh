@@ -28,11 +28,4 @@ chmod 777 /tmp
 rm -f /tmp/autossh_tunnels.state
 
 # Switch to myuser and execute the command passed as arguments
-# Build command string manually for ash shell compatibility
-cmd=""
-for arg in "$@"; do
-    # Simple escaping for shell arguments
-    escaped_arg=$(printf '%s' "$arg" | sed "s/'/'\\\\''/g")
-    cmd="$cmd '$escaped_arg'"
-done
-exec su myuser -c "$cmd"
+exec su-exec myuser "$@"
