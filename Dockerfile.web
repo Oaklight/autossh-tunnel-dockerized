@@ -2,6 +2,9 @@
 ARG REGISTRY_MIRROR=docker.io
 FROM ${REGISTRY_MIRROR}/library/golang:tip-alpine AS builder
 
+# Proxy support
+ARG GOPROXY
+
 WORKDIR /app
 
 # Copy the rest of the application code

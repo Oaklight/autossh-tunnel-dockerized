@@ -9,9 +9,15 @@ IMAGE_TAG_WEB = latest
 ADDITIONAL_TAGS_WEB = v1.6.2
 PLATFORMS_WEB = linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
 
-# Registry mirror support
+# Registry mirror and proxy support
 REGISTRY_MIRROR ?= docker.io
+GOPROXY ?=
+
 BUILD_ARGS = --build-arg REGISTRY_MIRROR=$(REGISTRY_MIRROR)
+
+ifneq ($(GOPROXY),)
+BUILD_ARGS += --build-arg GOPROXY=$(GOPROXY)
+endif
 
 # Default target
 all: push-autossh push-web
@@ -109,5 +115,7 @@ help:
 	@echo "Environment variables:"
 	@echo "  REGISTRY_MIRROR    - Docker registry mirror to use (default: docker.io)"
 	@echo "                       Example: REGISTRY_MIRROR=your-mirror:port make build-test"
+	@echo "  GOPROXY            - Go proxy to use for building (e.g., https://goproxy.cn)"
+	@echo "                       Example: GOPROXY=https://goproxy.cn make build-web"
 
 .PHONY: all build-autossh build-web push-autossh push-web build-test-autossh build-test-web build-test clean clean-cache help
