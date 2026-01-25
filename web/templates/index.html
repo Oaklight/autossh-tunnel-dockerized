@@ -10,6 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Configurable Links -->
+    <script>
+        // Configure your project links here
+        window.PROJECT_CONFIG = {
+            dockerHubUrl: 'https://hub.docker.com/r/oaklight/autossh-tunnel',
+            githubUrl: 'https://github.com/Oaklight/autossh-tunnel-dockerized',
+            projectName: 'SSH Tunnel Manager'
+        };
+    </script>
 </head>
 
 <body class="mdc-typography">
@@ -17,8 +27,30 @@
     <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
         <div class="mdc-top-app-bar__row">
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-                <i class="material-icons mdc-top-app-bar__navigation-icon">vpn_key</i>
+                <i class="material-icons mdc-top-app-bar__navigation-icon">compare_arrows</i>
                 <span class="mdc-top-app-bar__title">SSH Tunnel Manager</span>
+            </section>
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+                <div class="corner-icons">
+                    <div class="corner-icon-wrapper">
+                        <a href="#" id="dockerhub-link" target="_blank" class="corner-icon" data-tooltip="Docker Hub">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.888c0 .102.084.185.186.185m0 2.716h2.118a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.93 0h2.12a.186.186 0 00.185-.186V6.29a.186.186 0 00-.185-.185H8.1a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.964 0h2.119a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.93 0h2.12a.186.186 0 00.185-.185V9.006a.186.186 0 00-.185-.186H8.1a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.964 0h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186H5.136a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338 0-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983 0 1.97-.084 2.943-.25 1.225-.208 2.42-.598 3.554-1.146 1.147-.563 2.215-1.291 3.168-2.168.814-.75 1.518-1.607 2.05-2.553.404-.719.71-1.482.918-2.273a4.4 4.4 0 001.372.22c1.109 0 2.179-.536 2.717-1.36.189-.292.33-.609.415-.943l.034-.14-.079-.106z" />
+                            </svg>
+                        </a>
+                        <div class="tooltip" id="dockerhub-tooltip"></div>
+                    </div>
+                    <div class="corner-icon-wrapper">
+                        <a href="#" id="github-link" target="_blank" class="corner-icon" data-tooltip="GitHub">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                            </svg>
+                        </a>
+                        <div class="tooltip" id="github-tooltip"></div>
+                    </div>
+                </div>
             </section>
         </div>
     </header>
@@ -86,6 +118,132 @@
     <!-- Material Design JavaScript -->
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <script src="/static/script.js"></script>
+
+    <!-- Corner Icons Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize corner icon links
+            const dockerhubLink = document.getElementById('dockerhub-link');
+            const githubLink = document.getElementById('github-link');
+            const dockerhubTooltip = document.getElementById('dockerhub-tooltip');
+            const githubTooltip = document.getElementById('github-tooltip');
+
+            // Set URLs from configuration
+            if (window.PROJECT_CONFIG) {
+                dockerhubLink.href = window.PROJECT_CONFIG.dockerHubUrl;
+                githubLink.href = window.PROJECT_CONFIG.githubUrl;
+            }
+
+            // Smart tooltip positioning
+            function positionTooltip(element, tooltip) {
+                const rect = element.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const scrollX = window.pageXOffset;
+                const scrollY = window.pageYOffset;
+
+                // Reset all position classes
+                tooltip.classList.remove('position-top', 'position-bottom', 'position-left', 'position-right');
+
+                // Calculate available space in each direction
+                const spaceAbove = rect.top;
+                const spaceBelow = viewportHeight - rect.bottom;
+                const spaceLeft = rect.left;
+                const spaceRight = viewportWidth - rect.right;
+
+                let position = 'top'; // default
+                let left, top;
+
+                // Determine best position based on available space
+                if (spaceAbove >= tooltipRect.height + 10) {
+                    // Enough space above
+                    position = 'top';
+                    top = rect.top + scrollY - tooltipRect.height - 10;
+                    left = rect.left + scrollX + (rect.width / 2);
+                } else if (spaceBelow >= tooltipRect.height + 10) {
+                    // Enough space below
+                    position = 'bottom';
+                    top = rect.bottom + scrollY + 10;
+                    left = rect.left + scrollX + (rect.width / 2);
+                } else if (spaceLeft >= tooltipRect.width + 10) {
+                    // Enough space to the left
+                    position = 'left';
+                    top = rect.top + scrollY + (rect.height / 2);
+                    left = rect.left + scrollX - tooltipRect.width - 10;
+                } else if (spaceRight >= tooltipRect.width + 10) {
+                    // Enough space to the right
+                    position = 'right';
+                    top = rect.top + scrollY + (rect.height / 2);
+                    left = rect.right + scrollX + 10;
+                } else {
+                    // Not enough space anywhere, use top and adjust horizontally
+                    position = 'top';
+                    top = rect.top + scrollY - tooltipRect.height - 10;
+                    left = rect.left + scrollX + (rect.width / 2);
+                }
+
+                // Adjust horizontal position to keep tooltip in viewport
+                if (position === 'top' || position === 'bottom') {
+                    const tooltipHalfWidth = tooltipRect.width / 2;
+                    if (left - tooltipHalfWidth < 10) {
+                        left = tooltipHalfWidth + 10;
+                    } else if (left + tooltipHalfWidth > viewportWidth - 10) {
+                        left = viewportWidth - tooltipHalfWidth - 10;
+                    }
+                }
+
+                // Adjust vertical position to keep tooltip in viewport
+                if (position === 'left' || position === 'right') {
+                    const tooltipHalfHeight = tooltipRect.height / 2;
+                    if (top - tooltipHalfHeight < 10) {
+                        top = tooltipHalfHeight + 10;
+                    } else if (top + tooltipHalfHeight > viewportHeight - 10) {
+                        top = viewportHeight - tooltipHalfHeight - 10;
+                    }
+                }
+
+                // Apply position
+                tooltip.classList.add(`position-${position}`);
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
+            }
+
+            // Tooltip functionality
+            function showTooltip(element, tooltip, text) {
+                tooltip.textContent = text;
+                tooltip.classList.add('show');
+
+                // Position tooltip after it's visible to get accurate measurements
+                setTimeout(() => {
+                    positionTooltip(element, tooltip);
+                }, 0);
+            }
+
+            function hideTooltip(tooltip) {
+                tooltip.classList.remove('show');
+                tooltip.classList.remove('position-top', 'position-bottom', 'position-left', 'position-right');
+            }
+
+            // Docker Hub tooltip
+            dockerhubLink.addEventListener('mouseenter', function () {
+                showTooltip(this, dockerhubTooltip, this.href);
+            });
+
+            dockerhubLink.addEventListener('mouseleave', function () {
+                hideTooltip(dockerhubTooltip);
+            });
+
+            // GitHub tooltip
+            githubLink.addEventListener('mouseenter', function () {
+                showTooltip(this, githubTooltip, this.href);
+            });
+
+            githubLink.addEventListener('mouseleave', function () {
+                hideTooltip(githubTooltip);
+            });
+        });
+    </script>
 </body>
 
 </html>
