@@ -38,7 +38,7 @@ body {
 }
 
 .mdc-top-app-bar__navigation-icon {
-  margin-right: 12px;
+  margin-right: 6px;
   margin-left: 4px;
 }
 
@@ -453,13 +453,14 @@ body {
 }
 
 .mdc-button--unelevated {
-  background-color: var(--mdc-theme-secondary);
+  background-color: #ff9800;
   color: var(--mdc-theme-on-primary);
-  box-shadow: 0 4px 12px rgba(255, 64, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
 }
 
 .mdc-button--unelevated:hover {
-  box-shadow: 0 6px 16px rgba(255, 64, 129, 0.4);
+  background-color: #f57c00;
+  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
   transform: translateY(-1px);
 }
 
