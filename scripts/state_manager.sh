@@ -88,6 +88,20 @@ stop_tunnel_by_hash() {
 	local pid=$(get_tunnel_pid "$hash")
 	local name=$(get_tunnel_name "$hash")
 
+	# Source logger if not already loaded
+	if ! command -v log_info >/dev/null 2>&1; then
+		# Try multiple possible locations for logger.sh
+		if [ -f "/usr/local/bin/scripts/logger.sh" ]; then
+			. "/usr/local/bin/scripts/logger.sh"
+		elif [ -f "$(dirname "$0")/logger.sh" ]; then
+			. "$(dirname "$0")/logger.sh"
+		else
+			# Fallback to simple echo if logger not found
+			log_info() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [$1] $2"; }
+			log_error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [$1] $2" >&2; }
+		fi
+	fi
+
 	if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
 		log_info "STATE" "Stopping tunnel: $name ($hash, PID: $pid)"
 		kill "$pid" 2>/dev/null || true
@@ -197,6 +211,119 @@ cleanup_dead_processes() {
 	fi
 
 	rm -f "$temp_file"
+}
+
+# Function to start a specific tunnel by hash
+start_tunnel_by_hash() {
+	local hash=$1
+	local config_file="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
+
+	# Source logger if not already loaded
+	if ! command -v log_info >/dev/null 2>&1; then
+		# Try multiple possible locations for logger.sh
+		if [ -f "/usr/local/bin/scripts/logger.sh" ]; then
+			. "/usr/local/bin/scripts/logger.sh"
+		elif [ -f "$(dirname "$0")/logger.sh" ]; then
+			. "$(dirname "$0")/logger.sh"
+		else
+			# Fallback to simple echo if logger not found
+			log_info() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] [$1] $2"; }
+			log_error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] [$1] $2" >&2; }
+		fi
+	fi
+
+	# Source config parser if not already loaded
+	if ! command -v parse_config >/dev/null 2>&1; then
+		# Try multiple possible locations for config_parser.sh
+		if [ -f "/usr/local/bin/scripts/config_parser.sh" ]; then
+			. "/usr/local/bin/scripts/config_parser.sh"
+		elif [ -f "$(dirname "$0")/config_parser.sh" ]; then
+			. "$(dirname "$0")/config_parser.sh"
+		else
+			log_error "STATE" "Cannot find config_parser.sh module"
+			return 1
+		fi
+	fi
+
+	# Check if tunnel is already running
+	if is_tunnel_running "$hash"; then
+		local name=$(get_tunnel_name "$hash")
+		log_info "STATE" "Tunnel already running: $name ($hash)"
+		return 0
+	fi
+
+	# Find tunnel configuration by hash
+	local tunnel_config=$(parse_config "$config_file" | grep "	$hash	")
+
+	if [ -z "$tunnel_config" ]; then
+		log_error "STATE" "Tunnel configuration not found for hash: $hash"
+		return 1
+	fi
+
+	# Parse tunnel configuration
+	local remote_host=$(echo "$tunnel_config" | cut -f1)
+	local remote_port=$(echo "$tunnel_config" | cut -f2)
+	local local_port=$(echo "$tunnel_config" | cut -f3)
+	local direction=$(echo "$tunnel_config" | cut -f4)
+	local name=$(echo "$tunnel_config" | cut -f5)
+	local interactive=$(echo "$tunnel_config" | cut -f7)
+
+	# Skip interactive tunnels
+	if [ "$interactive" = "true" ]; then
+		log_info "STATE" "Skipping interactive tunnel: $name ($hash)"
+		return 0
+	fi
+
+	log_info "STATE" "Starting tunnel: $name ($hash)"
+
+	# Start the tunnel directly without sourcing start_autossh.sh
+	# This avoids the complex dependency chain
+	SSH_CONFIG_DIR="${SSH_CONFIG_DIR:-/home/myuser/.ssh}"
+
+	# Parse ports
+	if echo "$remote_port" | grep -q ":"; then
+		target_host=$(echo "$remote_port" | cut -d: -f1)
+		target_port=$(echo "$remote_port" | cut -d: -f2)
+	else
+		target_host="localhost"
+		target_port="$remote_port"
+	fi
+
+	if echo "$local_port" | grep -q ":"; then
+		local_host=$(echo "$local_port" | cut -d: -f1)
+		local_port=$(echo "$local_port" | cut -d: -f2)
+	else
+		local_host="localhost"
+	fi
+
+	# Build SSH options
+	ssh_opts="-M 0 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+	# Add SSH config directory if it exists
+	if [ -d "$SSH_CONFIG_DIR" ]; then
+		ssh_opts="$ssh_opts -F $SSH_CONFIG_DIR/config"
+	fi
+
+	# Create log directory if it doesn't exist
+	log_dir="/tmp/autossh-logs"
+	mkdir -p "$log_dir"
+	log_file="$log_dir/tunnel-${hash}.log"
+
+	# Start tunnel in background
+	if [ "$direction" = "local_to_remote" ]; then
+		log_info "STATE" "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port"
+		autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1 &
+	else
+		log_info "STATE" "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port"
+		autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1 &
+	fi
+	tunnel_pid=$!
+
+	# Save tunnel state
+	save_tunnel_state "$remote_host" "$remote_port" "$local_port" "$direction" "$name" "$hash" "$tunnel_pid"
+
+	log_info "STATE" "Tunnel started successfully: $name ($hash, PID: $tunnel_pid)"
+	return 0
 }
 
 # Function to get tunnel statistics

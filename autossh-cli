@@ -50,7 +50,7 @@ print_header() {
 
 # Show help information
 show_help() {
-	cat << EOF
+	cat <<EOF
 $(print_header "AutoSSH Tunnel Management CLI v$VERSION")
 
 $(print_color "$CYAN" "USAGE:")
@@ -116,7 +116,7 @@ EOF
 
 # Show version information
 show_version() {
-	cat << EOF
+	cat <<EOF
 $(print_header "AutoSSH Tunnel Management CLI")
 Version: $VERSION
 Scripts Directory: $SCRIPTS_DIR
@@ -138,22 +138,22 @@ set_env_vars() {
 # Check if scripts exist
 check_scripts() {
 	local missing=0
-	
+
 	if [ ! -f "$SCRIPTS_DIR/start_autossh.sh" ]; then
 		print_error "Missing: $SCRIPTS_DIR/start_autossh.sh"
 		missing=1
 	fi
-	
+
 	if [ ! -f "$SCRIPTS_DIR/config_parser.sh" ]; then
 		print_error "Missing: $SCRIPTS_DIR/config_parser.sh"
 		missing=1
 	fi
-	
+
 	if [ ! -f "$SCRIPTS_DIR/state_manager.sh" ]; then
 		print_error "Missing: $SCRIPTS_DIR/state_manager.sh"
 		missing=1
 	fi
-	
+
 	if [ $missing -eq 1 ]; then
 		print_error "Required script files are missing. Please ensure all scripts are in the scripts/ directory."
 		exit 1
@@ -173,65 +173,65 @@ parse_args() {
 	state_file=""
 	command=""
 	full_restart="false"
-	
+
 	while [ $# -gt 0 ]; do
 		case $1 in
-			-h|--help)
-				show_help
-				exit 0
-				;;
-			-v|--version)
-				show_version
-				exit 0
-				;;
-			-c|--config)
-				config_file="$2"
-				shift 2
-				;;
-			-s|--ssh-config)
-				ssh_config_dir="$2"
-				shift 2
-				;;
-			-f|--state-file)
-				state_file="$2"
-				shift 2
-				;;
-			--full)
-				full_restart="true"
+		-h | --help)
+			show_help
+			exit 0
+			;;
+		-v | --version)
+			show_version
+			exit 0
+			;;
+		-c | --config)
+			config_file="$2"
+			shift 2
+			;;
+		-s | --ssh-config)
+			ssh_config_dir="$2"
+			shift 2
+			;;
+		-f | --state-file)
+			state_file="$2"
+			shift 2
+			;;
+		--full)
+			full_restart="true"
+			shift
+			;;
+		start | stop | restart | status | list | validate | cleanup | stats | config | parse)
+			command="$1"
+			shift
+			;;
+		start-tunnel | stop-tunnel | show-tunnel)
+			command="$1"
+			tunnel_arg="$2"
+			shift 2
+			;;
+		logs)
+			command="$1"
+			shift
+			if [ -n "$1" ]; then
+				tunnel_arg="$1"
 				shift
-				;;
-			start|stop|restart|status|list|validate|cleanup|stats|config|parse)
-				command="$1"
-				shift
-				;;
-			start-tunnel|stop-tunnel|show-tunnel)
-				command="$1"
-				tunnel_arg="$2"
-				shift 2
-				;;
-			logs)
-				command="$1"
-				shift
-				if [ -n "$1" ]; then
-					tunnel_arg="$1"
-					shift
-				fi
-				;;
-			hash)
-				command="$1"
-				hash_name="$2"
-				hash_host="$3"
-				hash_port="$4"
-				hash_local="$5"
-				hash_dir="$6"
-				hash_interactive="$7"
-				shift 7
-				;;
-			*)
-				print_error "Unknown option: $1"
-				print_info "Use 'autossh-cli --help' for usage information."
-				exit 1
-				;;
+			fi
+			;;
+		hash)
+			command="$1"
+			hash_name="$2"
+			hash_host="$3"
+			hash_port="$4"
+			hash_local="$5"
+			hash_dir="$6"
+			hash_interactive="$7"
+			shift 7
+			;;
+		*)
+			print_error "Unknown option: $1"
+			print_info "Use 'autossh-cli --help' for usage information."
+			exit 1
+			;;
 		esac
 	done
 }
@@ -239,154 +239,158 @@ parse_args() {
 # Execute commands
 execute_command() {
 	case $command in
-		start)
-			print_info "Starting tunnels..."
-			if [ "$full_restart" = "true" ]; then
-				"$SCRIPTS_DIR/start_autossh.sh" false
+	start)
+		print_info "Starting tunnels..."
+		if [ "$full_restart" = "true" ]; then
+			"$SCRIPTS_DIR/start_autossh.sh" false
+		else
+			"$SCRIPTS_DIR/start_autossh.sh"
+		fi
+		;;
+	stop)
+		print_info "Stopping all managed tunnels..."
+		cleanup_managed_tunnels
+		;;
+	restart)
+		print_info "Restarting tunnels..."
+		if [ "$full_restart" = "true" ]; then
+			"$SCRIPTS_DIR/start_autossh.sh" false
+		else
+			"$SCRIPTS_DIR/start_autossh.sh"
+		fi
+		;;
+	status)
+		print_header "Tunnel Status"
+		list_managed_tunnels
+		;;
+	list)
+		print_header "Configured Tunnels"
+		parse_config "$AUTOSSH_CONFIG_FILE" | while IFS=$'\t' read -r remote_host remote_port local_port direction name hash interactive; do
+			if [ "$interactive" = "true" ]; then
+				status="INTERACTIVE"
 			else
-				"$SCRIPTS_DIR/start_autossh.sh"
+				status="NORMAL"
 			fi
-			;;
-		stop)
-			print_info "Stopping all managed tunnels..."
-			cleanup_managed_tunnels
-			;;
-		restart)
-			print_info "Restarting tunnels..."
-			if [ "$full_restart" = "true" ]; then
-				"$SCRIPTS_DIR/start_autossh.sh" false
-			else
-				"$SCRIPTS_DIR/start_autossh.sh"
-			fi
-			;;
-		status)
-			print_header "Tunnel Status"
-			list_managed_tunnels
-			;;
-		list)
-			print_header "Configured Tunnels"
-			parse_config "$AUTOSSH_CONFIG_FILE" | while IFS=$'\t' read -r remote_host remote_port local_port direction name hash interactive; do
-				if [ "$interactive" = "true" ]; then
-					status="INTERACTIVE"
-				else
-					status="NORMAL"
-				fi
-				printf "  %-20s %-12s %s -> %s:%s (%s)\n" "$name" "$status" "$local_port" "$remote_host" "$remote_port" "$hash"
-			done
-			;;
-		validate)
-			print_info "Validating configuration file: $AUTOSSH_CONFIG_FILE"
-			if validate_config "$AUTOSSH_CONFIG_FILE"; then
-				print_success "Configuration file is valid"
-			else
-				print_error "Configuration file validation failed"
-				exit 1
-			fi
-			;;
-		cleanup)
-			print_info "Cleaning up dead processes..."
-			cleanup_dead_processes
-			print_success "Cleanup completed"
-			;;
-		stats)
-			print_header "Tunnel Statistics"
-			get_tunnel_stats
-			;;
-		config)
-			print_header "Current Configuration"
-			echo "Config File: $AUTOSSH_CONFIG_FILE"
-			echo "SSH Config Dir: $SSH_CONFIG_DIR"
-			echo "State File: $AUTOSSH_STATE_FILE"
-			echo "Scripts Dir: $SCRIPTS_DIR"
-			;;
-		parse)
-			print_header "Parsed Configuration"
-			parse_config "$AUTOSSH_CONFIG_FILE"
-			;;
-		start-tunnel)
-			if [ -z "$tunnel_arg" ]; then
-				print_error "Tunnel hash required for start-tunnel command"
-				exit 1
-			fi
-			print_info "Starting tunnel: $tunnel_arg"
-			# Implementation would need to be added to start specific tunnel
-			print_warning "start-tunnel command not yet implemented"
-			;;
-		stop-tunnel)
-			if [ -z "$tunnel_arg" ]; then
-				print_error "Tunnel hash required for stop-tunnel command"
-				exit 1
-			fi
-			print_info "Stopping tunnel: $tunnel_arg"
-			stop_tunnel_by_hash "$tunnel_arg"
-			;;
-		show-tunnel)
-			if [ -z "$tunnel_arg" ]; then
-				print_error "Tunnel hash required for show-tunnel command"
-				exit 1
-			fi
-			print_header "Tunnel Details: $tunnel_arg"
-			get_tunnel_info "$tunnel_arg"
-			;;
-		hash)
-			if [ -z "$hash_name" ] || [ -z "$hash_host" ] || [ -z "$hash_port" ] || [ -z "$hash_local" ] || [ -z "$hash_dir" ]; then
-				print_error "All parameters required for hash calculation: name host port local direction interactive"
-				exit 1
-			fi
-			hash_result=$(calculate_tunnel_hash "$hash_name" "$hash_host" "$hash_port" "$hash_local" "$hash_dir" "${hash_interactive:-false}")
-			print_info "MD5 Hash: $hash_result"
-			;;
-		logs)
-			print_header "Tunnel Logs"
-			log_dir="/tmp/autossh-logs"
-			if [ ! -d "$log_dir" ]; then
-				print_warning "No log directory found at $log_dir"
-				exit 0
-			fi
-			
-			if [ -n "$tunnel_arg" ]; then
-				# Show logs for specific tunnel
-				log_file="$log_dir/tunnel-${tunnel_arg}.log"
-				if [ -f "$log_file" ]; then
-					print_info "Showing logs for tunnel: $tunnel_arg"
-					echo "Log file: $log_file"
-					echo "----------------------------------------"
-					tail -50 "$log_file"
-				else
-					print_error "Log file not found for tunnel: $tunnel_arg"
-					print_info "Available log files:"
-					ls -la "$log_dir"/tunnel-*.log 2>/dev/null || echo "No log files found"
-				fi
-			else
-				# Show all tunnel logs
-				print_info "Available tunnel log files:"
-				if ls "$log_dir"/tunnel-*.log >/dev/null 2>&1; then
-					for log_file in "$log_dir"/tunnel-*.log; do
-						filename=$(basename "$log_file")
-						size=$(du -h "$log_file" | cut -f1)
-						mtime=$(stat -c %y "$log_file" 2>/dev/null || stat -f %Sm "$log_file" 2>/dev/null || echo "unknown")
-						echo "  $filename (${size}, modified: $mtime)"
-					done
-					echo ""
-					print_info "Use 'autossh-cli logs <hash>' to view specific tunnel logs"
-					print_info "Recent activity from all tunnels:"
-					echo "----------------------------------------"
-					tail -20 "$log_dir"/tunnel-*.log 2>/dev/null | head -50
-				else
-					print_warning "No tunnel log files found"
-				fi
-			fi
-			;;
-		"")
-			print_error "No command specified"
-			print_info "Use 'autossh-cli --help' for usage information."
+			printf "  %-20s %-12s %s -> %s:%s (%s)\n" "$name" "$status" "$local_port" "$remote_host" "$remote_port" "$hash"
+		done
+		;;
+	validate)
+		print_info "Validating configuration file: $AUTOSSH_CONFIG_FILE"
+		if validate_config "$AUTOSSH_CONFIG_FILE"; then
+			print_success "Configuration file is valid"
+		else
+			print_error "Configuration file validation failed"
 			exit 1
-			;;
-		*)
-			print_error "Unknown command: $command"
-			print_info "Use 'autossh-cli --help' for usage information."
+		fi
+		;;
+	cleanup)
+		print_info "Cleaning up dead processes..."
+		cleanup_dead_processes
+		print_success "Cleanup completed"
+		;;
+	stats)
+		print_header "Tunnel Statistics"
+		get_tunnel_stats
+		;;
+	config)
+		print_header "Current Configuration"
+		echo "Config File: $AUTOSSH_CONFIG_FILE"
+		echo "SSH Config Dir: $SSH_CONFIG_DIR"
+		echo "State File: $AUTOSSH_STATE_FILE"
+		echo "Scripts Dir: $SCRIPTS_DIR"
+		;;
+	parse)
+		print_header "Parsed Configuration"
+		parse_config "$AUTOSSH_CONFIG_FILE"
+		;;
+	start-tunnel)
+		if [ -z "$tunnel_arg" ]; then
+			print_error "Tunnel hash required for start-tunnel command"
 			exit 1
-			;;
+		fi
+		print_info "Starting tunnel: $tunnel_arg"
+		if start_tunnel_by_hash "$tunnel_arg"; then
+			print_success "Tunnel started successfully: $tunnel_arg"
+		else
+			print_error "Failed to start tunnel: $tunnel_arg"
+			exit 1
+		fi
+		;;
+	stop-tunnel)
+		if [ -z "$tunnel_arg" ]; then
+			print_error "Tunnel hash required for stop-tunnel command"
+			exit 1
+		fi
+		print_info "Stopping tunnel: $tunnel_arg"
+		stop_tunnel_by_hash "$tunnel_arg"
+		;;
+	show-tunnel)
+		if [ -z "$tunnel_arg" ]; then
+			print_error "Tunnel hash required for show-tunnel command"
+			exit 1
+		fi
+		print_header "Tunnel Details: $tunnel_arg"
+		get_tunnel_info "$tunnel_arg"
+		;;
+	hash)
+		if [ -z "$hash_name" ] || [ -z "$hash_host" ] || [ -z "$hash_port" ] || [ -z "$hash_local" ] || [ -z "$hash_dir" ]; then
+			print_error "All parameters required for hash calculation: name host port local direction interactive"
+			exit 1
+		fi
+		hash_result=$(calculate_tunnel_hash "$hash_name" "$hash_host" "$hash_port" "$hash_local" "$hash_dir" "${hash_interactive:-false}")
+		print_info "MD5 Hash: $hash_result"
+		;;
+	logs)
+		print_header "Tunnel Logs"
+		log_dir="/tmp/autossh-logs"
+		if [ ! -d "$log_dir" ]; then
+			print_warning "No log directory found at $log_dir"
+			exit 0
+		fi
+
+		if [ -n "$tunnel_arg" ]; then
+			# Show logs for specific tunnel
+			log_file="$log_dir/tunnel-${tunnel_arg}.log"
+			if [ -f "$log_file" ]; then
+				print_info "Showing logs for tunnel: $tunnel_arg"
+				echo "Log file: $log_file"
+				echo "----------------------------------------"
+				tail -50 "$log_file"
+			else
+				print_error "Log file not found for tunnel: $tunnel_arg"
+				print_info "Available log files:"
+				ls -la "$log_dir"/tunnel-*.log 2>/dev/null || echo "No log files found"
+			fi
+		else
+			# Show all tunnel logs
+			print_info "Available tunnel log files:"
+			if ls "$log_dir"/tunnel-*.log >/dev/null 2>&1; then
+				for log_file in "$log_dir"/tunnel-*.log; do
+					filename=$(basename "$log_file")
+					size=$(du -h "$log_file" | cut -f1)
+					mtime=$(stat -c %y "$log_file" 2>/dev/null || stat -f %Sm "$log_file" 2>/dev/null || echo "unknown")
+					echo "  $filename (${size}, modified: $mtime)"
+				done
+				echo ""
+				print_info "Use 'autossh-cli logs <hash>' to view specific tunnel logs"
+				print_info "Recent activity from all tunnels:"
+				echo "----------------------------------------"
+				tail -20 "$log_dir"/tunnel-*.log 2>/dev/null | head -50
+			else
+				print_warning "No tunnel log files found"
+			fi
+		fi
+		;;
+	"")
+		print_error "No command specified"
+		print_info "Use 'autossh-cli --help' for usage information."
+		exit 1
+		;;
+	*)
+		print_error "Unknown command: $command"
+		print_info "Use 'autossh-cli --help' for usage information."
+		exit 1
+		;;
 	esac
 }
 
@@ -394,16 +398,16 @@ execute_command() {
 main() {
 	# Check if scripts exist
 	check_scripts
-	
+
 	# Parse command line arguments
 	parse_args "$@"
-	
+
 	# Set environment variables
 	set_env_vars
-	
+
 	# Source required modules
 	source_modules
-	
+
 	# Execute the command
 	execute_command
 }

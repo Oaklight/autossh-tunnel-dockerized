@@ -140,6 +140,48 @@ handle_request() {
 			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
 		fi
 		;;
+	"/stop")
+		if [ "$method" = "POST" ]; then
+			output=$(autossh-cli stop 2>&1)
+			# Escape quotes and newlines for JSON
+			json_output=$(echo "$output" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+			echo "{\"status\": \"success\", \"output\": \"$json_output\"}" | response "200 OK"
+		else
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
+		fi
+		;;
+	/start/*)
+		if [ "$method" = "POST" ]; then
+			# Extract tunnel hash from path
+			tunnel_hash=$(echo "$path" | sed 's|^/start/||')
+			if [ -n "$tunnel_hash" ]; then
+				output=$(autossh-cli start-tunnel "$tunnel_hash" 2>&1)
+				# Escape quotes and newlines for JSON
+				json_output=$(echo "$output" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+				echo "{\"status\": \"success\", \"tunnel_hash\": \"$tunnel_hash\", \"output\": \"$json_output\"}" | response "200 OK"
+			else
+				echo '{"error": "Tunnel hash required"}' | response "400 Bad Request"
+			fi
+		else
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
+		fi
+		;;
+	/stop/*)
+		if [ "$method" = "POST" ]; then
+			# Extract tunnel hash from path
+			tunnel_hash=$(echo "$path" | sed 's|^/stop/||')
+			if [ -n "$tunnel_hash" ]; then
+				output=$(autossh-cli stop-tunnel "$tunnel_hash" 2>&1)
+				# Escape quotes and newlines for JSON
+				json_output=$(echo "$output" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+				echo "{\"status\": \"success\", \"tunnel_hash\": \"$tunnel_hash\", \"output\": \"$json_output\"}" | response "200 OK"
+			else
+				echo '{"error": "Tunnel hash required"}' | response "400 Bad Request"
+			fi
+		else
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
+		fi
+		;;
 	*)
 		echo '{"error": "Not Found"}' | response "404 Not Found"
 		;;
