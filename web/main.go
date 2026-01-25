@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -80,7 +79,7 @@ func loadConfig() (Config, error) {
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		return Config{Tunnels: []Tunnel{}}, nil
 	}
-	data, err := ioutil.ReadFile(configFile)
+	data, err := os.ReadFile(configFile)
 	if err != nil {
 		return config, err
 	}
@@ -176,7 +175,7 @@ func saveConfig(config Config) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(configFile, data, mode); err != nil {
+	if err := os.WriteFile(configFile, data, mode); err != nil {
 		logMsg("ERROR", "WEB", "Error writing config file: %v. Check ownership and permissions.", err)
 		return err
 	}
@@ -301,7 +300,7 @@ func getLanguagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Read directory contents
-	files, err := ioutil.ReadDir(localesDir)
+	files, err := os.ReadDir(localesDir)
 	if err != nil {
 		http.Error(w, "Failed to read locales directory", http.StatusInternalServerError)
 		return
