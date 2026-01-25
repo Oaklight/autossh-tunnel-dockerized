@@ -15,8 +15,8 @@ calculate_tunnel_hash() {
 	# Create a consistent string for hashing
 	local hash_input="${name}|${remote_host}|${remote_port}|${local_port}|${direction}|${interactive}"
 
-	# Calculate MD5 hash
-	echo "$hash_input" | md5sum | cut -d' ' -f1
+	# Calculate MD5 hash (use printf to avoid trailing newline, more portable than echo -n)
+	printf '%s' "$hash_input" | md5sum | cut -d' ' -f1
 }
 
 # Function to parse YAML and extract tunnel configurations using pure shell
