@@ -14,6 +14,7 @@
   },
   "table": {
     "headers": {
+      "controls": "控制",
       "name": "名稱",
       "status": "狀態",
       "remote_host": "遠端主機",
@@ -46,13 +47,17 @@
     "save_restart": "儲存並重新啟動",
     "delete": "刪除隧道",
     "interactive_auth_enabled": "已啟用互動認證",
-    "interactive_auth_disabled": "已停用互動認證"
+    "interactive_auth_disabled": "已停用互動認證",
+    "start_tunnel": "啟動隧道",
+    "restart_tunnel": "重新啟動隧道",
+    "stop_tunnel": "停止隧道"
   },
   "tooltips": {
     "add_tunnel": "新增隧道",
     "save_config": "儲存設定並重新啟動",
     "direction": "方向",
-    "actions": "操作"
+    "actions": "操作",
+    "controls": "控制"
   },
   "messages": {
     "delete_confirm": "確定要刪除此隧道設定嗎？",
@@ -60,7 +65,17 @@
     "config_save_failed": "設定儲存失敗",
     "config_load_failed": "設定載入失敗",
     "validation_errors": "請修復驗證錯誤後再儲存",
-    "no_tunnels": "設定中未找到隧道"
+    "no_tunnels": "設定中未找到隧道",
+    "confirm_start": "確定要啟動此隧道嗎？",
+    "confirm_restart": "確定要重新啟動此隧道嗎？",
+    "confirm_stop": "確定要停止此隧道嗎？",
+    "start_success": "隧道啟動成功",
+    "restart_success": "隧道重新啟動成功",
+    "stop_success": "隧道停止成功",
+    "start_failed": "隧道啟動失敗",
+    "restart_failed": "隧道重新啟動失敗",
+    "stop_failed": "隧道停止失敗",
+    "save_first": "請先儲存設定"
   },
   "validation": {
     "port_range": "連接埠必須在 1 到 65535 之間",

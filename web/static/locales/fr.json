@@ -14,6 +14,7 @@
   },
   "table": {
     "headers": {
+      "controls": "Contrôles",
       "name": "Nom",
       "status": "État",
       "remote_host": "Hôte Distant",
@@ -46,13 +47,17 @@
     "save_restart": "Enregistrer et redémarrer",
     "delete": "Supprimer le tunnel",
     "interactive_auth_enabled": "Authentification interactive activée",
-    "interactive_auth_disabled": "Authentification interactive désactivée"
+    "interactive_auth_disabled": "Authentification interactive désactivée",
+    "start_tunnel": "Démarrer le tunnel",
+    "restart_tunnel": "Redémarrer le tunnel",
+    "stop_tunnel": "Arrêter le tunnel"
   },
   "tooltips": {
     "add_tunnel": "Ajouter un tunnel",
     "save_config": "Enregistrer la configuration et redémarrer",
     "direction": "Direction",
-    "actions": "Actions"
+    "actions": "Actions",
+    "controls": "Contrôles"
   },
   "messages": {
     "delete_confirm": "Êtes-vous sûr de vouloir supprimer cette configuration de tunnel ?",
@@ -60,7 +65,17 @@
     "config_save_failed": "Échec de l'enregistrement de la configuration",
     "config_load_failed": "Échec du chargement de la configuration",
     "validation_errors": "Veuillez corriger les erreurs de validation avant d'enregistrer",
-    "no_tunnels": "Aucun tunnel trouvé dans la configuration"
+    "no_tunnels": "Aucun tunnel trouvé dans la configuration",
+    "confirm_start": "Êtes-vous sûr de vouloir démarrer ce tunnel ?",
+    "confirm_restart": "Êtes-vous sûr de vouloir redémarrer ce tunnel ?",
+    "confirm_stop": "Êtes-vous sûr de vouloir arrêter ce tunnel ?",
+    "start_success": "Tunnel démarré avec succès",
+    "restart_success": "Tunnel redémarré avec succès",
+    "stop_success": "Tunnel arrêté avec succès",
+    "start_failed": "Échec du démarrage du tunnel",
+    "restart_failed": "Échec du redémarrage du tunnel",
+    "stop_failed": "Échec de l'arrêt du tunnel",
+    "save_first": "Veuillez d'abord enregistrer la configuration"
   },
   "validation": {
     "port_range": "Le port doit être compris entre 1 et 65535",

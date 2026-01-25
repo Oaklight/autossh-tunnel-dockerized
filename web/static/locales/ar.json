@@ -14,6 +14,7 @@
   },
   "table": {
     "headers": {
+      "controls": "التحكم",
       "name": "الاسم",
       "status": "الحالة",
       "remote_host": "المضيف البعيد",
@@ -46,13 +47,17 @@
     "save_restart": "حفظ وإعادة تشغيل",
     "delete": "حذف النفق",
     "interactive_auth_enabled": "المصادقة التفاعلية مفعلة",
-    "interactive_auth_disabled": "المصادقة التفاعلية معطلة"
+    "interactive_auth_disabled": "المصادقة التفاعلية معطلة",
+    "start_tunnel": "بدء النفق",
+    "restart_tunnel": "إعادة تشغيل النفق",
+    "stop_tunnel": "إيقاف النفق"
   },
   "tooltips": {
     "add_tunnel": "إضافة نفق",
     "save_config": "حفظ التكوين وإعادة التشغيل",
     "direction": "الاتجاه",
-    "actions": "العمليات"
+    "actions": "العمليات",
+    "controls": "التحكم"
   },
   "messages": {
     "delete_confirm": "هل أنت متأكد من أنك تريد حذف تكوين النفق هذا؟",
@@ -60,7 +65,17 @@
     "config_save_failed": "فشل في حفظ التكوين",
     "config_load_failed": "فشل في تحميل التكوين",
     "validation_errors": "يرجى إصلاح أخطاء التحقق قبل الحفظ",
-    "no_tunnels": "لم يتم العثور على أنفاق في التكوين"
+    "no_tunnels": "لم يتم العثور على أنفاق في التكوين",
+    "confirm_start": "هل أنت متأكد من أنك تريد بدء هذا النفق؟",
+    "confirm_restart": "هل أنت متأكد من أنك تريد إعادة تشغيل هذا النفق؟",
+    "confirm_stop": "هل أنت متأكد من أنك تريد إيقاف هذا النفق؟",
+    "start_success": "تم بدء النفق بنجاح",
+    "restart_success": "تم إعادة تشغيل النفق بنجاح",
+    "stop_success": "تم إيقاف النفق بنجاح",
+    "start_failed": "فشل في بدء النفق",
+    "restart_failed": "فشل في إعادة تشغيل النفق",
+    "stop_failed": "فشل في إيقاف النفق",
+    "save_first": "يرجى حفظ التكوين أولاً"
   },
   "validation": {
     "port_range": "يجب أن يكون المنفذ بين 1 و 65535",
