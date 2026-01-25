@@ -85,13 +85,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.tunnels && Array.isArray(data.tunnels)) {
                     data.tunnels.forEach((tunnel) => addRow(tunnel));
                 } else {
-                    console.warn("No tunnels found in configuration");
+                    const warningMsg = window.i18n ? window.i18n.t('messages.no_tunnels') : 'No tunnels found in configuration';
+                    console.warn(warningMsg);
                 }
             })
             .catch((error) => {
                 showLoading(false);
                 console.error("Error loading configuration:", error);
-                showMessage("Failed to load configuration", "error");
+                const errorMsg = window.i18n ? window.i18n.t('messages.config_load_failed') : 'Failed to load configuration';
+                showMessage(errorMsg, "error");
             });
     }
 
@@ -101,40 +103,88 @@ document.addEventListener("DOMContentLoaded", () => {
         row.className = "mdc-data-table__row new-row";
 
         let statusColor = "grey";
-        if (tunnel.status === "RUNNING" || tunnel.status === "NORMAL") statusColor = "green";
-        else if (tunnel.status === "DEAD") statusColor = "red";
-        else if (tunnel.status === "STARTING") statusColor = "orange";
-        else if (tunnel.status === "STOPPED") statusColor = "grey";
-        else if (tunnel.status === "N/A") statusColor = "grey";
+        let statusText = tunnel.status || "STOPPED";
+
+        // Translate status if i18n is available
+        if (window.i18n) {
+            switch (tunnel.status) {
+                case "RUNNING":
+                    statusText = window.i18n.t('table.status.running');
+                    statusColor = "green";
+                    break;
+                case "NORMAL":
+                    statusText = window.i18n.t('table.status.normal');
+                    statusColor = "green";
+                    break;
+                case "DEAD":
+                    statusText = window.i18n.t('table.status.dead');
+                    statusColor = "red";
+                    break;
+                case "STARTING":
+                    statusText = window.i18n.t('table.status.starting');
+                    statusColor = "orange";
+                    break;
+                case "STOPPED":
+                    statusText = window.i18n.t('table.status.stopped');
+                    statusColor = "grey";
+                    break;
+                case "N/A":
+                    statusText = window.i18n.t('table.status.na');
+                    statusColor = "grey";
+                    break;
+                default:
+                    statusColor = "grey";
+            }
+        } else {
+            // Fallback for when i18n is not loaded yet
+            if (tunnel.status === "RUNNING" || tunnel.status === "NORMAL") statusColor = "green";
+            else if (tunnel.status === "DEAD") statusColor = "red";
+            else if (tunnel.status === "STARTING") statusColor = "orange";
+            else if (tunnel.status === "STOPPED") statusColor = "grey";
+            else if (tunnel.status === "N/A") statusColor = "grey";
+        }
+
+        // Get translated placeholders
+        const tunnelNamePlaceholder = window.i18n ? window.i18n.t('table.placeholders.tunnel_name') : 'Tunnel name';
+        const remoteHostPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_host') : 'Remote host';
+        const remotePortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_port') : 'Remote port (e.g., 44497 or hostname:44497)';
+        const localPortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.local_port') : 'Local port (e.g., 55001 or 192.168.1.100:55001)';
+
+        const remoteToLocalText = window.i18n ? window.i18n.t('table.direction.remote_to_local') : 'Remote to Local';
+        const localToRemoteText = window.i18n ? window.i18n.t('table.direction.local_to_remote') : 'Local to Remote';
+
+        const interactiveEnabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
+        const interactiveDisabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
+        const deleteTunnelText = window.i18n ? window.i18n.t('buttons.delete') : 'Delete tunnel';
 
         row.innerHTML = `
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="Tunnel name">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="${tunnelNamePlaceholder}" data-i18n-placeholder="table.placeholders.tunnel_name">
             </td>
             <td class="mdc-data-table__cell">
-                <span style="color: ${statusColor}; font-weight: bold;">${escapeHtml(tunnel.status || "STOPPED")}</span>
+                <span style="color: ${statusColor}; font-weight: bold;">${escapeHtml(statusText)}</span>
             </td>
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="Remote host">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="${remoteHostPlaceholder}" data-i18n-placeholder="table.placeholders.remote_host">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="Remote port (e.g., 44497 or hostname:44497)">
+                <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="${remotePortPlaceholder}" data-i18n-placeholder="table.placeholders.remote_port">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="Local port (e.g., 55001 or 192.168.1.100:55001)">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="${localPortPlaceholder}" data-i18n-placeholder="table.placeholders.local_port">
             </td>
             <td class="mdc-data-table__cell">
                 <select class="table-select">
-                    <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""}>Remote to Local</option>
-                    <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""}>Local to Remote</option>
+                    <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""} data-i18n="table.direction.remote_to_local">${remoteToLocalText}</option>
+                    <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""} data-i18n="table.direction.local_to_remote">${localToRemoteText}</option>
                 </select>
             </td>
             <td class="mdc-data-table__cell">
                 <div class="action-buttons-cell">
-                    <button class="interactive-toggle-button ${tunnel.interactive ? 'active' : ''}" title="${tunnel.interactive ? 'Interactive Auth Enabled' : 'Interactive Auth Disabled'}" data-interactive="${tunnel.interactive ? 'true' : 'false'}">
+                    <button class="interactive-toggle-button ${tunnel.interactive ? 'active' : ''}" title="${tunnel.interactive ? interactiveEnabledText : interactiveDisabledText}" data-interactive="${tunnel.interactive ? 'true' : 'false'}">
                         <i class="material-icons">fingerprint</i>
                     </button>
-                    <button class="delete-button deleteRow" title="Delete tunnel">
+                    <button class="delete-button deleteRow" title="${deleteTunnelText}" data-i18n-title="buttons.delete">
                         <i class="material-icons">delete</i>
                     </button>
                 </div>
@@ -145,7 +195,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Add delete row event with confirmation
         row.querySelector(".deleteRow").addEventListener("click", () => {
-            if (confirm("Are you sure you want to delete this tunnel configuration?")) {
+            const confirmMessage = window.i18n ? window.i18n.t('messages.delete_confirm') : 'Are you sure you want to delete this tunnel configuration?';
+            if (confirm(confirmMessage)) {
                 row.style.animation = "fadeOut 0.3s ease-out";
                 setTimeout(() => row.remove(), 300);
             }
@@ -162,7 +213,9 @@ document.addEventListener("DOMContentLoaded", () => {
             interactiveToggle.setAttribute('data-interactive', newState.toString());
 
             // Update title (icon stays the same, only color changes via CSS)
-            interactiveToggle.title = newState ? 'Interactive Auth Enabled' : 'Interactive Auth Disabled';
+            const enabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
+            const disabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
+            interactiveToggle.title = newState ? enabledText : disabledText;
         });
 
         // Add input validation
@@ -194,7 +247,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const num = parseInt(value);
             if (value && (isNaN(num) || num < 1 || num > 65535)) {
                 input.classList.add('error');
-                input.title = 'Port must be between 1 and 65535';
+                const errorMsg = window.i18n ? window.i18n.t('validation.port_range') : 'Port must be between 1 and 65535';
+                input.title = errorMsg;
             }
         } else if (input.classList.contains('remote-port-input') || input.placeholder && input.placeholder.includes('Remote port')) {
             // Validate remote_port which can be "port" or "hostname:port" format
@@ -202,7 +256,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const portPattern = /^[\w.-]+:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    input.title = 'Invalid port format. Use "port" or "hostname:port" (e.g., 44497 or lambda5:44497)';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.remote_port_format') : 'Invalid port format. Use "port" or "hostname:port" (e.g., 44497 or lambda5:44497)';
+                    input.title = errorMsg;
                 }
             }
         } else if (input.placeholder && input.placeholder.includes('Local port')) {
@@ -211,7 +266,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const portPattern = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    input.title = 'Invalid port format. Use "port" or "ip:port" (e.g., 55001 or 192.168.1.100:55001)';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "ip:port" (e.g., 55001 or 192.168.1.100:55001)';
+                    input.title = errorMsg;
                 }
             }
         }
@@ -289,7 +345,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (hasErrors) {
-            showMessage("Please fix validation errors before saving", "error");
+            const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fix validation errors before saving';
+            showMessage(errorMsg, "error");
             return;
         }
 
@@ -325,11 +382,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 return response.text();
             })
             .then(() => {
-                showMessage("Configuration saved successfully!", "success");
+                const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
+                showMessage(successMsg, "success");
             })
             .catch(error => {
                 console.error("Error saving configuration:", error);
-                showMessage("Failed to save configuration", "error");
+                const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
+                showMessage(errorMsg, "error");
             });
     });
 
