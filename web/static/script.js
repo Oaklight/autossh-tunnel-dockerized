@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="${tunnelNamePlaceholder}" data-i18n-placeholder="table.placeholders.tunnel_name">
             </td>
             <td class="mdc-data-table__cell">
-                <i class="material-icons" style="color: ${statusColor}; font-size: 20px; vertical-align: middle;" title="${statusTooltip}">${statusIcon}</i>
+                <i class="material-icons status-indicator" data-hash="${tunnelHash}" style="color: ${statusColor}; font-size: 20px; vertical-align: middle; cursor: pointer;" title="${statusTooltip}">${statusIcon}</i>
             </td>
             <td class="mdc-data-table__cell">
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="${remoteHostPlaceholder}" data-i18n-placeholder="table.placeholders.remote_host">
@@ -194,6 +194,22 @@ document.addEventListener("DOMContentLoaded", () => {
         startButton.addEventListener("click", () => handleTunnelControl('start', tunnelHash, row));
         restartButton.addEventListener("click", () => handleTunnelControl('restart', tunnelHash, row));
         stopButton.addEventListener("click", () => handleTunnelControl('stop', tunnelHash, row));
+
+        // Add click event to status indicator
+        const statusIndicator = row.querySelector(".status-indicator");
+        if (statusIndicator && tunnelHash) {
+            statusIndicator.addEventListener("click", () => {
+                window.location.href = `/tunnel-detail?hash=${tunnelHash}`;
+            });
+            // Add hover effect
+            statusIndicator.style.transition = "transform 0.2s ease";
+            statusIndicator.addEventListener("mouseenter", () => {
+                statusIndicator.style.transform = "scale(1.2)";
+            });
+            statusIndicator.addEventListener("mouseleave", () => {
+                statusIndicator.style.transform = "scale(1)";
+            });
+        }
 
         // Add input validation
         addInputValidation(row);

@@ -19,6 +19,9 @@ response() {
 	echo "HTTP/1.1 $status"
 	echo "Content-Type: application/json; charset=utf-8"
 	echo "Content-Length: $length"
+	echo "Access-Control-Allow-Origin: *"
+	echo "Access-Control-Allow-Methods: GET, POST, OPTIONS"
+	echo "Access-Control-Allow-Headers: Content-Type"
 	echo "Connection: close"
 	echo ""
 	echo -n "$body"
@@ -115,6 +118,12 @@ handle_request() {
 	# Log request
 	log_info "API" "$method $path" >&2
 
+	# Handle OPTIONS requests for CORS preflight
+	if [ "$method" = "OPTIONS" ]; then
+		echo "" | response "204 No Content"
+		return
+	fi
+
 	case "$path" in
 	"/list")
 		if [ "$method" = "GET" ]; then
@@ -189,8 +198,9 @@ handle_request() {
 			if [ -n "$tunnel_hash" ]; then
 				log_file="/tmp/autossh-logs/tunnel-${tunnel_hash}.log"
 				if [ -f "$log_file" ]; then
-					# Read last 100 lines of log file
-					log_content=$(tail -100 "$log_file" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+					# Read last 100 lines of log file and properly escape for JSON
+					# Remove carriage returns, escape quotes, backslashes, and newlines
+					log_content=$(tail -100 "$log_file" | tr -d '\r' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
 					echo "{\"status\": \"success\", \"tunnel_hash\": \"$tunnel_hash\", \"log\": \"$log_content\"}" | response "200 OK"
 				else
 					echo "{\"error\": \"Log file not found for tunnel: $tunnel_hash\"}" | response "404 Not Found"
