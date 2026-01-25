@@ -14,6 +14,7 @@
   },
   "table": {
     "headers": {
+      "controls": "控制",
       "name": "名称",
       "status": "状态",
       "remote_host": "远程主机",
@@ -46,13 +47,17 @@
     "save_restart": "保存并重启",
     "delete": "删除隧道",
     "interactive_auth_enabled": "已启用交互认证",
-    "interactive_auth_disabled": "已禁用交互认证"
+    "interactive_auth_disabled": "已禁用交互认证",
+    "start_tunnel": "启动隧道",
+    "restart_tunnel": "重启隧道",
+    "stop_tunnel": "停止隧道"
   },
   "tooltips": {
     "add_tunnel": "添加隧道",
     "save_config": "保存配置并重启",
     "direction": "方向",
-    "actions": "操作"
+    "actions": "操作",
+    "controls": "控制"
   },
   "messages": {
     "delete_confirm": "确定要删除此隧道配置吗？",
@@ -60,7 +65,17 @@
     "config_save_failed": "配置保存失败",
     "config_load_failed": "配置加载失败",
     "validation_errors": "请修复验证错误后再保存",
-    "no_tunnels": "配置中未找到隧道"
+    "no_tunnels": "配置中未找到隧道",
+    "confirm_start": "确定要启动此隧道吗？",
+    "confirm_restart": "确定要重启此隧道吗？",
+    "confirm_stop": "确定要停止此隧道吗？",
+    "start_success": "隧道启动成功",
+    "restart_success": "隧道重启成功",
+    "stop_success": "隧道停止成功",
+    "start_failed": "隧道启动失败",
+    "restart_failed": "隧道重启失败",
+    "stop_failed": "隧道停止失败",
+    "save_first": "请先保存配置"
   },
   "validation": {
     "port_range": "端口必须在 1 到 65535 之间",

@@ -14,6 +14,7 @@
   },
   "table": {
     "headers": {
+      "controls": "제어",
       "name": "이름",
       "status": "상태",
       "remote_host": "원격 호스트",
@@ -46,13 +47,17 @@
     "save_restart": "저장 및 재시작",
     "delete": "터널 삭제",
     "interactive_auth_enabled": "대화형 인증 활성화됨",
-    "interactive_auth_disabled": "대화형 인증 비활성화됨"
+    "interactive_auth_disabled": "대화형 인증 비활성화됨",
+    "start_tunnel": "터널 시작",
+    "restart_tunnel": "터널 재시작",
+    "stop_tunnel": "터널 중지"
   },
   "tooltips": {
     "add_tunnel": "터널 추가",
     "save_config": "구성 저장 및 재시작",
     "direction": "방향",
-    "actions": "작업"
+    "actions": "작업",
+    "controls": "제어"
   },
   "messages": {
     "delete_confirm": "이 터널 구성을 삭제하시겠습니까?",
@@ -60,7 +65,17 @@
     "config_save_failed": "구성 저장 실패",
     "config_load_failed": "구성 로드 실패",
     "validation_errors": "저장하기 전에 유효성 검사 오류를 수정하세요",
-    "no_tunnels": "구성에서 터널을 찾을 수 없습니다"
+    "no_tunnels": "구성에서 터널을 찾을 수 없습니다",
+    "confirm_start": "이 터널을 시작하시겠습니까?",
+    "confirm_restart": "이 터널을 재시작하시겠습니까?",
+    "confirm_stop": "이 터널을 중지하시겠습니까?",
+    "start_success": "터널이 성공적으로 시작되었습니다",
+    "restart_success": "터널이 성공적으로 재시작되었습니다",
+    "stop_success": "터널이 성공적으로 중지되었습니다",
+    "start_failed": "터널 시작 실패",
+    "restart_failed": "터널 재시작 실패",
+    "stop_failed": "터널 중지 실패",
+    "save_first": "먼저 구성을 저장하세요"
   },
   "validation": {
     "port_range": "포트는 1에서 65535 사이여야 합니다",

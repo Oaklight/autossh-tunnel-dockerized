@@ -1,10 +1,11 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -41,6 +42,7 @@ type Tunnel struct {
 	Interactive bool   `yaml:"interactive" json:"interactive"`
 	Direction   string `yaml:"direction" json:"direction"`
 	Status      string `yaml:"-" json:"status,omitempty"`
+	Hash        string `yaml:"-" json:"hash,omitempty"`
 }
 
 type TunnelStatus struct {
@@ -57,12 +59,27 @@ type Language struct {
 	Name string `json:"name"`
 }
 
+// calculateTunnelHash calculates MD5 hash for tunnel configuration
+// This must match the hash calculation in scripts/config_parser.sh
+func calculateTunnelHash(t Tunnel) string {
+	// Format: name|remote_host|remote_port|local_port|direction|interactive
+	interactive := "false"
+	if t.Interactive {
+		interactive = "true"
+	}
+	hashInput := fmt.Sprintf("%s|%s|%s|%s|%s|%s",
+		t.Name, t.RemoteHost, t.RemotePort, t.LocalPort, t.Direction, interactive)
+	
+	hash := md5.Sum([]byte(hashInput))
+	return hex.EncodeToString(hash[:])
+}
+
 func loadConfig() (Config, error) {
 	var config Config
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		return Config{Tunnels: []Tunnel{}}, nil
 	}
-	data, err := ioutil.ReadFile(configFile)
+	data, err := os.ReadFile(configFile)
 	if err != nil {
 		return config, err
 	}
@@ -74,6 +91,8 @@ func loadConfig() (Config, error) {
 		if config.Tunnels[i].Direction == "" {
 			config.Tunnels[i].Direction = "remote_to_local"
 		}
+		// Calculate and set hash for each tunnel
+		config.Tunnels[i].Hash = calculateTunnelHash(config.Tunnels[i])
 	}
 	return config, nil
 }
@@ -156,7 +175,7 @@ func saveConfig(config Config) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(configFile, data, mode); err != nil {
+	if err := os.WriteFile(configFile, data, mode); err != nil {
 		logMsg("ERROR", "WEB", "Error writing config file: %v. Check ownership and permissions.", err)
 		return err
 	}
@@ -281,7 +300,7 @@ func getLanguagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Read directory contents
-	files, err := ioutil.ReadDir(localesDir)
+	files, err := os.ReadDir(localesDir)
 	if err != nil {
 		http.Error(w, "Failed to read locales directory", http.StatusInternalServerError)
 		return

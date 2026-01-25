@@ -16,8 +16,11 @@ RUN go mod init app
 # Force regenerate go.sum and download dependencies
 RUN go mod tidy && go mod download
 
-# Build the Go binary
-RUN CGO_ENABLED=0 go build -o app .
+# Build the Go binary with optimization flags
+RUN CGO_ENABLED=0 go build \
+    -ldflags="-s -w" \
+    -trimpath \
+    -o app .
 
 # Final stage
 ARG REGISTRY_MIRROR=docker.io

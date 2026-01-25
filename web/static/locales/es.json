@@ -14,6 +14,7 @@
   },
   "table": {
     "headers": {
+      "controls": "Controles",
       "name": "Nombre",
       "status": "Estado",
       "remote_host": "Host Remoto",
@@ -46,13 +47,17 @@
     "save_restart": "Guardar y reiniciar",
     "delete": "Eliminar túnel",
     "interactive_auth_enabled": "Autenticación interactiva activada",
-    "interactive_auth_disabled": "Autenticación interactiva desactivada"
+    "interactive_auth_disabled": "Autenticación interactiva desactivada",
+    "start_tunnel": "Iniciar túnel",
+    "restart_tunnel": "Reiniciar túnel",
+    "stop_tunnel": "Detener túnel"
   },
   "tooltips": {
     "add_tunnel": "Añadir túnel",
     "save_config": "Guardar configuración y reiniciar",
     "direction": "Dirección",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "controls": "Controles"
   },
   "messages": {
     "delete_confirm": "¿Está seguro de que desea eliminar esta configuración de túnel?",
@@ -60,7 +65,17 @@
     "config_save_failed": "Error al guardar la configuración",
     "config_load_failed": "Error al cargar la configuración",
     "validation_errors": "Por favor, corrija los errores de validación antes de guardar",
-    "no_tunnels": "No se encontraron túneles en la configuración"
+    "no_tunnels": "No se encontraron túneles en la configuración",
+    "confirm_start": "¿Está seguro de que desea iniciar este túnel?",
+    "confirm_restart": "¿Está seguro de que desea reiniciar este túnel?",
+    "confirm_stop": "¿Está seguro de que desea detener este túnel?",
+    "start_success": "Túnel iniciado correctamente",
+    "restart_success": "Túnel reiniciado correctamente",
+    "stop_success": "Túnel detenido correctamente",
+    "start_failed": "Error al iniciar el túnel",
+    "restart_failed": "Error al reiniciar el túnel",
+    "stop_failed": "Error al detener el túnel",
+    "save_first": "Por favor, guarde la configuración primero"
   },
   "validation": {
     "port_range": "El puerto debe estar entre 1 y 65535",

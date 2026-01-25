@@ -14,6 +14,7 @@
   },
   "table": {
     "headers": {
+      "controls": "コントロール",
       "name": "名前",
       "status": "ステータス",
       "remote_host": "リモートホスト",
@@ -46,13 +47,17 @@
     "save_restart": "保存して再起動",
     "delete": "トンネルを削除",
     "interactive_auth_enabled": "対話認証が有効",
-    "interactive_auth_disabled": "対話認証が無効"
+    "interactive_auth_disabled": "対話認証が無効",
+    "start_tunnel": "トンネルを開始",
+    "restart_tunnel": "トンネルを再起動",
+    "stop_tunnel": "トンネルを停止"
   },
   "tooltips": {
     "add_tunnel": "トンネルを追加",
     "save_config": "設定を保存して再起動",
     "direction": "方向",
-    "actions": "操作"
+    "actions": "操作",
+    "controls": "コントロール"
   },
   "messages": {
     "delete_confirm": "このトンネル設定を削除しますか？",
@@ -60,7 +65,17 @@
     "config_save_failed": "設定の保存に失敗しました",
     "config_load_failed": "設定の読み込みに失敗しました",
     "validation_errors": "保存する前に検証エラーを修正してください",
-    "no_tunnels": "設定にトンネルが見つかりません"
+    "no_tunnels": "設定にトンネルが見つかりません",
+    "confirm_start": "このトンネルを開始しますか？",
+    "confirm_restart": "このトンネルを再起動しますか？",
+    "confirm_stop": "このトンネルを停止しますか？",
+    "start_success": "トンネルが正常に開始されました",
+    "restart_success": "トンネルが正常に再起動されました",
+    "stop_success": "トンネルが正常に停止されました",
+    "start_failed": "トンネルの開始に失敗しました",
+    "restart_failed": "トンネルの再起動に失敗しました",
+    "stop_failed": "トンネルの停止に失敗しました",
+    "save_first": "まず設定を保存してください"
   },
   "validation": {
     "port_range": "ポートは1から65535の間である必要があります",
