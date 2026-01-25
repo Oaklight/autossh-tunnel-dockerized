@@ -103,45 +103,38 @@ document.addEventListener("DOMContentLoaded", () => {
         row.className = "mdc-data-table__row new-row";
 
         let statusColor = "grey";
-        let statusText = tunnel.status || "STOPPED";
+        let statusIcon = "radio_button_unchecked";
+        let statusTooltip = tunnel.status || "STOPPED";
 
-        // Translate status if i18n is available
-        if (window.i18n) {
-            switch (tunnel.status) {
-                case "RUNNING":
-                    statusText = window.i18n.t('table.status.running');
-                    statusColor = "green";
-                    break;
-                case "NORMAL":
-                    statusText = window.i18n.t('table.status.normal');
-                    statusColor = "green";
-                    break;
-                case "DEAD":
-                    statusText = window.i18n.t('table.status.dead');
-                    statusColor = "red";
-                    break;
-                case "STARTING":
-                    statusText = window.i18n.t('table.status.starting');
-                    statusColor = "orange";
-                    break;
-                case "STOPPED":
-                    statusText = window.i18n.t('table.status.stopped');
-                    statusColor = "grey";
-                    break;
-                case "N/A":
-                    statusText = window.i18n.t('table.status.na');
-                    statusColor = "grey";
-                    break;
-                default:
-                    statusColor = "grey";
-            }
-        } else {
-            // Fallback for when i18n is not loaded yet
-            if (tunnel.status === "RUNNING" || tunnel.status === "NORMAL") statusColor = "green";
-            else if (tunnel.status === "DEAD") statusColor = "red";
-            else if (tunnel.status === "STARTING") statusColor = "orange";
-            else if (tunnel.status === "STOPPED") statusColor = "grey";
-            else if (tunnel.status === "N/A") statusColor = "grey";
+        // Set status icon and color based on status
+        switch (tunnel.status) {
+            case "RUNNING":
+            case "NORMAL":
+                statusIcon = "check_circle";
+                statusColor = "#4CAF50"; // Green
+                statusTooltip = "Running";
+                break;
+            case "DEAD":
+                statusIcon = "cancel";
+                statusColor = "#F44336"; // Red
+                statusTooltip = "Dead";
+                break;
+            case "STARTING":
+                statusIcon = "hourglass_empty";
+                statusColor = "#FF9800"; // Orange
+                statusTooltip = "Starting";
+                break;
+            case "STOPPED":
+                statusIcon = "stop_circle";
+                statusColor = "#9E9E9E"; // Grey
+                statusTooltip = "Stopped";
+                break;
+            case "N/A":
+            default:
+                statusIcon = "help_outline";
+                statusColor = "#9E9E9E"; // Grey
+                statusTooltip = "Unknown";
+                break;
         }
 
         // Get translated placeholders
@@ -162,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="${tunnelNamePlaceholder}" data-i18n-placeholder="table.placeholders.tunnel_name">
             </td>
             <td class="mdc-data-table__cell">
-                <span style="color: ${statusColor}; font-weight: bold;">${escapeHtml(statusText)}</span>
+                <i class="material-icons" style="color: ${statusColor}; font-size: 20px; vertical-align: middle;" title="${statusTooltip}">${statusIcon}</i>
             </td>
             <td class="mdc-data-table__cell">
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="${remoteHostPlaceholder}" data-i18n-placeholder="table.placeholders.remote_host">

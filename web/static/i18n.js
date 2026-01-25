@@ -318,30 +318,14 @@ class I18n {
         // 由于表格行是动态生成的，我们需要重新设置它们的内容
         const tableRows = document.querySelectorAll('#tunnelTable tbody tr');
         tableRows.forEach(row => {
-            // 更新状态文本
+            // 状态现在使用图标显示，不需要翻译文本
+            // 只需要更新tooltip（如果需要的话）
             const statusCell = row.cells[1];
             if (statusCell) {
-                const statusSpan = statusCell.querySelector('span');
-                if (statusSpan) {
-                    const statusText = statusSpan.textContent.trim();
-                    let translatedStatus = statusText;
-
-                    // 根据当前状态文本反向查找并翻译
-                    if (statusText === 'RUNNING' || statusText === '运行中') {
-                        translatedStatus = this.t('table.status.running');
-                    } else if (statusText === 'NORMAL' || statusText === '正常') {
-                        translatedStatus = this.t('table.status.normal');
-                    } else if (statusText === 'DEAD' || statusText === '已停止') {
-                        translatedStatus = this.t('table.status.dead');
-                    } else if (statusText === 'STARTING' || statusText === '启动中') {
-                        translatedStatus = this.t('table.status.starting');
-                    } else if (statusText === 'STOPPED' || statusText === '已停止') {
-                        translatedStatus = this.t('table.status.stopped');
-                    } else if (statusText === 'N/A' || statusText === '不可用') {
-                        translatedStatus = this.t('table.status.na');
-                    }
-
-                    statusSpan.textContent = translatedStatus;
+                const statusIcon = statusCell.querySelector('i.material-icons');
+                if (statusIcon) {
+                    // 状态图标的tooltip保持英文，因为它们是通用的
+                    // 如果需要翻译tooltip，可以在这里添加逻辑
                 }
             }
 
