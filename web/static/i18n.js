@@ -149,6 +149,15 @@ class I18n {
     }
 
     /**
+     * 获取语言切换按钮的tooltip文本
+     */
+    getLanguageToggleTooltip() {
+        const languages = this.getSupportedLanguages();
+        const languageNames = languages.map(lang => lang.name).join(' / ');
+        return `${this.t('navigation.language_toggle_prefix')}: ${languageNames}`;
+    }
+
+    /**
      * 初始化国际化
      */
     async init() {

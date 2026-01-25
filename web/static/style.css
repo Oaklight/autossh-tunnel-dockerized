@@ -78,6 +78,7 @@ body {
 /* Language toggle specific styles */
 .language-toggle {
   font-family: inherit;
+  position: relative;
 }
 
 .language-toggle:focus {
@@ -87,6 +88,81 @@ body {
 
 .language-toggle .material-icons {
   font-size: 22px;
+}
+
+/* Language Dropdown Menu */
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  min-width: 150px;
+  margin-top: 8px;
+}
+
+.language-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.language-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.language-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.language-dropdown-item:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.language-dropdown-item:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.language-dropdown-item:only-child {
+  border-radius: 8px;
+}
+
+.language-dropdown-item.active {
+  background: rgba(33, 150, 243, 0.2);
+  color: #64b5f6;
+}
+
+.language-dropdown-item.active::after {
+  content: '✓';
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.language-flag {
+  margin-right: 8px;
+  font-size: 16px;
 }
 
 .corner-icon::before {
