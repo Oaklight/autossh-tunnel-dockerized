@@ -71,6 +71,22 @@ body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Language toggle specific styles */
+.language-toggle {
+  font-family: inherit;
+}
+
+.language-toggle:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
+}
+
+.language-toggle .material-icons {
+  font-size: 22px;
 }
 
 .corner-icon::before {
