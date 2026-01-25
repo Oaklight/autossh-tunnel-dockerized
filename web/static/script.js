@@ -85,13 +85,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.tunnels && Array.isArray(data.tunnels)) {
                     data.tunnels.forEach((tunnel) => addRow(tunnel));
                 } else {
-                    console.warn("No tunnels found in configuration");
+                    const warningMsg = window.i18n ? window.i18n.t('messages.no_tunnels') : 'No tunnels found in configuration';
+                    console.warn(warningMsg);
                 }
             })
             .catch((error) => {
                 showLoading(false);
                 console.error("Error loading configuration:", error);
-                showMessage("Failed to load configuration", "error");
+                const errorMsg = window.i18n ? window.i18n.t('messages.config_load_failed') : 'Failed to load configuration';
+                showMessage(errorMsg, "error");
             });
     }
 
@@ -101,41 +103,84 @@ document.addEventListener("DOMContentLoaded", () => {
         row.className = "mdc-data-table__row new-row";
 
         let statusColor = "grey";
-        if (tunnel.status === "RUNNING" || tunnel.status === "NORMAL") statusColor = "green";
-        else if (tunnel.status === "DEAD") statusColor = "red";
-        else if (tunnel.status === "STARTING") statusColor = "orange";
-        else if (tunnel.status === "STOPPED") statusColor = "grey";
-        else if (tunnel.status === "N/A") statusColor = "grey";
+        let statusIcon = "radio_button_unchecked";
+        let statusTooltip = tunnel.status || "STOPPED";
+
+        // Set status icon and color based on status
+        switch (tunnel.status) {
+            case "RUNNING":
+            case "NORMAL":
+                statusIcon = "check_circle";
+                statusColor = "#4CAF50"; // Green
+                statusTooltip = "Running";
+                break;
+            case "DEAD":
+                statusIcon = "cancel";
+                statusColor = "#F44336"; // Red
+                statusTooltip = "Dead";
+                break;
+            case "STARTING":
+                statusIcon = "hourglass_empty";
+                statusColor = "#FF9800"; // Orange
+                statusTooltip = "Starting";
+                break;
+            case "STOPPED":
+                statusIcon = "stop_circle";
+                statusColor = "#9E9E9E"; // Grey
+                statusTooltip = "Stopped";
+                break;
+            case "N/A":
+            default:
+                statusIcon = "help_outline";
+                statusColor = "#9E9E9E"; // Grey
+                statusTooltip = "Unknown";
+                break;
+        }
+
+        // Get translated placeholders
+        const tunnelNamePlaceholder = window.i18n ? window.i18n.t('table.placeholders.tunnel_name') : 'Tunnel name';
+        const remoteHostPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_host') : 'Remote host';
+        const remotePortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_port') : 'Remote port (e.g., 44497 or hostname:44497)';
+        const localPortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.local_port') : 'Local port (e.g., 55001 or 192.168.1.100:55001)';
+
+        const remoteToLocalText = window.i18n ? window.i18n.t('table.direction.remote_to_local') : 'Remote to Local';
+        const localToRemoteText = window.i18n ? window.i18n.t('table.direction.local_to_remote') : 'Local to Remote';
+
+        const interactiveEnabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
+        const interactiveDisabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
+        const deleteTunnelText = window.i18n ? window.i18n.t('buttons.delete') : 'Delete tunnel';
 
         row.innerHTML = `
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="Tunnel name">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="${tunnelNamePlaceholder}" data-i18n-placeholder="table.placeholders.tunnel_name">
             </td>
             <td class="mdc-data-table__cell">
-                <span style="color: ${statusColor}; font-weight: bold;">${escapeHtml(tunnel.status || "STOPPED")}</span>
+                <i class="material-icons" style="color: ${statusColor}; font-size: 20px; vertical-align: middle;" title="${statusTooltip}">${statusIcon}</i>
             </td>
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="Remote host">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="${remoteHostPlaceholder}" data-i18n-placeholder="table.placeholders.remote_host">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="Remote port (e.g., 44497 or hostname:44497)">
+                <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="${remotePortPlaceholder}" data-i18n-placeholder="table.placeholders.remote_port">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="Local port (e.g., 55001 or 192.168.1.100:55001)">
-            </td>
-            <td class="mdc-data-table__cell">
-                <input type="checkbox" class="table-checkbox" ${tunnel.interactive ? "checked" : ""}>
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="${localPortPlaceholder}" data-i18n-placeholder="table.placeholders.local_port">
             </td>
             <td class="mdc-data-table__cell">
                 <select class="table-select">
-                    <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""}>Remote to Local</option>
-                    <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""}>Local to Remote</option>
+                    <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""} data-i18n="table.direction.remote_to_local">${remoteToLocalText}</option>
+                    <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""} data-i18n="table.direction.local_to_remote">${localToRemoteText}</option>
                 </select>
             </td>
             <td class="mdc-data-table__cell">
-                <button class="delete-button deleteRow" title="Delete tunnel">
-                    <i class="material-icons">delete</i>
-                </button>
+                <div class="action-buttons-cell">
+                    <button class="interactive-toggle-button ${tunnel.interactive ? 'active' : ''}" title="${tunnel.interactive ? interactiveEnabledText : interactiveDisabledText}" data-interactive="${tunnel.interactive ? 'true' : 'false'}">
+                        <i class="material-icons">fingerprint</i>
+                    </button>
+                    <button class="delete-button deleteRow" title="${deleteTunnelText}" data-i18n-title="buttons.delete">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
             </td>
         `;
 
@@ -143,10 +188,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Add delete row event with confirmation
         row.querySelector(".deleteRow").addEventListener("click", () => {
-            if (confirm("Are you sure you want to delete this tunnel configuration?")) {
+            const confirmMessage = window.i18n ? window.i18n.t('messages.delete_confirm') : 'Are you sure you want to delete this tunnel configuration?';
+            if (confirm(confirmMessage)) {
                 row.style.animation = "fadeOut 0.3s ease-out";
                 setTimeout(() => row.remove(), 300);
             }
+        });
+
+        // Add interactive toggle event
+        const interactiveToggle = row.querySelector(".interactive-toggle-button");
+        interactiveToggle.addEventListener("click", () => {
+            const isActive = interactiveToggle.classList.contains('active');
+            const newState = !isActive;
+
+            // Update button state
+            interactiveToggle.classList.toggle('active', newState);
+            interactiveToggle.setAttribute('data-interactive', newState.toString());
+
+            // Update title (icon stays the same, only color changes via CSS)
+            const enabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
+            const disabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
+            interactiveToggle.title = newState ? enabledText : disabledText;
         });
 
         // Add input validation
@@ -178,7 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const num = parseInt(value);
             if (value && (isNaN(num) || num < 1 || num > 65535)) {
                 input.classList.add('error');
-                input.title = 'Port must be between 1 and 65535';
+                const errorMsg = window.i18n ? window.i18n.t('validation.port_range') : 'Port must be between 1 and 65535';
+                input.title = errorMsg;
             }
         } else if (input.classList.contains('remote-port-input') || input.placeholder && input.placeholder.includes('Remote port')) {
             // Validate remote_port which can be "port" or "hostname:port" format
@@ -186,7 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const portPattern = /^[\w.-]+:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    input.title = 'Invalid port format. Use "port" or "hostname:port" (e.g., 44497 or lambda5:44497)';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.remote_port_format') : 'Invalid port format. Use "port" or "hostname:port" (e.g., 44497 or lambda5:44497)';
+                    input.title = errorMsg;
                 }
             }
         } else if (input.placeholder && input.placeholder.includes('Local port')) {
@@ -195,7 +259,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const portPattern = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    input.title = 'Invalid port format. Use "port" or "ip:port" (e.g., 55001 or 192.168.1.100:55001)';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "ip:port" (e.g., 55001 or 192.168.1.100:55001)';
+                    input.title = errorMsg;
                 }
             }
         }
@@ -273,19 +338,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (hasErrors) {
-            showMessage("Please fix validation errors before saving", "error");
+            const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fix validation errors before saving';
+            showMessage(errorMsg, "error");
             return;
         }
 
         const updatedData = rows.map((row) => {
             const cells = row.cells;
+            const interactiveToggle = cells[6].querySelector(".interactive-toggle-button");
             return {
                 name: cells[0].querySelector("input").value.trim(),
                 remote_host: cells[2].querySelector("input").value.trim(),
                 remote_port: cells[3].querySelector("input").value.trim(),
                 local_port: cells[4].querySelector("input").value.trim(),
-                interactive: cells[5].querySelector("input[type='checkbox']").checked,
-                direction: cells[6].querySelector("select").value,
+                interactive: interactiveToggle.getAttribute('data-interactive') === 'true',
+                direction: cells[5].querySelector("select").value,
             };
         });
 
@@ -308,11 +375,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 return response.text();
             })
             .then(() => {
-                showMessage("Configuration saved successfully!", "success");
+                const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
+                showMessage(successMsg, "success");
             })
             .catch(error => {
                 console.error("Error saving configuration:", error);
-                showMessage("Failed to save configuration", "error");
+                const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
+                showMessage(errorMsg, "error");
             });
     });
 

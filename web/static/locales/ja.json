@@ -1,0 +1,187 @@
+{
+  "app": {
+    "title": "SSH トンネル設定",
+    "name": "SSH トンネルマネージャー",
+    "help_title": "SSH トンネルマネージャー - ヘルプ"
+  },
+  "navigation": {
+    "help": "ヘルプとドキュメント",
+    "docker_hub": "Docker Hub",
+    "github": "GitHub",
+    "back": "戻る",
+    "language_toggle": "Language / 言語",
+    "language_toggle_prefix": "利用可能な言語"
+  },
+  "table": {
+    "headers": {
+      "name": "名前",
+      "status": "ステータス",
+      "remote_host": "リモートホスト",
+      "remote_port": "リモートポート",
+      "local_port": "ローカルポート",
+      "direction": "方向",
+      "actions": "操作"
+    },
+    "placeholders": {
+      "tunnel_name": "トンネル名",
+      "remote_host": "リモートホスト",
+      "remote_port": "リモートポート (例: 44497 または hostname:44497)",
+      "local_port": "ローカルポート (例: 55001 または 192.168.1.100:55001)"
+    },
+    "direction": {
+      "remote_to_local": "リモートからローカルへ",
+      "local_to_remote": "ローカルからリモートへ"
+    },
+    "status": {
+      "running": "実行中",
+      "normal": "正常",
+      "dead": "停止",
+      "starting": "開始中",
+      "stopped": "停止",
+      "na": "利用不可"
+    }
+  },
+  "buttons": {
+    "add": "追加",
+    "save_restart": "保存して再起動",
+    "delete": "トンネルを削除",
+    "interactive_auth_enabled": "対話認証が有効",
+    "interactive_auth_disabled": "対話認証が無効"
+  },
+  "tooltips": {
+    "add_tunnel": "トンネルを追加",
+    "save_config": "設定を保存して再起動",
+    "direction": "方向",
+    "actions": "操作"
+  },
+  "messages": {
+    "delete_confirm": "このトンネル設定を削除しますか？",
+    "config_saved": "設定が正常に保存されました！",
+    "config_save_failed": "設定の保存に失敗しました",
+    "config_load_failed": "設定の読み込みに失敗しました",
+    "validation_errors": "保存する前に検証エラーを修正してください",
+    "no_tunnels": "設定にトンネルが見つかりません"
+  },
+  "validation": {
+    "port_range": "ポートは1から65535の間である必要があります",
+    "remote_port_format": "無効なポート形式です。\"ポート\" または \"ホスト名:ポート\" 形式を使用してください (例: 44497 または lambda5:44497)",
+    "local_port_format": "無効なポート形式です。\"ポート\" または \"IP:ポート\" 形式を使用してください (例: 55001 または 192.168.1.100:55001)"
+  },
+  "help": {
+    "toc": "目次",
+    "sections": {
+      "overview": "概要",
+      "setup": "クイックセットアップ",
+      "web_config": "Web設定",
+      "yaml_config": "YAML設定",
+      "ssh_config": "SSH設定",
+      "advanced": "高度な設定",
+      "troubleshooting": "トラブルシューティング"
+    },
+    "overview": {
+      "title": "概要",
+      "description": "SSH Tunnel Manager は、autossh と YAML 設定ファイルを使用して SSH トンネルを管理する Docker ベースのソリューションです。",
+      "features": {
+        "title": "主な機能：",
+        "dockerized": "Docker化：環境のカプセル化、簡単なデプロイと管理",
+        "web_config": "Web設定：視覚的なインターフェースでトンネル設定を管理",
+        "auto_reload": "自動リロード：設定変更を検出して自動的にサービスをリロード",
+        "bidirectional": "双方向トンネル：ローカルからリモートおよびリモートからローカルのトンネルをサポート",
+        "multi_arch": "マルチアーキテクチャサポート：AMD64、ARM64など複数のアーキテクチャをサポート"
+      }
+    },
+    "setup": {
+      "title": "クイックセットアップ",
+      "step1": "1. 設定ファイルをダウンロード",
+      "step1_desc": "docker-compose.yaml をダウンロード",
+      "step1_create": "設定ディレクトリを作成",
+      "step2": "2. ユーザー権限を設定",
+      "step2_check": "現在のユーザー UID/GID を確認",
+      "step2_set": "環境変数を設定",
+      "step3": "3. サービスを開始",
+      "step4": "4. Web インターフェースにアクセス",
+      "step4_desc": "ブラウザで以下にアクセス：",
+      "access_url": "http://localhost:5000"
+    },
+    "web_config": {
+      "title": "Web設定",
+      "interface": {
+        "title": "インターフェースの説明：",
+        "name": "Name：トンネル名、識別用",
+        "status": "Status：トンネルの現在の状態（実行中/停止/エラー）",
+        "remote_host": "Remote Host：リモートホストアドレス（例：user@server.com）",
+        "remote_port": "Remote Port：リモートポートまたはホスト:ポート形式",
+        "local_port": "Local Port：ローカルポートまたはIP:ポート形式",
+        "direction": "Direction：トンネルの方向（リモートからローカル/ローカルからリモート）",
+        "actions": "Actions：操作ボタン（対話認証/削除）"
+      },
+      "interactive_auth": {
+        "title": "対話認証：",
+        "description": "指紋アイコンをクリックして対話認証の状態を切り替えることができます：",
+        "enabled": "緑色：対話認証が有効",
+        "disabled": "グレー：対話認証が無効"
+      },
+      "save_config": {
+        "title": "設定の保存：",
+        "description": "Save & Restart ボタンをクリックして設定を保存し、トンネルサービスを再起動します。"
+      }
+    },
+    "yaml_config": {
+      "title": "YAML設定",
+      "basic_format": "基本形式：",
+      "basic_comment1": "ローカルサービスをリモートサーバーに公開",
+      "basic_comment2": "リモートサービスをローカルポートにマップ",
+      "advanced_format": "高度な設定 - バインドアドレスを指定：",
+      "advanced_comment1": "リモートバインドアドレスを指定",
+      "advanced_comment2": "ローカルバインドアドレスを指定"
+    },
+    "ssh_config": {
+      "title": "SSH設定",
+      "important": "重要",
+      "important_desc": "このプロジェクトは SSH 接続設定のために ~/.ssh/config ファイルに大きく依存しています。",
+      "example": "SSH設定ファイルの例 (~/.ssh/config)：",
+      "permissions": "SSH キーの権限："
+    },
+    "advanced": {
+      "title": "高度な設定",
+      "env_vars": "環境変数：",
+      "env_puid": "コンテナユーザー UID（デフォルト：1000）",
+      "env_pgid": "コンテナユーザー GID（デフォルト：1000）",
+      "port_formats": "ポート形式：",
+      "port_simple": "シンプルポート",
+      "port_hostname": "ホスト名:ポート",
+      "port_ip": "IP:ポート",
+      "tunnel_directions": "トンネルの方向：",
+      "direction_r2l": "リモートサービスをローカルにマップ（デフォルト）",
+      "direction_l2r": "ローカルサービスをリモートに公開",
+      "security": "セキュリティ注意事項：",
+      "security_desc": "リモートポートフォワーディングを有効にする場合、リモートサーバーで GatewayPorts の設定が必要な場合があります：",
+      "security_edit": "/etc/ssh/sshd_config を編集",
+      "security_restart": "SSH サービスを再起動"
+    },
+    "troubleshooting": {
+      "title": "トラブルシューティング",
+      "common_issues": "よくある問題：",
+      "tunnel_failed": "🔴 トンネル接続失敗",
+      "permission_error": "🔴 権限エラー",
+      "config_not_effective": "🔴 設定が有効にならない",
+      "view_logs": "ログを表示：",
+      "view_logs_all": "すべてのサービスログを表示",
+      "view_logs_specific": "特定のサービスログを表示",
+      "restart_services": "サービスを再起動：",
+      "restart_all": "すべてのサービスを再起動",
+      "restart_specific": "特定のサービスを再起動",
+      "solutions": {
+        "check_ssh_config": "SSH 設定ファイル ~/.ssh/config を確認",
+        "verify_ssh_keys": "SSH キーの権限を確認",
+        "confirm_remote_access": "リモートホストへのアクセスを確認",
+        "check_puid_pgid": "PUID/PGID 設定を確認",
+        "confirm_ssh_permissions": "SSH キーファイルの権限を確認",
+        "verify_docker_permissions": "Docker ユーザーグループの権限を確認",
+        "check_yaml_syntax": "YAML 構文が正しいか確認",
+        "confirm_config_path": "設定ファイルのパスを確認",
+        "restart_container": "コンテナサービスを再起動"
+      }
+    }
+  }
+}

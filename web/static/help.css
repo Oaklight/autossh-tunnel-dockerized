@@ -1,0 +1,314 @@
+/* Help Page Specific Styles */
+
+/* Back Button Styling */
+.mdc-top-app-bar__navigation-icon {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    padding: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.mdc-top-app-bar__navigation-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    transform: scale(1.05);
+}
+
+.mdc-top-app-bar__navigation-icon:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+}
+
+.help-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 32px;
+    min-height: calc(100vh - 64px);
+}
+
+/* Table of Contents */
+.help-toc {
+    position: sticky;
+    top: 88px;
+    height: fit-content;
+    background: var(--mdc-theme-surface);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+}
+
+.help-toc h3 {
+    margin: 0 0 16px 0;
+    color: var(--mdc-theme-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.help-toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.help-toc li {
+    margin: 0;
+}
+
+.help-toc a {
+    display: block;
+    padding: 8px 12px;
+    color: rgba(0, 0, 0, 0.7);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    border-left: 3px solid transparent;
+}
+
+.help-toc a:hover {
+    background-color: rgba(33, 150, 243, 0.08);
+    color: var(--mdc-theme-primary);
+    border-left-color: var(--mdc-theme-primary);
+}
+
+.help-toc a.active {
+    background-color: rgba(33, 150, 243, 0.12);
+    color: var(--mdc-theme-primary);
+    border-left-color: var(--mdc-theme-primary);
+    font-weight: 500;
+}
+
+/* Help Content */
+.help-content {
+    min-width: 0;
+    /* Prevent grid overflow */
+}
+
+.help-section {
+    margin-bottom: 48px;
+    scroll-margin-top: 88px;
+    /* Account for fixed header */
+}
+
+.help-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--mdc-theme-primary);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.help-section h2 .material-icons {
+    font-size: 1.6rem;
+}
+
+.help-card {
+    background: var(--mdc-theme-surface);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+    margin-bottom: 16px;
+}
+
+.help-card h4 {
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0 0 12px 0;
+}
+
+.help-card h5 {
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 16px 0 8px 0;
+}
+
+.help-card p {
+    color: rgba(0, 0, 0, 0.7);
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+}
+
+.help-card ul {
+    color: rgba(0, 0, 0, 0.7);
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    padding-left: 20px;
+}
+
+.help-card li {
+    margin-bottom: 8px;
+}
+
+.help-card code {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+    color: #d32f2f;
+}
+
+/* Code Blocks */
+.code-block {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin: 16px 0;
+    overflow: hidden;
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 16px;
+    overflow-x: auto;
+    background: transparent;
+    color: #333;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.code-block code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+
+/* Troubleshooting Items */
+.troubleshoot-item {
+    background: rgba(255, 152, 0, 0.05);
+    border-left: 4px solid #ff9800;
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.troubleshoot-item h5 {
+    margin: 0 0 12px 0;
+    color: #f57c00;
+    font-weight: 600;
+}
+
+.troubleshoot-item ul {
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .help-container {
+        grid-template-columns: 200px 1fr;
+        gap: 24px;
+        padding: 16px;
+    }
+
+    .help-toc {
+        padding: 16px;
+    }
+
+    .help-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .help-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 12px;
+    }
+
+    .help-toc {
+        position: static;
+        order: 2;
+        margin-top: 24px;
+    }
+
+    .help-content {
+        order: 1;
+    }
+
+    .help-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .help-section h2 .material-icons {
+        font-size: 1.3rem;
+    }
+
+    .help-card {
+        padding: 16px;
+    }
+
+    .code-block pre {
+        padding: 12px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .help-container {
+        padding: 8px;
+    }
+
+    .help-section {
+        margin-bottom: 32px;
+    }
+
+    .help-section h2 {
+        font-size: 1.3rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .help-card {
+        padding: 12px;
+    }
+
+    .help-card h4 {
+        font-size: 1.1rem;
+    }
+
+    .code-block pre {
+        padding: 8px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for code blocks */
+.code-block pre::-webkit-scrollbar {
+    height: 6px;
+}
+
+.code-block pre::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.code-block pre::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.code-block pre::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}

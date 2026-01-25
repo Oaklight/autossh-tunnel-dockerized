@@ -1,0 +1,187 @@
+{
+  "app": {
+    "title": "SSH 터널 구성",
+    "name": "SSH 터널 관리자",
+    "help_title": "SSH 터널 관리자 - 도움말"
+  },
+  "navigation": {
+    "help": "도움말 및 문서",
+    "docker_hub": "Docker Hub",
+    "github": "GitHub",
+    "back": "뒤로",
+    "language_toggle": "Language / 언어",
+    "language_toggle_prefix": "사용 가능한 언어"
+  },
+  "table": {
+    "headers": {
+      "name": "이름",
+      "status": "상태",
+      "remote_host": "원격 호스트",
+      "remote_port": "원격 포트",
+      "local_port": "로컬 포트",
+      "direction": "방향",
+      "actions": "작업"
+    },
+    "placeholders": {
+      "tunnel_name": "터널 이름",
+      "remote_host": "원격 호스트",
+      "remote_port": "원격 포트 (예: 44497 또는 hostname:44497)",
+      "local_port": "로컬 포트 (예: 55001 또는 192.168.1.100:55001)"
+    },
+    "direction": {
+      "remote_to_local": "원격에서 로컬로",
+      "local_to_remote": "로컬에서 원격으로"
+    },
+    "status": {
+      "running": "실행 중",
+      "normal": "정상",
+      "dead": "중지됨",
+      "starting": "시작 중",
+      "stopped": "중지됨",
+      "na": "사용 불가"
+    }
+  },
+  "buttons": {
+    "add": "추가",
+    "save_restart": "저장 및 재시작",
+    "delete": "터널 삭제",
+    "interactive_auth_enabled": "대화형 인증 활성화됨",
+    "interactive_auth_disabled": "대화형 인증 비활성화됨"
+  },
+  "tooltips": {
+    "add_tunnel": "터널 추가",
+    "save_config": "구성 저장 및 재시작",
+    "direction": "방향",
+    "actions": "작업"
+  },
+  "messages": {
+    "delete_confirm": "이 터널 구성을 삭제하시겠습니까?",
+    "config_saved": "구성이 성공적으로 저장되었습니다!",
+    "config_save_failed": "구성 저장 실패",
+    "config_load_failed": "구성 로드 실패",
+    "validation_errors": "저장하기 전에 유효성 검사 오류를 수정하세요",
+    "no_tunnels": "구성에서 터널을 찾을 수 없습니다"
+  },
+  "validation": {
+    "port_range": "포트는 1에서 65535 사이여야 합니다",
+    "remote_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"호스트명:포트\" 형식을 사용하세요 (예: 44497 또는 lambda5:44497)",
+    "local_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"IP:포트\" 형식을 사용하세요 (예: 55001 또는 192.168.1.100:55001)"
+  },
+  "help": {
+    "toc": "목차",
+    "sections": {
+      "overview": "개요",
+      "setup": "빠른 설정",
+      "web_config": "웹 구성",
+      "yaml_config": "YAML 구성",
+      "ssh_config": "SSH 구성",
+      "advanced": "고급 구성",
+      "troubleshooting": "문제 해결"
+    },
+    "overview": {
+      "title": "개요",
+      "description": "SSH Tunnel Manager는 autossh와 YAML 구성 파일을 사용하여 SSH 터널을 관리하는 Docker 기반 솔루션입니다.",
+      "features": {
+        "title": "주요 기능:",
+        "dockerized": "Docker화: 환경 캡슐화, 쉬운 배포 및 관리",
+        "web_config": "웹 구성: 시각적 인터페이스를 통한 터널 구성 관리",
+        "auto_reload": "자동 재로드: 구성 변경 감지 및 자동 서비스 재로드",
+        "bidirectional": "양방향 터널: 로컬에서 원격으로 및 원격에서 로컬로 터널 지원",
+        "multi_arch": "다중 아키텍처 지원: AMD64, ARM64 등 다양한 아키텍처 지원"
+      }
+    },
+    "setup": {
+      "title": "빠른 설정",
+      "step1": "1. 구성 파일 다운로드",
+      "step1_desc": "docker-compose.yaml 다운로드",
+      "step1_create": "구성 디렉토리 생성",
+      "step2": "2. 사용자 권한 구성",
+      "step2_check": "현재 사용자 UID/GID 확인",
+      "step2_set": "환경 변수 설정",
+      "step3": "3. 서비스 시작",
+      "step4": "4. 웹 인터페이스 접속",
+      "step4_desc": "브라우저에서 다음 주소로 접속:",
+      "access_url": "http://localhost:5000"
+    },
+    "web_config": {
+      "title": "웹 구성",
+      "interface": {
+        "title": "인터페이스 설명:",
+        "name": "Name: 터널 이름, 식별용",
+        "status": "Status: 터널 현재 상태 (실행/중지/오류)",
+        "remote_host": "Remote Host: 원격 호스트 주소 (예: user@server.com)",
+        "remote_port": "Remote Port: 원격 포트 또는 호스트:포트 형식",
+        "local_port": "Local Port: 로컬 포트 또는 IP:포트 형식",
+        "direction": "Direction: 터널 방향 (원격에서 로컬로/로컬에서 원격으로)",
+        "actions": "Actions: 작업 버튼 (대화형 인증/삭제)"
+      },
+      "interactive_auth": {
+        "title": "대화형 인증:",
+        "description": "지문 아이콘을 클릭하여 대화형 인증 상태를 전환할 수 있습니다:",
+        "enabled": "녹색: 대화형 인증 활성화",
+        "disabled": "회색: 대화형 인증 비활성화"
+      },
+      "save_config": {
+        "title": "구성 저장:",
+        "description": "Save & Restart 버튼을 클릭하여 구성을 저장하고 터널 서비스를 재시작합니다."
+      }
+    },
+    "yaml_config": {
+      "title": "YAML 구성",
+      "basic_format": "기본 형식:",
+      "basic_comment1": "로컬 서비스를 원격 서버에 노출",
+      "basic_comment2": "원격 서비스를 로컬 포트에 매핑",
+      "advanced_format": "고급 구성 - 바인딩 주소 지정:",
+      "advanced_comment1": "원격 바인딩 주소 지정",
+      "advanced_comment2": "로컬 바인딩 주소 지정"
+    },
+    "ssh_config": {
+      "title": "SSH 구성",
+      "important": "중요",
+      "important_desc": "이 프로젝트는 SSH 연결 구성을 위해 ~/.ssh/config 파일에 크게 의존합니다.",
+      "example": "SSH 구성 파일 예제 (~/.ssh/config):",
+      "permissions": "SSH 키 권한:"
+    },
+    "advanced": {
+      "title": "고급 구성",
+      "env_vars": "환경 변수:",
+      "env_puid": "컨테이너 사용자 UID (기본값: 1000)",
+      "env_pgid": "컨테이너 사용자 GID (기본값: 1000)",
+      "port_formats": "포트 형식:",
+      "port_simple": "단순 포트",
+      "port_hostname": "호스트명:포트",
+      "port_ip": "IP:포트",
+      "tunnel_directions": "터널 방향:",
+      "direction_r2l": "원격 서비스를 로컬에 매핑 (기본값)",
+      "direction_l2r": "로컬 서비스를 원격에 노출",
+      "security": "보안 주의사항:",
+      "security_desc": "원격 포트 포워딩을 활성화할 때 원격 서버에서 GatewayPorts 구성이 필요할 수 있습니다:",
+      "security_edit": "/etc/ssh/sshd_config 편집",
+      "security_restart": "SSH 서비스 재시작"
+    },
+    "troubleshooting": {
+      "title": "문제 해결",
+      "common_issues": "일반적인 문제:",
+      "tunnel_failed": "🔴 터널 연결 실패",
+      "permission_error": "🔴 권한 오류",
+      "config_not_effective": "🔴 구성이 적용되지 않음",
+      "view_logs": "로그 보기:",
+      "view_logs_all": "모든 서비스 로그 보기",
+      "view_logs_specific": "특정 서비스 로그 보기",
+      "restart_services": "서비스 재시작:",
+      "restart_all": "모든 서비스 재시작",
+      "restart_specific": "특정 서비스 재시작",
+      "solutions": {
+        "check_ssh_config": "SSH 구성 파일 ~/.ssh/config 확인",
+        "verify_ssh_keys": "SSH 키 권한 확인",
+        "confirm_remote_access": "원격 호스트 접근 가능 여부 확인",
+        "check_puid_pgid": "PUID/PGID 설정 확인",
+        "confirm_ssh_permissions": "SSH 키 파일 권한 확인",
+        "verify_docker_permissions": "Docker 사용자 그룹 권한 확인",
+        "check_yaml_syntax": "YAML 구문이 올바른지 확인",
+        "confirm_config_path": "구성 파일 경로 확인",
+        "restart_container": "컨테이너 서비스 재시작"
+      }
+    }
+  }
+}

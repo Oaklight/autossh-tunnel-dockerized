@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -49,6 +50,11 @@ type TunnelStatus struct {
 
 type Config struct {
 	Tunnels []Tunnel `yaml:"tunnels" json:"tunnels"`
+}
+
+type Language struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
 }
 
 func loadConfig() (Config, error) {
@@ -194,6 +200,11 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
+func helpHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "help.html")))
+	tmpl.Execute(w, nil)
+}
+
 func fetchTunnelStatuses() (map[string]string, error) {
 	if apiBaseURL == "" {
 		return nil, nil
@@ -260,6 +271,59 @@ func updateConfigHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status": "success"}`))
 }
 
+func getLanguagesHandler(w http.ResponseWriter, r *http.Request) {
+	localesDir := filepath.Join(staticDir, "locales")
+	
+	// Check if locales directory exists
+	if _, err := os.Stat(localesDir); os.IsNotExist(err) {
+		http.Error(w, "Locales directory not found", http.StatusNotFound)
+		return
+	}
+	
+	// Read directory contents
+	files, err := ioutil.ReadDir(localesDir)
+	if err != nil {
+		http.Error(w, "Failed to read locales directory", http.StatusInternalServerError)
+		return
+	}
+	
+	var languages []Language
+	// 9 core languages: Chinese (Simplified & Traditional), English, Japanese, Korean, Spanish, French, Russian, Arabic
+	languageNames := map[string]string{
+		"zh":      "中文 (简体)",
+		"zh-hant": "中文 (繁體)",
+		"en":      "English",
+		"ja":      "日本語",
+		"ko":      "한국어",
+		"es":      "Español",
+		"fr":      "Français",
+		"ru":      "Русский",
+		"ar":      "العربية",
+	}
+	
+	// Scan for .json files
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".json") {
+			// Extract language code from filename (e.g., "en.json" -> "en")
+			langCode := strings.TrimSuffix(file.Name(), ".json")
+			
+			// Get language name from map, fallback to code if not found
+			langName := languageNames[langCode]
+			if langName == "" {
+				langName = strings.ToUpper(langCode) // Fallback to uppercase code
+			}
+			
+			languages = append(languages, Language{
+				Code: langCode,
+				Name: langName,
+			})
+		}
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(languages)
+}
+
 func main() {
 	// Configure logging to match the unified format
 	// [YYYY-MM-DD HH:MM:SS] [LEVEL] [COMPONENT] Message
@@ -278,6 +342,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/help", helpHandler)
 	http.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -288,6 +353,7 @@ func main() {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	})
+	http.HandleFunc("/api/languages", getLanguagesHandler)
 
 	logMsg("INFO", "WEB", "Starting server on %s", defaultPort)
 	err := http.ListenAndServe(defaultPort, nil)

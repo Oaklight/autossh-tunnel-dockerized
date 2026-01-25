@@ -1,0 +1,200 @@
+/* Universal Tooltip System Styles */
+
+.universal-tooltip {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 10000;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  font-family: "Roboto", sans-serif;
+}
+
+/* Show state */
+.universal-tooltip.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Arrow styles for different positions */
+.universal-tooltip::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+}
+
+/* Default position: top (tooltip above element) */
+.universal-tooltip.position-top::before {
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: rgba(0, 0, 0, 0.9);
+  border-bottom: none;
+}
+
+/* Bottom position (tooltip below element) */
+.universal-tooltip.position-bottom::before {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-color: rgba(0, 0, 0, 0.9);
+  border-top: none;
+}
+
+/* Left position (tooltip to the left of element) */
+.universal-tooltip.position-left::before {
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: rgba(0, 0, 0, 0.9);
+  border-right: none;
+}
+
+/* Right position (tooltip to the right of element) */
+.universal-tooltip.position-right::before {
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: rgba(0, 0, 0, 0.9);
+  border-left: none;
+}
+
+/* Animation variants */
+.universal-tooltip.position-top {
+  transform: translateY(-5px);
+}
+
+.universal-tooltip.position-top.show {
+  transform: translateY(0);
+}
+
+.universal-tooltip.position-bottom {
+  transform: translateY(5px);
+}
+
+.universal-tooltip.position-bottom.show {
+  transform: translateY(0);
+}
+
+.universal-tooltip.position-left {
+  transform: translateX(-5px);
+}
+
+.universal-tooltip.position-left.show {
+  transform: translateX(0);
+}
+
+.universal-tooltip.position-right {
+  transform: translateX(5px);
+}
+
+.universal-tooltip.position-right.show {
+  transform: translateX(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .universal-tooltip {
+    font-size: 11px;
+    padding: 6px 10px;
+    max-width: 200px;
+  }
+
+  .universal-tooltip::before {
+    border-width: 4px;
+  }
+
+  .universal-tooltip.position-top::before {
+    bottom: -8px;
+  }
+
+  .universal-tooltip.position-bottom::before {
+    top: -8px;
+  }
+
+  .universal-tooltip.position-left::before {
+    right: -8px;
+  }
+
+  .universal-tooltip.position-right::before {
+    left: -8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .universal-tooltip {
+    font-size: 10px;
+    padding: 4px 8px;
+    max-width: 180px;
+  }
+
+  .universal-tooltip::before {
+    border-width: 3px;
+  }
+
+  .universal-tooltip.position-top::before {
+    bottom: -6px;
+  }
+
+  .universal-tooltip.position-bottom::before {
+    top: -6px;
+  }
+
+  .universal-tooltip.position-left::before {
+    right: -6px;
+  }
+
+  .universal-tooltip.position-right::before {
+    left: -6px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .universal-tooltip {
+    background: #000000;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+  }
+
+  .universal-tooltip::before {
+    border-top-color: #000000;
+    border-bottom-color: #000000;
+    border-left-color: #000000;
+    border-right-color: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .universal-tooltip {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+  }
+
+  .universal-tooltip.position-top,
+  .universal-tooltip.position-bottom,
+  .universal-tooltip.position-left,
+  .universal-tooltip.position-right {
+    transform: none;
+  }
+
+  .universal-tooltip.show {
+    transform: none;
+  }
+}
