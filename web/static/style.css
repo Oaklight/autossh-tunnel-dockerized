@@ -395,8 +395,8 @@ body {
 
 .mdc-data-table__header-cell:nth-child(2),
 .mdc-data-table__cell:nth-child(2) {
-  width: 12%;
-  min-width: 90px;
+  width: 8%;
+  min-width: 60px;
 }
 
 .mdc-data-table__header-cell:nth-child(3),
