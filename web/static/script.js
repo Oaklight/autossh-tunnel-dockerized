@@ -20,54 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const dataTableEl = document.querySelector('.mdc-data-table');
         if (dataTableEl) {
             dataTable = new mdc.dataTable.MDCDataTable(dataTableEl);
-            initResizableColumns();
         }
-    }
-
-    // Initialize Resizable Columns
-    function initResizableColumns() {
-        const table = document.getElementById('tunnelTable');
-        const headerRow = table.querySelector('thead tr');
-        const cols = headerRow.querySelectorAll('th');
-
-        cols.forEach((col, index) => {
-            // Don't add resizer to the last column (Action)
-            if (index === cols.length - 1) return;
-
-            const resizer = document.createElement('div');
-            resizer.classList.add('resizer');
-            col.appendChild(resizer);
-
-            createResizableColumn(col, resizer);
-        });
-    }
-
-    function createResizableColumn(col, resizer) {
-        let x = 0;
-        let w = 0;
-
-        const mouseDownHandler = function (e) {
-            x = e.clientX;
-            const styles = window.getComputedStyle(col);
-            w = parseInt(styles.width, 10);
-
-            document.addEventListener('mousemove', mouseMoveHandler);
-            document.addEventListener('mouseup', mouseUpHandler);
-            document.body.classList.add('resizing');
-        };
-
-        const mouseMoveHandler = function (e) {
-            const dx = e.clientX - x;
-            col.style.width = `${w + dx}px`;
-        };
-
-        const mouseUpHandler = function () {
-            document.removeEventListener('mousemove', mouseMoveHandler);
-            document.removeEventListener('mouseup', mouseUpHandler);
-            document.body.classList.remove('resizing');
-        };
-
-        resizer.addEventListener('mousedown', mouseDownHandler);
     }
 
     // Load configuration from server

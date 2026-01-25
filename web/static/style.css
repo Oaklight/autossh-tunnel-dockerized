@@ -862,32 +862,6 @@ body {
   position: relative;
 }
 
-/* Resizable Columns */
-.mdc-data-table__header-cell {
-  position: relative;
-}
-
-.resizer {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: 5px;
-  background: rgba(0, 0, 0, 0.05);
-  cursor: col-resize;
-  user-select: none;
-  transition: background 0.2s;
-}
-
-.resizer:hover,
-.resizing .resizer {
-  background: var(--mdc-theme-primary);
-  width: 2px;
-}
-
-.resizing {
-  cursor: col-resize;
-}
 
 /* Loading State */
 .loading {
