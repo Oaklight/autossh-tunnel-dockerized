@@ -160,11 +160,6 @@ body {
   font-weight: bold;
 }
 
-.language-flag {
-  margin-right: 8px;
-  font-size: 16px;
-}
-
 .corner-icon::before {
   content: '';
   position: absolute;

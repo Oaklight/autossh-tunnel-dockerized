@@ -170,9 +170,8 @@
                         item.classList.add('active');
                     }
 
-                    // Add flag emoji for visual appeal
-                    const flag = lang.code === 'en' ? '🇺🇸' : '🇨🇳';
-                    item.innerHTML = `<span class="language-flag">${flag}</span>${lang.name}`;
+                    // Display language name only
+                    item.textContent = lang.name;
 
                     item.addEventListener('click', function (e) {
                         e.stopPropagation();

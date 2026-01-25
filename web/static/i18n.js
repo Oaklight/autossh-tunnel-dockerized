@@ -8,6 +8,7 @@ class I18n {
         this.translations = {};
         this.fallbackLang = 'en';
         this.storageKey = 'ssh-tunnel-lang';
+        this.supportedLanguages = []; // Will be loaded from API
 
         // 从本地存储加载语言设置
         this.loadLanguageFromStorage();
