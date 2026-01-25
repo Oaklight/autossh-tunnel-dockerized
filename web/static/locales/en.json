@@ -154,6 +154,15 @@
       "save_config": {
         "title": "Save Configuration:",
         "description": "Click the Save & Restart button to save configuration and restart tunnel services."
+      },
+      "tunnel_detail": {
+        "title": "Tunnel Detail Page:",
+        "description": "Click on the status indicator in the main page table to open the tunnel's detail page.",
+        "features": "The detail page provides the following features:",
+        "feature_config": "View complete tunnel configuration",
+        "feature_control": "Start, restart, or stop the tunnel",
+        "feature_logs": "View tunnel logs in real-time",
+        "feature_status": "Monitor tunnel running status"
       }
     },
     "yaml_config": {

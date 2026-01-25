@@ -45,6 +45,20 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshLogsBtn.addEventListener('click', loadLogs);
     clearLogsBtn.addEventListener('click', clearLogs);
 
+    // Listen for i18n ready event to update translations
+    window.addEventListener('i18nReady', () => {
+        if (currentTunnel) {
+            displayTunnelInfo(currentTunnel);
+        }
+    });
+
+    // Listen for language change event to update translations
+    window.addEventListener('languageChanged', () => {
+        if (currentTunnel) {
+            displayTunnelInfo(currentTunnel);
+        }
+    });
+
     function initializeMDC() {
         const buttons = document.querySelectorAll('.mdc-button');
         buttons.forEach(button => {

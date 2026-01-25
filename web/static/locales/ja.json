@@ -148,12 +148,21 @@
       "interactive_auth": {
         "title": "対話認証：",
         "description": "指紋アイコンをクリックして対話認証の状態を切り替えることができます：",
-        "enabled": "緑色：対話認証が有効",
-        "disabled": "グレー：対話認証が無効"
+        "enabled": "🫆 緑色：対話認証が有効",
+        "disabled": "🫆 グレー：対話認証が無効"
       },
       "save_config": {
         "title": "設定の保存：",
         "description": "Save & Restart ボタンをクリックして設定を保存し、トンネルサービスを再起動します。"
+      },
+      "tunnel_detail": {
+        "title": "トンネル詳細ページ：",
+        "description": "メインページの表でステータスインジケーターをクリックすると、そのトンネルの詳細ページが開きます。",
+        "features": "詳細ページでは以下の機能を提供します：",
+        "feature_config": "トンネルの完全な設定情報を表示",
+        "feature_control": "トンネルの開始、再起動、停止",
+        "feature_logs": "トンネルログをリアルタイムで表示",
+        "feature_status": "トンネルの実行状態を監視"
       }
     },
     "yaml_config": {
