@@ -299,53 +299,47 @@ body {
 }
 
 /* Column width distribution */
-/* Column width distribution (Name, Status, Remote Host, Remote Port, Local Port, Interactive, Direction, Actions) */
+/* Column width distribution (Name, Status, Remote Host, Remote Port, Local Port, Direction, Actions) */
 .mdc-data-table__header-cell:nth-child(1),
 .mdc-data-table__cell:nth-child(1) {
-  width: 15%;
-  min-width: 100px;
+  width: 18%;
+  min-width: 120px;
 }
 
 .mdc-data-table__header-cell:nth-child(2),
 .mdc-data-table__cell:nth-child(2) {
-  width: 10%;
-  min-width: 80px;
+  width: 12%;
+  min-width: 90px;
 }
 
 .mdc-data-table__header-cell:nth-child(3),
 .mdc-data-table__cell:nth-child(3) {
-  width: 15%;
-  min-width: 100px;
+  width: 18%;
+  min-width: 120px;
 }
 
 .mdc-data-table__header-cell:nth-child(4),
 .mdc-data-table__cell:nth-child(4) {
-  width: 12%;
-  min-width: 80px;
+  width: 15%;
+  min-width: 100px;
 }
 
 .mdc-data-table__header-cell:nth-child(5),
 .mdc-data-table__cell:nth-child(5) {
-  width: 12%;
-  min-width: 80px;
+  width: 15%;
+  min-width: 100px;
 }
 
 .mdc-data-table__header-cell:nth-child(6),
 .mdc-data-table__cell:nth-child(6) {
-  width: 8%;
-  min-width: 60px;
+  width: 12%;
+  min-width: 100px;
 }
 
 .mdc-data-table__header-cell:nth-child(7),
 .mdc-data-table__cell:nth-child(7) {
-  width: 23%;
-  min-width: 120px;
-}
-
-.mdc-data-table__header-cell:nth-child(8),
-.mdc-data-table__cell:nth-child(8) {
-  width: 5%;
-  min-width: 50px;
+  width: 10%;
+  min-width: 90px;
 }
 
 /* Input Fields in Table */
@@ -469,6 +463,53 @@ body {
   transform: translateY(-1px);
 }
 
+/* Action Buttons Cell */
+.action-buttons-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Interactive Toggle Button */
+.interactive-toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #9e9e9e;
+}
+
+.interactive-toggle-button:hover {
+  background-color: rgba(158, 158, 158, 0.08);
+  transform: scale(1.1);
+}
+
+.interactive-toggle-button.active {
+  color: #4caf50;
+}
+
+.interactive-toggle-button.active:hover {
+  background-color: rgba(76, 175, 80, 0.08);
+  color: #388e3c;
+}
+
+.interactive-toggle-button .material-icons {
+  font-size: 20px;
+  transition: all 0.2s ease;
+}
+
+.interactive-toggle-button:active .material-icons {
+  transform: scale(0.9);
+}
+
 /* Delete Button */
 .delete-button {
   background: none;
@@ -481,7 +522,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
   width: 40px;
   height: 40px;
 }
@@ -623,6 +663,22 @@ body {
     font-size: 12px;
   }
 
+  .delete-button .material-icons {
+    font-size: 18px;
+  }
+
+  .action-buttons-cell {
+    gap: 4px;
+  }
+
+  .interactive-toggle-button,
+  .delete-button {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  .interactive-toggle-button .material-icons,
   .delete-button .material-icons {
     font-size: 18px;
   }

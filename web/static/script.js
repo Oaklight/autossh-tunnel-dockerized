@@ -124,18 +124,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="Local port (e.g., 55001 or 192.168.1.100:55001)">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="checkbox" class="table-checkbox" ${tunnel.interactive ? "checked" : ""}>
-            </td>
-            <td class="mdc-data-table__cell">
                 <select class="table-select">
                     <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""}>Remote to Local</option>
                     <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""}>Local to Remote</option>
                 </select>
             </td>
             <td class="mdc-data-table__cell">
-                <button class="delete-button deleteRow" title="Delete tunnel">
-                    <i class="material-icons">delete</i>
-                </button>
+                <div class="action-buttons-cell">
+                    <button class="interactive-toggle-button ${tunnel.interactive ? 'active' : ''}" title="${tunnel.interactive ? 'Interactive Auth Enabled' : 'Interactive Auth Disabled'}" data-interactive="${tunnel.interactive ? 'true' : 'false'}">
+                        <i class="material-icons">fingerprint</i>
+                    </button>
+                    <button class="delete-button deleteRow" title="Delete tunnel">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
             </td>
         `;
 
@@ -147,6 +149,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 row.style.animation = "fadeOut 0.3s ease-out";
                 setTimeout(() => row.remove(), 300);
             }
+        });
+
+        // Add interactive toggle event
+        const interactiveToggle = row.querySelector(".interactive-toggle-button");
+        interactiveToggle.addEventListener("click", () => {
+            const isActive = interactiveToggle.classList.contains('active');
+            const newState = !isActive;
+
+            // Update button state
+            interactiveToggle.classList.toggle('active', newState);
+            interactiveToggle.setAttribute('data-interactive', newState.toString());
+
+            // Update title (icon stays the same, only color changes via CSS)
+            interactiveToggle.title = newState ? 'Interactive Auth Enabled' : 'Interactive Auth Disabled';
         });
 
         // Add input validation
@@ -279,13 +295,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const updatedData = rows.map((row) => {
             const cells = row.cells;
+            const interactiveToggle = cells[6].querySelector(".interactive-toggle-button");
             return {
                 name: cells[0].querySelector("input").value.trim(),
                 remote_host: cells[2].querySelector("input").value.trim(),
                 remote_port: cells[3].querySelector("input").value.trim(),
                 local_port: cells[4].querySelector("input").value.trim(),
-                interactive: cells[5].querySelector("input[type='checkbox']").checked,
-                direction: cells[6].querySelector("select").value,
+                interactive: interactiveToggle.getAttribute('data-interactive') === 'true',
+                direction: cells[5].querySelector("select").value,
             };
         });
 
