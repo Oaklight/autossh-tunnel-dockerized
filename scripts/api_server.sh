@@ -182,6 +182,61 @@ handle_request() {
 			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
 		fi
 		;;
+	/logs/*)
+		if [ "$method" = "GET" ]; then
+			# Extract tunnel hash from path
+			tunnel_hash=$(echo "$path" | sed 's|^/logs/||')
+			if [ -n "$tunnel_hash" ]; then
+				log_file="/tmp/autossh-logs/tunnel-${tunnel_hash}.log"
+				if [ -f "$log_file" ]; then
+					# Read last 100 lines of log file
+					log_content=$(tail -100 "$log_file" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+					echo "{\"status\": \"success\", \"tunnel_hash\": \"$tunnel_hash\", \"log\": \"$log_content\"}" | response "200 OK"
+				else
+					echo "{\"error\": \"Log file not found for tunnel: $tunnel_hash\"}" | response "404 Not Found"
+				fi
+			else
+				echo '{"error": "Tunnel hash required"}' | response "400 Bad Request"
+			fi
+		else
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
+		fi
+		;;
+	"/logs")
+		if [ "$method" = "GET" ]; then
+			# List all available log files
+			log_dir="/tmp/autossh-logs"
+			if [ -d "$log_dir" ] && ls "$log_dir"/tunnel-*.log >/dev/null 2>&1; then
+				echo "["
+				first=true
+				for log_file in "$log_dir"/tunnel-*.log; do
+					filename=$(basename "$log_file")
+					hash=$(echo "$filename" | sed 's/tunnel-//;s/.log$//')
+					size=$(du -h "$log_file" | cut -f1)
+					mtime=$(stat -c %y "$log_file" 2>/dev/null || stat -f %Sm "$log_file" 2>/dev/null || echo "unknown")
+
+					if [ "$first" = "true" ]; then
+						first=false
+					else
+						echo ","
+					fi
+
+					printf '  {
+	   "hash": "%s",
+	   "filename": "%s",
+	   "size": "%s",
+	   "modified": "%s"
+	 }' "$hash" "$filename" "$size" "$mtime"
+				done
+				echo ""
+				echo "]"
+			else
+				echo "[]"
+			fi | response "200 OK"
+		else
+			echo '{"error": "Method not allowed"}' | response "405 Method Not Allowed"
+		fi
+		;;
 	*)
 		echo '{"error": "Not Found"}' | response "404 Not Found"
 		;;
