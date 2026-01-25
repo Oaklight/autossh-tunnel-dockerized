@@ -25,7 +25,20 @@ fi
 # Ensure state file directory exists and is writable
 mkdir -p /tmp
 chmod 777 /tmp
+
+# Ensure log directory exists with proper permissions
+mkdir -p /tmp/autossh-logs
+chmod 777 /tmp/autossh-logs
+
+# Clean up state file on container start to ensure accuracy
+# The state file will be recreated with actual running tunnels
 rm -f /tmp/autossh_tunnels.state
+touch /tmp/autossh_tunnels.state
+chmod 666 /tmp/autossh_tunnels.state
+chown myuser:mygroup /tmp/autossh_tunnels.state
+
+# Also ensure log directory is owned by myuser
+chown -R myuser:mygroup /tmp/autossh-logs
 
 # Switch to myuser and execute the command passed as arguments
 exec su-exec myuser "$@"

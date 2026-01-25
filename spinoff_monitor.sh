@@ -20,6 +20,21 @@ cleanup() {
 # Trap signals
 trap cleanup TERM INT
 
+# Ensure state file and log directory have proper permissions
+# Note: entrypoint.sh already created these with correct ownership
+# We just ensure they still exist and are accessible
+if [ ! -f /tmp/autossh_tunnels.state ]; then
+	echo "Creating state file..."
+	touch /tmp/autossh_tunnels.state
+	chmod 666 /tmp/autossh_tunnels.state
+fi
+
+if [ ! -d /tmp/autossh-logs ]; then
+	echo "Creating log directory..."
+	mkdir -p /tmp/autossh-logs
+	chmod 777 /tmp/autossh-logs
+fi
+
 # Start API server if enabled
 if [ "${API_ENABLE:-false}" = "true" ]; then
 	echo "Starting API server..."
