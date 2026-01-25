@@ -194,6 +194,11 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
+func helpHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "help.html")))
+	tmpl.Execute(w, nil)
+}
+
 func fetchTunnelStatuses() (map[string]string, error) {
 	if apiBaseURL == "" {
 		return nil, nil
@@ -278,6 +283,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/help", helpHandler)
 	http.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:

@@ -33,6 +33,12 @@
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
                 <div class="corner-icons">
                     <div class="corner-icon-wrapper">
+                        <a href="/help" class="corner-icon" data-tooltip="Help & Documentation">
+                            <i class="material-icons">help</i>
+                        </a>
+                        <div class="tooltip" id="help-tooltip"></div>
+                    </div>
+                    <div class="corner-icon-wrapper">
                         <a href="#" id="dockerhub-link" target="_blank" class="corner-icon" data-tooltip="Docker Hub">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                 <path
@@ -102,7 +108,8 @@
                     <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
                     <span class="mdc-button__label">Add</span>
                 </button>
-                <button class="mdc-button mdc-button--unelevated" id="saveConfig" title="Save Configuration and Restart">
+                <button class="mdc-button mdc-button--unelevated" id="saveConfig"
+                    title="Save Configuration and Restart">
                     <span class="mdc-button__ripple"></span>
                     <i class="material-icons mdc-button__icon" aria-hidden="true">save</i>
                     <span class="mdc-button__label">Save & Restart</span>
@@ -119,8 +126,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize corner icon links
+            const helpLink = document.querySelector('a[href="/help"]');
             const dockerhubLink = document.getElementById('dockerhub-link');
             const githubLink = document.getElementById('github-link');
+            const helpTooltip = document.getElementById('help-tooltip');
             const dockerhubTooltip = document.getElementById('dockerhub-tooltip');
             const githubTooltip = document.getElementById('github-tooltip');
 
@@ -220,6 +229,15 @@
                 tooltip.classList.remove('show');
                 tooltip.classList.remove('position-top', 'position-bottom', 'position-left', 'position-right');
             }
+
+            // Help tooltip
+            helpLink.addEventListener('mouseenter', function () {
+                showTooltip(this, helpTooltip, 'Help & Documentation');
+            });
+
+            helpLink.addEventListener('mouseleave', function () {
+                hideTooltip(helpTooltip);
+            });
 
             // Docker Hub tooltip
             dockerhubLink.addEventListener('mouseenter', function () {
