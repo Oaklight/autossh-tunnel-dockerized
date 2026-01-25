@@ -164,6 +164,14 @@ class I18n {
         // 设置HTML lang属性
         document.documentElement.lang = this.currentLang;
 
+        // 标记i18n已准备就绪
+        this.isReady = true;
+
+        // 触发i18n准备就绪事件
+        window.dispatchEvent(new CustomEvent('i18nReady', {
+            detail: { language: this.currentLang }
+        }));
+
         return true;
     }
 
@@ -240,12 +248,8 @@ class I18n {
             element.title = this.t(key);
         });
 
-        // 更新tooltip属性
-        const elementsWithTooltip = document.querySelectorAll('[data-i18n-tooltip]');
-        elementsWithTooltip.forEach(element => {
-            const key = element.getAttribute('data-i18n-tooltip');
-            element.setAttribute('data-tooltip', this.t(key));
-        });
+        // Tooltip属性由tooltip系统自己处理，这里不需要设置data-tooltip
+        // 新的tooltip系统会直接读取data-i18n-tooltip并调用this.t()
 
         // 重新生成所有表格行以更新动态内容
         this.updateTableRows();

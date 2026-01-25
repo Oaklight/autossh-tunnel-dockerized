@@ -8,7 +8,8 @@
     "help": "帮助与文档",
     "docker_hub": "Docker Hub",
     "github": "GitHub",
-    "back": "返回"
+    "back": "返回",
+    "language_toggle": "Language / 语言"
   },
   "table": {
     "headers": {
