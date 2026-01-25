@@ -386,47 +386,53 @@ body {
 }
 
 /* Column width distribution */
-/* Column width distribution (Name, Status, Remote Host, Remote Port, Local Port, Direction, Actions) */
+/* Column width distribution (Controls, Name, Status, Remote Host, Remote Port, Local Port, Direction, Actions) */
 .mdc-data-table__header-cell:nth-child(1),
 .mdc-data-table__cell:nth-child(1) {
-  width: 18%;
-  min-width: 120px;
+  width: 12%;
+  min-width: 130px;
 }
 
 .mdc-data-table__header-cell:nth-child(2),
 .mdc-data-table__cell:nth-child(2) {
-  width: 8%;
-  min-width: 60px;
+  width: 15%;
+  min-width: 110px;
 }
 
 .mdc-data-table__header-cell:nth-child(3),
 .mdc-data-table__cell:nth-child(3) {
-  width: 18%;
-  min-width: 120px;
+  width: 7%;
+  min-width: 55px;
 }
 
 .mdc-data-table__header-cell:nth-child(4),
 .mdc-data-table__cell:nth-child(4) {
   width: 15%;
-  min-width: 100px;
+  min-width: 110px;
 }
 
 .mdc-data-table__header-cell:nth-child(5),
 .mdc-data-table__cell:nth-child(5) {
-  width: 15%;
-  min-width: 100px;
+  width: 13%;
+  min-width: 95px;
 }
 
 .mdc-data-table__header-cell:nth-child(6),
 .mdc-data-table__cell:nth-child(6) {
-  width: 12%;
-  min-width: 100px;
+  width: 13%;
+  min-width: 95px;
 }
 
 .mdc-data-table__header-cell:nth-child(7),
 .mdc-data-table__cell:nth-child(7) {
-  width: 10%;
-  min-width: 90px;
+  width: 11%;
+  min-width: 95px;
+}
+
+.mdc-data-table__header-cell:nth-child(8),
+.mdc-data-table__cell:nth-child(8) {
+  width: 9%;
+  min-width: 85px;
 }
 
 /* Input Fields in Table */
@@ -549,6 +555,83 @@ body {
   background-color: #f57c00;
   box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
   transform: translateY(-1px);
+}
+
+/* Control Buttons Cell */
+.control-buttons-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+/* Control Button Styles */
+.control-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  position: relative;
+}
+
+.control-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.control-button .material-icons {
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+/* Start Button */
+.start-button {
+  color: #4caf50;
+}
+
+.start-button:hover:not(:disabled) {
+  background-color: rgba(76, 175, 80, 0.1);
+  transform: scale(1.1);
+}
+
+.start-button:active:not(:disabled) .material-icons {
+  transform: scale(0.9);
+}
+
+/* Restart Button */
+.restart-button {
+  color: #ff9800;
+}
+
+.restart-button:hover:not(:disabled) {
+  background-color: rgba(255, 152, 0, 0.1);
+  transform: rotate(180deg) scale(1.1);
+}
+
+.restart-button:active:not(:disabled) .material-icons {
+  transform: scale(0.9);
+}
+
+/* Stop Button */
+.stop-button {
+  color: #f44336;
+}
+
+.stop-button:hover:not(:disabled) {
+  background-color: rgba(244, 67, 54, 0.1);
+  transform: scale(1.1);
+}
+
+.stop-button:active:not(:disabled) .material-icons {
+  transform: scale(0.9);
 }
 
 /* Action Buttons Cell */

@@ -82,6 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .then((data) => {
                 showLoading(false);
+                // Clear existing rows before adding new ones
+                tableBody.innerHTML = '';
                 if (data.tunnels && Array.isArray(data.tunnels)) {
                     data.tunnels.forEach((tunnel) => addRow(tunnel));
                 } else {
@@ -137,6 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
         }
 
+        // Use server-provided hash or empty string for new tunnels
+        const tunnelHash = tunnel.hash || '';
+
         // Get translated placeholders
         const tunnelNamePlaceholder = window.i18n ? window.i18n.t('table.placeholders.tunnel_name') : 'Tunnel name';
         const remoteHostPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_host') : 'Remote host';
@@ -150,7 +155,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const interactiveDisabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
         const deleteTunnelText = window.i18n ? window.i18n.t('buttons.delete') : 'Delete tunnel';
 
+        const startTunnelText = window.i18n ? window.i18n.t('buttons.start_tunnel') : 'Start tunnel';
+        const restartTunnelText = window.i18n ? window.i18n.t('buttons.restart_tunnel') : 'Restart tunnel';
+        const stopTunnelText = window.i18n ? window.i18n.t('buttons.stop_tunnel') : 'Stop tunnel';
+
         row.innerHTML = `
+            <td class="mdc-data-table__cell">
+                <div class="control-buttons-cell">
+                    <button class="control-button start-button" data-hash="${tunnelHash}" title="${startTunnelText}" data-i18n-title="buttons.start_tunnel">
+                        <i class="material-icons">play_arrow</i>
+                    </button>
+                    <button class="control-button restart-button" data-hash="${tunnelHash}" title="${restartTunnelText}" data-i18n-title="buttons.restart_tunnel">
+                        <i class="material-icons">refresh</i>
+                    </button>
+                    <button class="control-button stop-button" data-hash="${tunnelHash}" title="${stopTunnelText}" data-i18n-title="buttons.stop_tunnel">
+                        <i class="material-icons">stop</i>
+                    </button>
+                </div>
+            </td>
             <td class="mdc-data-table__cell">
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="${tunnelNamePlaceholder}" data-i18n-placeholder="table.placeholders.tunnel_name">
             </td>
@@ -211,11 +233,91 @@ document.addEventListener("DOMContentLoaded", () => {
             interactiveToggle.title = newState ? enabledText : disabledText;
         });
 
+        // Add control button events
+        const startButton = row.querySelector(".start-button");
+        const restartButton = row.querySelector(".restart-button");
+        const stopButton = row.querySelector(".stop-button");
+
+        startButton.addEventListener("click", () => handleTunnelControl('start', tunnelHash, row));
+        restartButton.addEventListener("click", () => handleTunnelControl('restart', tunnelHash, row));
+        stopButton.addEventListener("click", () => handleTunnelControl('stop', tunnelHash, row));
+
         // Add input validation
         addInputValidation(row);
 
         // Remove animation class after animation completes
         setTimeout(() => row.classList.remove("new-row"), 300);
+    }
+
+    // Handle tunnel control actions
+    async function handleTunnelControl(action, hash, row) {
+        // Check if hash is available
+        if (!hash) {
+            const errorMsg = window.i18n ? window.i18n.t('messages.save_first') : 'Please save the configuration first';
+            showMessage(errorMsg, 'error');
+            return;
+        }
+
+        const actionText = window.i18n ? window.i18n.t(`buttons.${action}_tunnel`) : `${action} tunnel`;
+        const confirmMsg = window.i18n ? window.i18n.t(`messages.confirm_${action}`) : `Are you sure you want to ${action} this tunnel?`;
+
+        // For restart and stop, ask for confirmation
+        if ((action === 'restart' || action === 'stop') && !confirm(confirmMsg)) {
+            return;
+        }
+
+        // Disable all control buttons during operation
+        const controlButtons = row.querySelectorAll('.control-button');
+        controlButtons.forEach(btn => btn.disabled = true);
+
+        try {
+            let endpoint, method;
+
+            if (action === 'restart') {
+                // Restart = stop + start
+                endpoint = `/stop/${hash}`;
+                method = 'POST';
+
+                const stopResponse = await fetch(`http://localhost:8080${endpoint}`, { method });
+                if (!stopResponse.ok) {
+                    const stopData = await stopResponse.text();
+                    throw new Error(`Stop failed: ${stopResponse.status} - ${stopData}`);
+                }
+
+                // Wait a bit before starting
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                endpoint = `/start/${hash}`;
+                const startResponse = await fetch(`http://localhost:8080${endpoint}`, { method });
+                if (!startResponse.ok) {
+                    const startData = await startResponse.text();
+                    throw new Error(`Start failed: ${startResponse.status} - ${startData}`);
+                }
+            } else {
+                endpoint = `/${action}/${hash}`;
+                method = 'POST';
+
+                const response = await fetch(`http://localhost:8080${endpoint}`, { method });
+                if (!response.ok) {
+                    const responseData = await response.text();
+                    throw new Error(`${action} failed: ${response.status} - ${responseData}`);
+                }
+            }
+
+            const successMsg = window.i18n ? window.i18n.t(`messages.${action}_success`) : `Tunnel ${action}ed successfully`;
+            showMessage(successMsg, 'success');
+
+            // Reload status after a short delay
+            setTimeout(() => loadConfiguration(), 1500);
+
+        } catch (error) {
+            console.error(`Error ${action}ing tunnel:`, error);
+            const errorMsg = window.i18n ? window.i18n.t(`messages.${action}_failed`) : `Failed to ${action} tunnel: ${error.message}`;
+            showMessage(errorMsg, 'error');
+        } finally {
+            // Re-enable control buttons
+            controlButtons.forEach(btn => btn.disabled = false);
+        }
     }
 
     // Add input validation
@@ -345,14 +447,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const updatedData = rows.map((row) => {
             const cells = row.cells;
-            const interactiveToggle = cells[6].querySelector(".interactive-toggle-button");
+            const interactiveToggle = cells[7].querySelector(".interactive-toggle-button");
             return {
-                name: cells[0].querySelector("input").value.trim(),
-                remote_host: cells[2].querySelector("input").value.trim(),
-                remote_port: cells[3].querySelector("input").value.trim(),
-                local_port: cells[4].querySelector("input").value.trim(),
+                name: cells[1].querySelector("input").value.trim(),
+                remote_host: cells[3].querySelector("input").value.trim(),
+                remote_port: cells[4].querySelector("input").value.trim(),
+                local_port: cells[5].querySelector("input").value.trim(),
                 interactive: interactiveToggle.getAttribute('data-interactive') === 'true',
-                direction: cells[5].querySelector("select").value,
+                direction: cells[6].querySelector("select").value,
             };
         });
 
