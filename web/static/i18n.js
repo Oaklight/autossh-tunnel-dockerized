@@ -19,13 +19,27 @@ class I18n {
      */
     loadLanguageFromStorage() {
         const savedLang = localStorage.getItem(this.storageKey);
-        if (savedLang && ['en', 'zh'].includes(savedLang)) {
+        if (savedLang) {
             this.currentLang = savedLang;
         } else {
             // 检测浏览器语言
             const browserLang = navigator.language || navigator.userLanguage;
-            if (browserLang.startsWith('zh')) {
+            if (browserLang.startsWith('zh-Hant') || browserLang.startsWith('zh-TW') || browserLang.startsWith('zh-HK')) {
+                this.currentLang = 'zh-hant';
+            } else if (browserLang.startsWith('zh')) {
                 this.currentLang = 'zh';
+            } else if (browserLang.startsWith('es')) {
+                this.currentLang = 'es';
+            } else if (browserLang.startsWith('fr')) {
+                this.currentLang = 'fr';
+            } else if (browserLang.startsWith('ru')) {
+                this.currentLang = 'ru';
+            } else if (browserLang.startsWith('ja')) {
+                this.currentLang = 'ja';
+            } else if (browserLang.startsWith('ko')) {
+                this.currentLang = 'ko';
+            } else if (browserLang.startsWith('ar')) {
+                this.currentLang = 'ar';
             }
         }
     }
@@ -110,7 +124,9 @@ class I18n {
      * 切换语言
      */
     async switchLanguage(lang) {
-        if (!['en', 'zh'].includes(lang)) {
+        // 验证语言是否在支持的语言列表中
+        const supportedCodes = this.supportedLanguages.map(l => l.code);
+        if (supportedCodes.length > 0 && !supportedCodes.includes(lang)) {
             console.error(`Unsupported language: ${lang}`);
             return false;
         }
@@ -140,13 +156,31 @@ class I18n {
     }
 
     /**
+     * 从API加载支持的语言列表
+     */
+    async loadSupportedLanguages() {
+        try {
+            const response = await fetch('/api/languages');
+            if (!response.ok) {
+                throw new Error('Failed to load supported languages');
+            }
+            this.supportedLanguages = await response.json();
+            console.log('Loaded supported languages:', this.supportedLanguages);
+        } catch (error) {
+            console.error('Error loading supported languages:', error);
+            // 回退到默认语言列表
+            this.supportedLanguages = [
+                { code: 'en', name: 'English' },
+                { code: 'zh', name: '中文' }
+            ];
+        }
+    }
+
+    /**
      * 获取支持的语言列表
      */
     getSupportedLanguages() {
-        return [
-            { code: 'en', name: 'English' },
-            { code: 'zh', name: '中文' }
-        ];
+        return this.supportedLanguages;
     }
 
     /**
@@ -162,6 +196,17 @@ class I18n {
      * 初始化国际化
      */
     async init() {
+        // 首先加载支持的语言列表
+        await this.loadSupportedLanguages();
+
+        // 验证当前语言是否在支持的语言列表中
+        const supportedCodes = this.supportedLanguages.map(l => l.code);
+        if (supportedCodes.length > 0 && !supportedCodes.includes(this.currentLang)) {
+            console.warn(`Current language ${this.currentLang} not supported, falling back to ${this.fallbackLang}`);
+            this.currentLang = this.fallbackLang;
+            this.saveLanguageToStorage();
+        }
+
         // 加载当前语言和回退语言的翻译
         await Promise.all([
             this.loadTranslations(this.currentLang),
