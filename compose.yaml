@@ -23,5 +23,5 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
-      - API_BASE_URL=http://172.17.0.1:8080
+      - API_BASE_URL=http://localhost:8080
     restart: always

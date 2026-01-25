@@ -29,7 +29,9 @@
     <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
         <div class="mdc-top-app-bar__row">
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-                <button class="material-icons mdc-top-app-bar__navigation-icon" id="backButton">arrow_back</button>
+                <a href="/" class="mdc-top-app-bar__navigation-icon">
+                    <i class="material-icons">arrow_back</i>
+                </a>
                 <span class="mdc-top-app-bar__title" data-i18n="navigation.help">Help & Documentation</span>
             </section>
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
@@ -173,6 +175,16 @@ export PGID=$(id -g)</code></pre>
                         <h4 data-i18n="help.web_config.save_config.title">保存配置：</h4>
                         <p data-i18n="help.web_config.save_config.description">点击 <strong style="color: #ff9800;">Save &
                                 Restart</strong> 按钮保存配置并重启隧道服务。</p>
+
+                        <h4 data-i18n="help.web_config.tunnel_detail.title">隧道详情页面：</h4>
+                        <p data-i18n="help.web_config.tunnel_detail.description">点击主页面表格中的隧道名称可以打开该隧道的详情页面。</p>
+                        <p data-i18n="help.web_config.tunnel_detail.features">详情页面提供以下功能：</p>
+                        <ul>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_config">查看隧道的完整配置信息</li>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_control">启动、重启或停止隧道</li>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_logs">实时查看隧道日志</li>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_status">监控隧道运行状态</li>
+                        </ul>
                     </div>
                 </section>
 
@@ -446,12 +458,6 @@ docker compose restart autossh</code></pre>
             // Initialize dropdown when i18n is ready
             window.addEventListener('i18nReady', function () {
                 initLanguageDropdown();
-            });
-
-            // Back button functionality
-            const backButton = document.getElementById('backButton');
-            backButton.addEventListener('click', function () {
-                window.history.back();
             });
 
             // Smooth scrolling for TOC links

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="tunnel_detail.title">Tunnel Details</title>
+    <!-- Material Design CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/tunnel-detail.css">
+    <link rel="stylesheet" href="/static/tooltip.css">
+
+    <!-- Configurable Links -->
+    <script>
+        // Configure your project links here
+        window.PROJECT_CONFIG = {
+            dockerHubUrl: 'https://hub.docker.com/r/oaklight/autossh-tunnel',
+            githubUrl: 'https://github.com/Oaklight/autossh-tunnel-dockerized',
+            projectName: 'SSH Tunnel Manager'
+        };
+    </script>
+</head>
+
+<body class="mdc-typography" data-page-title="tunnel_detail.title">
+    <!-- App Bar -->
+    <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
+        <div class="mdc-top-app-bar__row">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <a href="/" class="mdc-top-app-bar__navigation-icon">
+                    <i class="material-icons">arrow_back</i>
+                </a>
+                <span class="mdc-top-app-bar__title" data-i18n="tunnel_detail.title">Tunnel Details</span>
+            </section>
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+                <div class="corner-icons">
+                    <!-- Language Toggle -->
+                    <div class="corner-icon-wrapper">
+                        <button class="corner-icon language-toggle" id="languageToggle">
+                            <i class="material-icons">language</i>
+                        </button>
+                        <div class="language-dropdown" id="languageDropdown">
+                            <!-- Language options will be dynamically populated -->
+                        </div>
+                    </div>
+                    <a href="#" id="dockerhub-link" target="_blank" class="corner-icon"
+                        data-i18n-tooltip="navigation.docker_hub">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.888c0 .102.084.185.186.185m0 2.716h2.118a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.93 0h2.12a.186.186 0 00.185-.186V6.29a.186.186 0 00-.185-.185H8.1a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.964 0h2.119a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.93 0h2.12a.186.186 0 00.185-.185V9.006a.186.186 0 00-.185-.186H8.1a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.964 0h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186H5.136a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338 0-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983 0 1.97-.084 2.943-.25 1.225-.208 2.42-.598 3.554-1.146 1.147-.563 2.215-1.291 3.168-2.168.814-.75 1.518-1.607 2.05-2.553.404-.719.71-1.482.918-2.273a4.4 4.4 0 001.372.22c1.109 0 2.179-.536 2.717-1.36.189-.292.33-.609.415-.943l.034-.14-.079-.106z" />
+                        </svg>
+                    </a>
+                    <a href="#" id="github-link" target="_blank" class="corner-icon"
+                        data-i18n-tooltip="navigation.github">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mdc-top-app-bar--fixed-adjust">
+        <div class="container">
+            <!-- Tunnel Configuration Card -->
+            <div class="mdc-card detail-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="material-icons">settings</i>
+                        <span data-i18n="tunnel_detail.configuration">Configuration</span>
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.name">Name</label>
+                            <div class="config-value" id="tunnelName">-</div>
+                        </div>
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.hash">Hash</label>
+                            <div class="config-value hash-value" id="tunnelHash">-</div>
+                        </div>
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.remote_host">Remote Host</label>
+                            <div class="config-value" id="remoteHost">-</div>
+                        </div>
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.remote_port">Remote Port</label>
+                            <div class="config-value" id="remotePort">-</div>
+                        </div>
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.local_port">Local Port</label>
+                            <div class="config-value" id="localPort">-</div>
+                        </div>
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.direction">Direction</label>
+                            <div class="config-value" id="direction">-</div>
+                        </div>
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.interactive">Interactive Auth</label>
+                            <div class="config-value" id="interactive">
+                                <i class="material-icons">help_outline</i>
+                            </div>
+                        </div>
+                        <div class="config-item">
+                            <label data-i18n="tunnel_detail.status">Status</label>
+                            <div class="config-value" id="statusValue">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Buttons Card -->
+            <div class="mdc-card detail-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="material-icons">control_camera</i>
+                        <span data-i18n="tunnel_detail.controls">Controls</span>
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div class="control-buttons">
+                        <button class="mdc-button mdc-button--raised control-btn start-btn" id="startBtn">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">play_arrow</i>
+                            <span class="mdc-button__label" data-i18n="buttons.start_tunnel">Start</span>
+                        </button>
+                        <button class="mdc-button mdc-button--raised control-btn restart-btn" id="restartBtn">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">refresh</i>
+                            <span class="mdc-button__label" data-i18n="buttons.restart_tunnel">Restart</span>
+                        </button>
+                        <button class="mdc-button mdc-button--raised control-btn stop-btn" id="stopBtn">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">stop</i>
+                            <span class="mdc-button__label" data-i18n="buttons.stop_tunnel">Stop</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Card -->
+            <div class="mdc-card detail-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="material-icons">description</i>
+                        <span data-i18n="tunnel_detail.logs">Logs</span>
+                    </h2>
+                    <div class="log-controls">
+                        <button class="icon-button" id="refreshLogsBtn" title="Refresh logs">
+                            <i class="material-icons">refresh</i>
+                        </button>
+                        <button class="icon-button" id="clearLogsBtn" title="Clear display">
+                            <i class="material-icons">clear_all</i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="log-box" id="logBox">
+                        <div class="log-placeholder">
+                            <i class="material-icons">info</i>
+                            <p data-i18n="tunnel_detail.no_logs">No logs available yet. Start the tunnel to see logs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Material Design JavaScript -->
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <!-- Internationalization -->
+    <script src="/static/i18n.js"></script>
+    <!-- Universal Tooltip System -->
+    <script src="/static/tooltip.js"></script>
+    <!-- API Configuration -->
+    <script>
+        window.API_BASE_URL = '{{ .APIBaseURL }}';
+    </script>
+    <script src="/static/tunnel-detail.js"></script>
+
+    <!-- Language Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize corner icon links
+            const dockerhubLink = document.getElementById('dockerhub-link');
+            const githubLink = document.getElementById('github-link');
+
+            // Set URLs from configuration
+            if (window.PROJECT_CONFIG) {
+                dockerhubLink.href = window.PROJECT_CONFIG.dockerHubUrl;
+                githubLink.href = window.PROJECT_CONFIG.githubUrl;
+            }
+
+            // Language dropdown functionality
+            const languageToggle = document.getElementById('languageToggle');
+            const languageDropdown = document.getElementById('languageDropdown');
+
+            // Initialize language dropdown
+            function initLanguageDropdown() {
+                if (!window.i18n) return;
+
+                const supportedLanguages = window.i18n.getSupportedLanguages();
+                const currentLang = window.i18n.getCurrentLanguage();
+
+                // Clear existing options
+                languageDropdown.innerHTML = '';
+
+                // Add language options
+                supportedLanguages.forEach(lang => {
+                    const item = document.createElement('button');
+                    item.className = 'language-dropdown-item';
+                    if (lang.code === currentLang) {
+                        item.classList.add('active');
+                    }
+
+                    // Display language name only
+                    item.textContent = lang.name;
+
+                    item.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        if (lang.code !== currentLang) {
+                            window.i18n.switchLanguage(lang.code);
+                        }
+                        hideLanguageDropdown();
+                    });
+
+                    languageDropdown.appendChild(item);
+                });
+            }
+
+            // Show dropdown
+            function showLanguageDropdown() {
+                initLanguageDropdown();
+                languageDropdown.classList.add('show');
+                document.addEventListener('click', hideLanguageDropdown);
+            }
+
+            // Hide dropdown
+            function hideLanguageDropdown() {
+                languageDropdown.classList.remove('show');
+                document.removeEventListener('click', hideLanguageDropdown);
+            }
+
+            // Toggle dropdown on button click
+            languageToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (languageDropdown.classList.contains('show')) {
+                    hideLanguageDropdown();
+                } else {
+                    showLanguageDropdown();
+                }
+            });
+
+            // Update dropdown when language changes
+            window.addEventListener('languageChanged', function () {
+                if (languageDropdown.classList.contains('show')) {
+                    initLanguageDropdown();
+                }
+            });
+
+            // Initialize dropdown when i18n is ready
+            window.addEventListener('i18nReady', function () {
+                initLanguageDropdown();
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -82,6 +82,21 @@
     "remote_port_format": "Formato de puerto no válido. Utilice el formato \"puerto\" o \"hostname:puerto\" (ej.: 44497 o lambda5:44497)",
     "local_port_format": "Formato de puerto no válido. Utilice el formato \"puerto\" o \"IP:puerto\" (ej.: 55001 o 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "Detalles del Túnel",
+    "configuration": "Configuración",
+    "name": "Nombre",
+    "hash": "Hash",
+    "remote_host": "Host Remoto",
+    "remote_port": "Puerto Remoto",
+    "local_port": "Puerto Local",
+    "direction": "Dirección",
+    "interactive": "Autenticación Interactiva",
+    "status": "Estado",
+    "controls": "Controles",
+    "logs": "Registros",
+    "no_logs": "No hay registros disponibles aún. Inicie el túnel para ver los registros."
+  },
   "help": {
     "toc": "Tabla de contenidos",
     "sections": {
@@ -133,12 +148,21 @@
       "interactive_auth": {
         "title": "Autenticación interactiva:",
         "description": "Haga clic en el icono de huella dactilar para cambiar el estado de autenticación interactiva:",
-        "enabled": "Verde: Autenticación interactiva activada",
-        "disabled": "Gris: Autenticación interactiva desactivada"
+        "enabled": "🫆 Verde: Autenticación interactiva activada",
+        "disabled": "🫆 Gris: Autenticación interactiva desactivada"
       },
       "save_config": {
         "title": "Guardar configuración:",
         "description": "Haga clic en el botón Save & Restart para guardar la configuración y reiniciar el servicio de túneles."
+      },
+      "tunnel_detail": {
+        "title": "Página de Detalles del Túnel:",
+        "description": "Haga clic en el indicador de estado en la tabla de la página principal para abrir la página de detalles del túnel.",
+        "features": "La página de detalles proporciona las siguientes funciones:",
+        "feature_config": "Ver la configuración completa del túnel",
+        "feature_control": "Iniciar, reiniciar o detener el túnel",
+        "feature_logs": "Ver los registros del túnel en tiempo real",
+        "feature_status": "Monitorear el estado de ejecución del túnel"
       }
     },
     "yaml_config": {

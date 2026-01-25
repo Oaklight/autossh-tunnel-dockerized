@@ -82,6 +82,21 @@
     "remote_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"호스트명:포트\" 형식을 사용하세요 (예: 44497 또는 lambda5:44497)",
     "local_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"IP:포트\" 형식을 사용하세요 (예: 55001 또는 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "터널 상세정보",
+    "configuration": "구성",
+    "name": "이름",
+    "hash": "해시",
+    "remote_host": "원격 호스트",
+    "remote_port": "원격 포트",
+    "local_port": "로컬 포트",
+    "direction": "방향",
+    "interactive": "대화형 인증",
+    "status": "상태",
+    "controls": "제어",
+    "logs": "로그",
+    "no_logs": "아직 로그가 없습니다. 터널을 시작하면 로그가 표시됩니다."
+  },
   "help": {
     "toc": "목차",
     "sections": {
@@ -133,12 +148,21 @@
       "interactive_auth": {
         "title": "대화형 인증:",
         "description": "지문 아이콘을 클릭하여 대화형 인증 상태를 전환할 수 있습니다:",
-        "enabled": "녹색: 대화형 인증 활성화",
-        "disabled": "회색: 대화형 인증 비활성화"
+        "enabled": "🫆 녹색: 대화형 인증 활성화",
+        "disabled": "🫆 회색: 대화형 인증 비활성화"
       },
       "save_config": {
         "title": "구성 저장:",
         "description": "Save & Restart 버튼을 클릭하여 구성을 저장하고 터널 서비스를 재시작합니다."
+      },
+      "tunnel_detail": {
+        "title": "터널 상세 페이지:",
+        "description": "메인 페이지 표에서 상태 표시기를 클릭하면 해당 터널의 상세 페이지가 열립니다.",
+        "features": "상세 페이지는 다음 기능을 제공합니다:",
+        "feature_config": "터널의 전체 구성 정보 보기",
+        "feature_control": "터널 시작, 재시작 또는 중지",
+        "feature_logs": "터널 로그를 실시간으로 보기",
+        "feature_status": "터널 실행 상태 모니터링"
       }
     },
     "yaml_config": {

@@ -82,6 +82,21 @@
     "remote_port_format": "Format de port non valide. Utilisez le format \"port\" ou \"hostname:port\" (ex. : 44497 ou lambda5:44497)",
     "local_port_format": "Format de port non valide. Utilisez le format \"port\" ou \"IP:port\" (ex. : 55001 ou 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "Détails du Tunnel",
+    "configuration": "Configuration",
+    "name": "Nom",
+    "hash": "Hash",
+    "remote_host": "Hôte Distant",
+    "remote_port": "Port Distant",
+    "local_port": "Port Local",
+    "direction": "Direction",
+    "interactive": "Authentification Interactive",
+    "status": "État",
+    "controls": "Contrôles",
+    "logs": "Journaux",
+    "no_logs": "Aucun journal disponible pour le moment. Démarrez le tunnel pour voir les journaux."
+  },
   "help": {
     "toc": "Table des matières",
     "sections": {
@@ -133,12 +148,21 @@
       "interactive_auth": {
         "title": "Authentification interactive :",
         "description": "Cliquez sur l'icône d'empreinte digitale pour basculer l'état de l'authentification interactive :",
-        "enabled": "Vert : Authentification interactive activée",
-        "disabled": "Gris : Authentification interactive désactivée"
+        "enabled": "🫆 Vert : Authentification interactive activée",
+        "disabled": "🫆 Gris : Authentification interactive désactivée"
       },
       "save_config": {
         "title": "Enregistrer la configuration :",
         "description": "Cliquez sur le bouton Save & Restart pour enregistrer la configuration et redémarrer le service de tunnels."
+      },
+      "tunnel_detail": {
+        "title": "Page de Détails du Tunnel :",
+        "description": "Cliquez sur l'indicateur d'état dans le tableau de la page principale pour ouvrir la page de détails du tunnel.",
+        "features": "La page de détails fournit les fonctionnalités suivantes :",
+        "feature_config": "Afficher la configuration complète du tunnel",
+        "feature_control": "Démarrer, redémarrer ou arrêter le tunnel",
+        "feature_logs": "Afficher les journaux du tunnel en temps réel",
+        "feature_status": "Surveiller l'état d'exécution du tunnel"
       }
     },
     "yaml_config": {
