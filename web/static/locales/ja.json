@@ -82,6 +82,21 @@
     "remote_port_format": "無効なポート形式です。\"ポート\" または \"ホスト名:ポート\" 形式を使用してください (例: 44497 または lambda5:44497)",
     "local_port_format": "無効なポート形式です。\"ポート\" または \"IP:ポート\" 形式を使用してください (例: 55001 または 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "トンネル詳細",
+    "configuration": "設定情報",
+    "name": "名前",
+    "hash": "ハッシュ",
+    "remote_host": "リモートホスト",
+    "remote_port": "リモートポート",
+    "local_port": "ローカルポート",
+    "direction": "方向",
+    "interactive": "対話認証",
+    "status": "ステータス",
+    "controls": "コントロール",
+    "logs": "ログ",
+    "no_logs": "ログはまだありません。トンネルを開始するとログが表示されます。"
+  },
   "help": {
     "toc": "目次",
     "sections": {

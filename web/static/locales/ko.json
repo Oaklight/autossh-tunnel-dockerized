@@ -82,6 +82,21 @@
     "remote_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"호스트명:포트\" 형식을 사용하세요 (예: 44497 또는 lambda5:44497)",
     "local_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"IP:포트\" 형식을 사용하세요 (예: 55001 또는 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "터널 상세정보",
+    "configuration": "구성",
+    "name": "이름",
+    "hash": "해시",
+    "remote_host": "원격 호스트",
+    "remote_port": "원격 포트",
+    "local_port": "로컬 포트",
+    "direction": "방향",
+    "interactive": "대화형 인증",
+    "status": "상태",
+    "controls": "제어",
+    "logs": "로그",
+    "no_logs": "아직 로그가 없습니다. 터널을 시작하면 로그가 표시됩니다."
+  },
   "help": {
     "toc": "목차",
     "sections": {

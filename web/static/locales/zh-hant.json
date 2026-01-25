@@ -82,6 +82,21 @@
     "remote_port_format": "連接埠格式無效。請使用 \"連接埠\" 或 \"主機名:連接埠\" 格式 (例如：44497 或 lambda5:44497)",
     "local_port_format": "連接埠格式無效。請使用 \"連接埠\" 或 \"IP:連接埠\" 格式 (例如：55001 或 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "隧道詳情",
+    "configuration": "設定資訊",
+    "name": "名稱",
+    "hash": "雜湊值",
+    "remote_host": "遠端主機",
+    "remote_port": "遠端連接埠",
+    "local_port": "本機連接埠",
+    "direction": "方向",
+    "interactive": "互動認證",
+    "status": "狀態",
+    "controls": "控制操作",
+    "logs": "記錄",
+    "no_logs": "暫無記錄。啟動隧道後將顯示記錄。"
+  },
   "help": {
     "toc": "目錄",
     "sections": {

@@ -101,13 +101,15 @@ document.addEventListener("DOMContentLoaded", () => {
         localPort.textContent = tunnel.local_port || '-';
 
         const directionText = tunnel.direction === 'remote_to_local'
-            ? 'Remote → Local'
-            : 'Local → Remote';
+            ? (window.i18n ? window.i18n.t('table.direction.remote_to_local') : 'Remote → Local')
+            : (window.i18n ? window.i18n.t('table.direction.local_to_remote') : 'Local → Remote');
         direction.textContent = directionText;
 
+        const enabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Enabled';
+        const disabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Disabled';
         interactive.innerHTML = tunnel.interactive
-            ? '<i class="material-icons" style="color: #4CAF50;">check_circle</i> Enabled'
-            : '<i class="material-icons" style="color: #9E9E9E;">cancel</i> Disabled';
+            ? `<i class="material-icons" style="color: #4CAF50;">check_circle</i> ${enabledText}`
+            : `<i class="material-icons" style="color: #9E9E9E;">cancel</i> ${disabledText}`;
 
         statusValue.textContent = tunnel.status || 'Unknown';
     }
@@ -124,22 +126,22 @@ document.addEventListener("DOMContentLoaded", () => {
             case 'RUNNING':
             case 'NORMAL':
                 icon = 'check_circle';
-                text = 'Running';
+                text = window.i18n ? window.i18n.t('table.status.running') : 'Running';
                 className = 'running';
                 break;
             case 'STOPPED':
                 icon = 'stop_circle';
-                text = 'Stopped';
+                text = window.i18n ? window.i18n.t('table.status.stopped') : 'Stopped';
                 className = 'stopped';
                 break;
             case 'STARTING':
                 icon = 'hourglass_empty';
-                text = 'Starting';
+                text = window.i18n ? window.i18n.t('table.status.starting') : 'Starting';
                 className = 'starting';
                 break;
             case 'DEAD':
                 icon = 'cancel';
-                text = 'Dead';
+                text = window.i18n ? window.i18n.t('table.status.dead') : 'Dead';
                 className = 'dead';
                 break;
         }
@@ -153,8 +155,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function handleControl(action) {
         const confirmMessages = {
-            restart: 'Are you sure you want to restart this tunnel?',
-            stop: 'Are you sure you want to stop this tunnel?'
+            restart: window.i18n ? window.i18n.t('messages.confirm_restart') : 'Are you sure you want to restart this tunnel?',
+            stop: window.i18n ? window.i18n.t('messages.confirm_stop') : 'Are you sure you want to stop this tunnel?'
         };
 
         if (confirmMessages[action] && !confirm(confirmMessages[action])) {
@@ -183,7 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!response.ok) throw new Error(`Failed to ${action} tunnel`);
             }
 
-            showMessage(`Tunnel ${action}ed successfully`, 'success');
+            const successMsg = window.i18n ? window.i18n.t(`messages.${action}_success`) : `Tunnel ${action}ed successfully`;
+            showMessage(successMsg, 'success');
 
             // Reload details after a short delay
             setTimeout(() => {
@@ -193,7 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error(`Error ${action}ing tunnel:`, error);
-            showMessage(`Failed to ${action} tunnel: ${error.message}`, 'error');
+            const failMsg = window.i18n ? window.i18n.t(`messages.${action}_failed`) : `Failed to ${action} tunnel`;
+            showMessage(`${failMsg}: ${error.message}`, 'error');
         } finally {
             setButtonsEnabled(true);
         }

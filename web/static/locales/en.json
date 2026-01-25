@@ -82,6 +82,21 @@
     "remote_port_format": "Invalid port format. Use \"port\" or \"hostname:port\" (e.g., 44497 or lambda5:44497)",
     "local_port_format": "Invalid port format. Use \"port\" or \"ip:port\" (e.g., 55001 or 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "Tunnel Details",
+    "configuration": "Configuration",
+    "name": "Name",
+    "hash": "Hash",
+    "remote_host": "Remote Host",
+    "remote_port": "Remote Port",
+    "local_port": "Local Port",
+    "direction": "Direction",
+    "interactive": "Interactive Auth",
+    "status": "Status",
+    "controls": "Controls",
+    "logs": "Logs",
+    "no_logs": "No logs available yet. Start the tunnel to see logs."
+  },
   "help": {
     "toc": "Table of Contents",
     "sections": {

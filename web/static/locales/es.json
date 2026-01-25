@@ -82,6 +82,21 @@
     "remote_port_format": "Formato de puerto no válido. Utilice el formato \"puerto\" o \"hostname:puerto\" (ej.: 44497 o lambda5:44497)",
     "local_port_format": "Formato de puerto no válido. Utilice el formato \"puerto\" o \"IP:puerto\" (ej.: 55001 o 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "Detalles del Túnel",
+    "configuration": "Configuración",
+    "name": "Nombre",
+    "hash": "Hash",
+    "remote_host": "Host Remoto",
+    "remote_port": "Puerto Remoto",
+    "local_port": "Puerto Local",
+    "direction": "Dirección",
+    "interactive": "Autenticación Interactiva",
+    "status": "Estado",
+    "controls": "Controles",
+    "logs": "Registros",
+    "no_logs": "No hay registros disponibles aún. Inicie el túnel para ver los registros."
+  },
   "help": {
     "toc": "Tabla de contenidos",
     "sections": {

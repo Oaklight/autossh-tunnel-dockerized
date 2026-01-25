@@ -82,6 +82,21 @@
     "remote_port_format": "端口格式无效。请使用 \"端口\" 或 \"主机名:端口\" 格式 (例如：44497 或 lambda5:44497)",
     "local_port_format": "端口格式无效。请使用 \"端口\" 或 \"IP:端口\" 格式 (例如：55001 或 192.168.1.100:55001)"
   },
+  "tunnel_detail": {
+    "title": "隧道详情",
+    "configuration": "配置信息",
+    "name": "名称",
+    "hash": "哈希值",
+    "remote_host": "远程主机",
+    "remote_port": "远程端口",
+    "local_port": "本地端口",
+    "direction": "方向",
+    "interactive": "交互认证",
+    "status": "状态",
+    "controls": "控制操作",
+    "logs": "日志",
+    "no_logs": "暂无日志。启动隧道后将显示日志。"
+  },
   "help": {
     "toc": "目录",
     "sections": {
