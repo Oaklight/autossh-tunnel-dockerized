@@ -81,15 +81,23 @@ class TooltipManager {
     updateTooltipText(element, tooltip) {
         let text = '';
 
-        // Check for i18n tooltip first
-        const i18nKey = element.getAttribute('data-i18n-tooltip');
-        if (i18nKey && window.i18n) {
-            text = window.i18n.t(i18nKey);
-        }
+        // Special handling for language toggle button
+        if (element.id === 'languageToggle' && window.i18n && window.i18n.getLanguageToggleTooltip) {
+            text = window.i18n.getLanguageToggleTooltip();
+        } else {
+            // Check for i18n tooltip first
+            const i18nKey = element.getAttribute('data-i18n-tooltip');
+            if (i18nKey && window.i18n) {
+                text = window.i18n.t(i18nKey);
+            }
 
-        // Fallback to static tooltip
-        if (!text) {
-            text = element.getAttribute('data-tooltip') || '';
+            // Fallback to static tooltip (but skip "dynamic" placeholder)
+            if (!text) {
+                const tooltipAttr = element.getAttribute('data-tooltip') || '';
+                if (tooltipAttr !== 'dynamic') {
+                    text = tooltipAttr;
+                }
+            }
         }
 
         tooltip.textContent = text;

@@ -9,7 +9,8 @@
     "docker_hub": "Docker Hub",
     "github": "GitHub",
     "back": "返回",
-    "language_toggle": "Language / 语言"
+    "language_toggle": "Language / 语言",
+    "language_toggle_prefix": "可用语言"
   },
   "table": {
     "headers": {

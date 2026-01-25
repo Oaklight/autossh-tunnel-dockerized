@@ -35,10 +35,14 @@
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
                 <div class="corner-icons">
                     <!-- Language Toggle -->
-                    <button class="corner-icon language-toggle" id="languageToggle"
-                        data-i18n-tooltip="navigation.language_toggle">
-                        <i class="material-icons">language</i>
-                    </button>
+                    <div class="corner-icon-wrapper">
+                        <button class="corner-icon language-toggle" id="languageToggle">
+                            <i class="material-icons">language</i>
+                        </button>
+                        <div class="language-dropdown" id="languageDropdown">
+                            <!-- Language options will be dynamically populated -->
+                        </div>
+                    </div>
                     <a href="#" id="dockerhub-link" target="_blank" class="corner-icon"
                         data-i18n-tooltip="navigation.docker_hub">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -372,12 +376,77 @@ docker compose restart autossh</code></pre>
                 githubLink.href = window.PROJECT_CONFIG.githubUrl;
             }
 
-            // Language toggle functionality
+            // Language dropdown functionality
             const languageToggle = document.getElementById('languageToggle');
-            languageToggle.addEventListener('click', function () {
+            const languageDropdown = document.getElementById('languageDropdown');
+
+            // Initialize language dropdown
+            function initLanguageDropdown() {
+                if (!window.i18n) return;
+
+                const supportedLanguages = window.i18n.getSupportedLanguages();
                 const currentLang = window.i18n.getCurrentLanguage();
-                const newLang = currentLang === 'en' ? 'zh' : 'en';
-                window.i18n.switchLanguage(newLang);
+
+                // Clear existing options
+                languageDropdown.innerHTML = '';
+
+                // Add language options
+                supportedLanguages.forEach(lang => {
+                    const item = document.createElement('button');
+                    item.className = 'language-dropdown-item';
+                    if (lang.code === currentLang) {
+                        item.classList.add('active');
+                    }
+
+                    // Add flag emoji for visual appeal
+                    const flag = lang.code === 'en' ? '🇺🇸' : '🇨🇳';
+                    item.innerHTML = `<span class="language-flag">${flag}</span>${lang.name}`;
+
+                    item.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        if (lang.code !== currentLang) {
+                            window.i18n.switchLanguage(lang.code);
+                        }
+                        hideLanguageDropdown();
+                    });
+
+                    languageDropdown.appendChild(item);
+                });
+            }
+
+            // Show dropdown
+            function showLanguageDropdown() {
+                initLanguageDropdown();
+                languageDropdown.classList.add('show');
+                document.addEventListener('click', hideLanguageDropdown);
+            }
+
+            // Hide dropdown
+            function hideLanguageDropdown() {
+                languageDropdown.classList.remove('show');
+                document.removeEventListener('click', hideLanguageDropdown);
+            }
+
+            // Toggle dropdown on button click
+            languageToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (languageDropdown.classList.contains('show')) {
+                    hideLanguageDropdown();
+                } else {
+                    showLanguageDropdown();
+                }
+            });
+
+            // Update dropdown when language changes
+            window.addEventListener('languageChanged', function () {
+                if (languageDropdown.classList.contains('show')) {
+                    initLanguageDropdown();
+                }
+            });
+
+            // Initialize dropdown when i18n is ready
+            window.addEventListener('i18nReady', function () {
+                initLanguageDropdown();
             });
 
             // Back button functionality
