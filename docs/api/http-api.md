@@ -10,6 +10,48 @@ The API server runs on port 8080 by default:
 http://localhost:8080
 ```
 
+## Authentication
+
+The API supports optional Bearer token authentication. When enabled, all API requests must include an `Authorization` header with a valid Bearer token.
+
+### Enabling Authentication
+
+Set the `API_KEY` environment variable in your Docker Compose configuration:
+
+```yaml
+services:
+  autossh:
+    environment:
+      # Single API key
+      - API_KEY=your-secret-key
+      
+      # Or multiple keys (comma-separated)
+      - API_KEY=key1,key2,key3
+```
+
+### Using Authentication
+
+When `API_KEY` is set, include the Bearer token in your requests:
+
+```bash
+# With authentication
+curl -H "Authorization: Bearer your-secret-key" http://localhost:8080/status
+
+# Without authentication (when API_KEY is not set)
+curl http://localhost:8080/status
+```
+
+### Unauthorized Response
+
+If authentication fails, the API returns a `401 Unauthorized` response:
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "Valid Bearer token required"
+}
+```
+
 ## Endpoints
 
 ### Get Tunnel List
@@ -277,30 +319,34 @@ GET /logs/<tunnel_hash>
 
 **HTTP Status:** 405
 
-## Web Panel Proxy Endpoints
-
-The web panel (port 5000) provides proxy endpoints to the API server:
-
-| Web Panel Endpoint | Proxies To |
-|-------------------|------------|
-| `POST /api/tunnel/start` | `POST /start/<hash>` |
-| `POST /api/tunnel/stop` | `POST /stop/<hash>` |
-| `POST /api/tunnel/restart` | Stop then Start |
-
-**Request Format:**
+### Unauthorized
 
 ```json
 {
-  "hash": "tunnel_hash_here"
+  "error": "Unauthorized",
+  "message": "Valid Bearer token required"
 }
 ```
 
-**Example:**
+**HTTP Status:** 401
 
-```bash
-curl -X POST http://localhost:5000/api/tunnel/start \
-  -H "Content-Type: application/json" \
-  -d '{"hash": "7b840f8344679dff5df893eefd245043"}'
+## Web Panel
+
+The web panel runs on port 5000 and provides a graphical interface for tunnel management. All API calls are made directly from the browser to the API server (port 8080).
+
+!!! note "Network Configuration"
+    The web panel no longer requires host network mode. It uses bridge networking with port mapping, and all API calls are made directly from the browser.
+
+### Configuration
+
+```yaml
+services:
+  web:
+    ports:
+      - "5000:5000"
+    environment:
+      - API_BASE_URL=http://localhost:8080
+      - API_KEY=your-secret-key  # Must match autossh API_KEY
 ```
 
 ## Integration Examples
@@ -311,14 +357,19 @@ curl -X POST http://localhost:5000/api/tunnel/start \
 import requests
 
 API_BASE = "http://localhost:8080"
+API_KEY = "your-secret-key"  # Optional
+
+headers = {}
+if API_KEY:
+    headers["Authorization"] = f"Bearer {API_KEY}"
 
 # Get tunnel list
-response = requests.get(f"{API_BASE}/list")
+response = requests.get(f"{API_BASE}/list", headers=headers)
 tunnels = response.json()
 
 # Start a specific tunnel
 tunnel_hash = "7b840f8344679dff5df893eefd245043"
-response = requests.post(f"{API_BASE}/start/{tunnel_hash}")
+response = requests.post(f"{API_BASE}/start/{tunnel_hash}", headers=headers)
 result = response.json()
 print(result)
 ```
@@ -327,15 +378,18 @@ print(result)
 
 ```javascript
 const API_BASE = "http://localhost:8080";
+const API_KEY = "your-secret-key"; // Optional
+
+const headers = API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {};
 
 // Get tunnel status
-fetch(`${API_BASE}/status`)
+fetch(`${API_BASE}/status`, { headers })
   .then((response) => response.json())
   .then((data) => console.log(data));
 
 // Stop a specific tunnel
 const tunnelHash = "7b840f8344679dff5df893eefd245043";
-fetch(`${API_BASE}/stop/${tunnelHash}`, { method: "POST" })
+fetch(`${API_BASE}/stop/${tunnelHash}`, { method: "POST", headers })
   .then((response) => response.json())
   .then((data) => console.log(data));
 ```
@@ -346,13 +400,20 @@ fetch(`${API_BASE}/stop/${tunnelHash}`, { method: "POST" })
 #!/bin/bash
 
 API_BASE="http://localhost:8080"
+API_KEY="your-secret-key"  # Optional
 TUNNEL_HASH="7b840f8344679dff5df893eefd245043"
 
+# Build auth header if API_KEY is set
+AUTH_HEADER=""
+if [ -n "$API_KEY" ]; then
+    AUTH_HEADER="-H \"Authorization: Bearer $API_KEY\""
+fi
+
 # Check status
-curl -s "$API_BASE/status" | jq .
+eval curl -s $AUTH_HEADER "$API_BASE/status" | jq .
 
 # Start tunnel
-curl -s -X POST "$API_BASE/start/$TUNNEL_HASH" | jq .
+eval curl -s -X POST $AUTH_HEADER "$API_BASE/start/$TUNNEL_HASH" | jq .
 
 # Stop tunnel
-curl -s -X POST "$API_BASE/stop/$TUNNEL_HASH" | jq .
+eval curl -s -X POST $AUTH_HEADER "$API_BASE/stop/$TUNNEL_HASH" | jq .
