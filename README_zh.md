@@ -4,7 +4,7 @@
 
 本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将 **本地服务通过 SSH 隧道暴露到远程服务器**，或将 **远程服务映射到本地端口**，从而方便地访问位于防火墙后的服务。最新版本可监测 `config.yaml` 变化并自动重载服务。
 
-![网页面板界面](https://github.com/user-attachments/assets/990f5128-e724-49af-9b07-62e48276fdc9)
+![网页面板界面](https://github.com/user-attachments/assets/bb26d0f5-14ee-4289-b809-e48381c05bc1)
 
 ## 目录
 
@@ -374,8 +374,9 @@ docker compose logs -f
 ## 致谢
 
 - [autossh](http://www.harding.motd.ca/autossh/) 用于维护 SSH 连接。
-- [yq](https://github.com/mikefarah/yq) 用于解析 YAML 配置文件。
 - [Docker](https://www.docker.com/) 用于容器化。
+- [Alpine Linux](https://alpinelinux.org/) 提供轻量级基础镜像。
+- [Go](https://golang.org/) 用于 Web 面板后端。
 
 ---
 
