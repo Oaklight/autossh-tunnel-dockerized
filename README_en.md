@@ -266,7 +266,7 @@ autossh-cli stop
 | POST   | `/start/<hash>` | Start a specific tunnel            |
 | POST   | `/stop/<hash>`  | Stop a specific tunnel             |
 
-For detailed API documentation, see: [Tunnel Control API Documentation](doc/tunnel-control-api_en.md)
+For detailed API documentation, see: [Tunnel Control API Documentation](https://oaklight.github.io/autossh-tunnel-dockerized/en/api/http-api/)
 
 ## Security Considerations
 

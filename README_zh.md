@@ -271,7 +271,7 @@ autossh-cli stop
 | POST | `/start/<hash>` | 启动指定的隧道         |
 | POST | `/stop/<hash>`  | 停止指定的隧道         |
 
-详细 API 文档请参阅：[隧道控制 API 文档](doc/tunnel-control-api_zh.md)
+详细 API 文档请参阅：[隧道控制 API 文档](https://oaklight.github.io/autossh-tunnel-dockerized/zh/api/http-api/)
 
 ## 安全注意事项
 
