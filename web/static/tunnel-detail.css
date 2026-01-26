@@ -1,5 +1,26 @@
 /* Tunnel Detail Page Styles */
 
+/* Back Button Styling */
+.mdc-top-app-bar__navigation-icon {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    padding: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.mdc-top-app-bar__navigation-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    transform: scale(1.05);
+}
+
+.mdc-top-app-bar__navigation-icon:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+}
+
 :root {
     --status-running: #4CAF50;
     --status-stopped: #9E9E9E;
