@@ -1,0 +1,118 @@
+site_name: SSH 隧道管理器
+site_description: 基于 Docker 和 autossh 的 SSH 隧道管理，支持 Web 面板和 API 控制
+repo_url: https://github.com/Oaklight/autossh-tunnel-dockerized
+repo_name: Oaklight/autossh-tunnel-dockerized
+
+# Documentation directory
+docs_dir: docs
+
+# Theme configuration
+theme:
+  name: material
+  palette:
+    # Auto mode (follow system)
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.copy
+  language: zh
+
+# Extra configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Oaklight/autossh-tunnel-dockerized
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/oaklight/autossh-tunnel
+  alternate:
+    - name: English
+      link: https://autossh-tunnel-en.readthedocs.io/
+      lang: en
+    - name: 中文
+      link: https://autossh-tunnel-zh.readthedocs.io/
+      lang: zh
+
+# Navigation structure
+nav:
+  - 首页: index.md
+  - 快速开始:
+      - 快速入门: getting-started.md
+      - SSH 配置: ssh-config.md
+      - 架构说明: architecture.md
+  - 用户指南:
+      - Web 面板: web-panel.md
+      - 隧道控制 API:
+          - 概述: api/index.md
+          - CLI 参考: api/cli-reference.md
+          - HTTP API: api/http-api.md
+          - 隧道生命周期: api/tunnel-lifecycle.md
+  - 开发指南:
+      - 贡献指南: development/contributing.md
+      - 国际化: development/i18n.md
+  - 故障排除: troubleshooting.md
+
+# Hide navigation on specific pages
+hooks: []
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: true
+  - fenced_code
+  - footnotes
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.blocks.details
+  - pymdownx.blocks.tab
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - tables
+
+# Plugins
+plugins:
+  - search:
+      lang: zh
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+# Copyright
+copyright: Copyright &copy; 2024-2026 SSH 隧道管理器

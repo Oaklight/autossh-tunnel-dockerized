@@ -1,0 +1,11 @@
+# MkDocs and theme
+mkdocs>=1.5.0
+mkdocs-material>=9.7.0
+
+# Extensions
+pymdown-extensions>=10.0.0
+mkdocs-material-extensions>=1.0.0
+
+# Additional dependencies
+markdown>=3.4.0
+jinja2>=3.1.0
