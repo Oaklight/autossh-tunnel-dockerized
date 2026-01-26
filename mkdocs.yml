@@ -1,4 +1,4 @@
-site_name: SSH 隧道管理器
+site_name: Autossh Tunnel
 site_description: 基于 Docker 和 autossh 的 SSH 隧道管理，支持 Web 面板和 API 控制
 repo_url: https://github.com/Oaklight/autossh-tunnel-dockerized
 repo_name: Oaklight/autossh-tunnel-dockerized
@@ -115,4 +115,4 @@ plugins:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
 
 # Copyright
-copyright: Copyright &copy; 2024-2026 SSH 隧道管理器
+copyright: Copyright &copy; 2024 Peng Ding
