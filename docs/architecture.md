@@ -41,7 +41,7 @@ graph TB
     end
     
     SSH -->|read-only mount| ENTRY
-    CONFIG -->|read-write mount| ENTRY
+    CONFIG -->|read-only mount| ENTRY
     CONFIG -->|read-write mount| WEBSERVER
     
     ENTRY --> MONITOR
