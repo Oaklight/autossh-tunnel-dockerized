@@ -17,6 +17,7 @@ graph TB
     subgraph "Host Machine"
         SSH[~/.ssh<br/>SSH Keys & Config]
         CONFIG[./config<br/>config.yaml]
+        BROWSER[Browser]
     end
     
     subgraph "Docker Containers"
@@ -31,7 +32,6 @@ graph TB
         
         subgraph "web Container (Optional)"
             WEBSERVER[Go Web Server<br/>:5000]
-            WEBUI[Web UI]
         end
     end
     
@@ -50,8 +50,8 @@ graph TB
     CLI --> AUTOSSH
     API --> CLI
     
-    WEBUI --> API
-    WEBSERVER --> WEBUI
+    BROWSER -->|Static files| WEBSERVER
+    BROWSER -->|Direct API calls| API
     
     AUTOSSH -->|SSH Tunnel| REMOTE1
     AUTOSSH -->|SSH Tunnel| REMOTE2
@@ -160,8 +160,8 @@ An optional web-based management interface that communicates with the autossh co
 
 | Component | Description |
 |-----------|-------------|
-| `Go Web Server` | Serves the web UI and proxies API requests |
-| `Web UI` | HTML/CSS/JavaScript frontend with i18n support |
+| `Go Web Server` | Serves static files and manages configuration |
+| `Web UI` | HTML/CSS/JavaScript frontend with i18n support (runs in browser) |
 
 ### Volume Mounts
 
@@ -176,7 +176,10 @@ An optional web-based management interface that communicates with the autossh co
 | `PUID` | User ID for file permissions | `1000` | No |
 | `PGID` | Group ID for file permissions | `1000` | No |
 | `TZ` | Timezone for log timestamps | `UTC` | No |
-| `API_BASE_URL` | URL of the autossh API server | `http://localhost:8080` | **Yes** |
+| `API_BASE_URL` | URL of the autossh API server (passed to browser) | `http://localhost:8080` | **Yes** |
+
+!!! info "Direct API Architecture"
+    The `API_BASE_URL` is passed to the browser-based frontend, which makes API calls directly to the autossh container. The Go web server does not proxy API requests - it only serves static files and manages configuration.
 
 ### Docker Compose Example
 
@@ -185,7 +188,8 @@ name: autotunnel
 services:
   web:
     image: oaklight/autossh-tunnel-web-panel:latest
-    network_mode: "host"
+    ports:
+      - "5000:5000"
     volumes:
       - ./config:/home/myuser/config
     environment:
@@ -195,6 +199,9 @@ services:
       - API_BASE_URL=http://localhost:8080
     restart: always
 ```
+
+!!! note "Network Mode"
+    The web container uses bridge networking with port mapping instead of host network mode. API calls are made directly from the browser to the API server.
 
 ---
 
@@ -221,7 +228,8 @@ services:
 
   web:
     image: oaklight/autossh-tunnel-web-panel:latest
-    network_mode: "host"
+    ports:
+      - "5000:5000"
     volumes:
       - ./config:/home/myuser/config:rw
     environment:
@@ -235,32 +243,52 @@ services:
 !!! note "Configuration Editing"
     The web panel mounts the config directory as read-write (`rw`) to allow editing the configuration through the UI. The autossh container only needs read access (`ro`) since it only reads the configuration.
 
+!!! info "Network Architecture"
+    - The **autossh container** uses host network mode to allow tunnels to bind to specific IP addresses
+    - The **web container** uses bridge networking with port mapping (5000:5000)
+    - The browser makes **direct API calls** to the autossh API server (port 8080)
+    - The Go web server only serves static files and configuration management endpoints
+
 ---
 
 ## Communication Flow
 
-### Web Panel to Tunnel Control
+### Web Panel to Tunnel Control (Direct API Architecture)
+
+The web panel uses a **direct API architecture** where the browser makes API calls directly to the autossh API server, bypassing the Go web server for tunnel control operations.
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant WebUI as Web UI (:5000)
-    participant WebServer as Go Web Server
+    participant Browser as Browser
+    participant WebServer as Go Web Server (:5000)
     participant API as API Server (:8080)
     participant CLI as autossh-cli
     participant Tunnel as autossh process
 
-    User->>WebUI: Click "Start Tunnel"
-    WebUI->>WebServer: POST /api/tunnel/start
-    WebServer->>API: POST /start/{hash}
+    Note over Browser,WebServer: Initial page load
+    User->>Browser: Open web panel
+    Browser->>WebServer: GET / (static files)
+    WebServer-->>Browser: HTML/CSS/JS
+    Browser->>WebServer: GET /api/config/api
+    WebServer-->>Browser: {base_url: "http://localhost:8080"}
+    
+    Note over Browser,API: Direct API calls from browser
+    User->>Browser: Click "Start Tunnel"
+    Browser->>API: POST /start/{hash}
     API->>CLI: autossh-cli start-tunnel {hash}
     CLI->>Tunnel: Start autossh process
     Tunnel-->>CLI: PID
     CLI-->>API: Success + output
-    API-->>WebServer: JSON response
-    WebServer-->>WebUI: JSON response
-    WebUI-->>User: Update UI
+    API-->>Browser: JSON response
+    Browser-->>User: Update UI
 ```
+
+!!! tip "Benefits of Direct API Architecture"
+    - **Simplified networking**: Web container doesn't need host network mode
+    - **Reduced latency**: No proxy overhead for API calls
+    - **Better scalability**: Web server only handles static files
+    - **Clearer separation**: Configuration management vs tunnel control
 
 ### Configuration Change Detection
 
@@ -285,11 +313,33 @@ sequenceDiagram
 
 ## Network Mode
 
-Both containers use `network_mode: "host"` to:
+The containers use different network modes based on their requirements:
+
+### autossh Container (Host Network)
+
+The autossh container uses `network_mode: "host"` to:
 
 1. Allow direct access to host network interfaces
 2. Enable tunnels to bind to specific IP addresses
 3. Simplify port forwarding configuration
+
+### web Container (Bridge Network)
+
+The web container uses bridge networking with port mapping:
+
+```yaml
+ports:
+  - "5000:5000"
+```
+
+This is possible because:
+
+1. The web server only serves static files and configuration endpoints
+2. All API calls are made directly from the browser to the API server
+3. No proxy functionality is needed between web and autossh containers
+
+!!! note "API Accessibility"
+    Since the browser makes direct API calls to port 8080, the API server must be accessible from the user's browser. When using host network mode for autossh, the API is available on `localhost:8080` from the host machine.
 
 ---
 

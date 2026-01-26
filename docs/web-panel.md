@@ -12,6 +12,7 @@ The web panel provides a visual interface for managing SSH tunnel configurations
 - **Multi-language Support**: Supports Chinese, English, and other languages
 - **Tunnel Status Monitoring**: Real-time view of each tunnel's running status
 - **Individual Tunnel Control**: Start and stop each tunnel independently
+- **Direct API Architecture**: Browser makes API calls directly to the tunnel control API for improved performance
 
 ## Accessing the Web Panel
 
@@ -166,15 +167,34 @@ cd config/backups/
 ls -t | tail -n +11 | xargs rm -f
 ```
 
+## Architecture
+
+The web panel uses a **direct API architecture**:
+
+1. **Static File Server**: The Go web server (port 5000) serves HTML, CSS, and JavaScript files
+2. **Configuration Management**: The web server handles configuration file reading and writing
+3. **Direct API Calls**: The browser makes API calls directly to the autossh API server (port 8080)
+
+This architecture provides:
+
+- **Better Performance**: No proxy overhead for API calls
+- **Simplified Networking**: Web container doesn't require host network mode
+- **Clear Separation**: Configuration management vs tunnel control
+
+!!! info "Network Requirements"
+    Since the browser makes direct API calls to port 8080, ensure the API server is accessible from the user's browser. When running locally, this is typically `http://localhost:8080`.
+
 ## Security Recommendations
 
 1. **Restrict Access**: By default, the web panel only listens on localhost. If remote access is needed, use SSH tunneling or VPN.
 
-2. **Use Firewall**: Ensure the web panel port (default 5000) is not exposed to the public internet.
+2. **Use Firewall**: Ensure the web panel port (default 5000) and API port (default 8080) are not exposed to the public internet.
 
-3. **Regular Backups**: Although the web panel backs up automatically, it's recommended to manually backup important configurations regularly.
+3. **Enable API Authentication**: Set `API_KEY` environment variable on the autossh container to require authentication for API calls.
 
-4. **Review Changes**: Carefully check before saving configurations to avoid accidentally disrupting existing tunnels.
+4. **Regular Backups**: Although the web panel backs up automatically, it's recommended to manually backup important configurations regularly.
+
+5. **Review Changes**: Carefully check before saving configurations to avoid accidentally disrupting existing tunnels.
 
 ## Next Steps
 
