@@ -4,7 +4,7 @@
 
 This project provides a Docker-based solution to manage SSH tunnels using `autossh` and a YAML configuration file. This setup allows you to easily expose **local services to a remote server through an SSH tunnel** or **map remote services to a local port**, making it convenient to access services behind a firewall. Additionally, it detects changes in `config.yaml` and automatically reloads the service configuration.
 
-![Web Panel Interface](https://github.com/user-attachments/assets/a9d7255e-77c1-4f3e-b63e-4a0e67ff4460)
+![Web Panel Interface](https://github.com/user-attachments/assets/990f5128-e724-49af-9b07-62e48276fdc9)
 
 ## Table of Contents
 
@@ -20,6 +20,7 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
   - [6. Access Services](#6-access-services)
 - [SSH Config Configuration Guide](README_ssh_config_en.md)
 - [Web-Based Configuration](#web-based-configuration)
+- [Tunnel Control API](#tunnel-control-api)
 - [Customization](#customization)
   - [Add More Tunnels](#add-more-tunnels)
   - [Modify Dockerfile](#modify-dockerfile)
@@ -43,6 +44,9 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 - **Flexible Direction Configuration**: Support exposing local services to a remote server (`local_to_remote`) or mapping remote services to a local port (`remote_to_local`).
 - **Automatic Reload**: Detect changes in `config.yaml` and automatically reload the service configuration.
 - **Web-Based Configuration**: Manage tunnels and configuration updates via a web panel.
+- **CLI Tool (autossh-cli)**: Command-line interface for managing tunnels, viewing status, and controlling individual tunnels.
+- **HTTP API**: RESTful API for programmatic tunnel control, enabling integration with other tools and automation.
+- **Individual Tunnel Control**: Start, stop, and manage each tunnel independently without affecting others.
 
 ## Prerequisites
 
@@ -249,6 +253,45 @@ Once the containers are running, access the web panel at: `http://localhost:5000
 ### Backup Management
 
 The web panel automatically creates backups in `config/backups/` every time you save changes. You may need to manually clean up old backup files to prevent disk space issues.
+
+## Tunnel Control API
+
+The project provides both CLI and HTTP API interfaces for advanced tunnel management.
+
+### CLI Commands
+
+```bash
+# List all configured tunnels
+autossh-cli list
+
+# View tunnel running status
+autossh-cli status
+
+# Start a specific tunnel
+autossh-cli start-tunnel <hash>
+
+# Stop a specific tunnel
+autossh-cli stop-tunnel <hash>
+
+# Start all tunnels
+autossh-cli start
+
+# Stop all tunnels
+autossh-cli stop
+```
+
+### HTTP API Endpoints
+
+| Method | Endpoint        | Description                        |
+| ------ | --------------- | ---------------------------------- |
+| GET    | `/list`         | Get list of all configured tunnels |
+| GET    | `/status`       | Get running status of all tunnels  |
+| POST   | `/start`        | Start all tunnels                  |
+| POST   | `/stop`         | Stop all tunnels                   |
+| POST   | `/start/<hash>` | Start a specific tunnel            |
+| POST   | `/stop/<hash>`  | Stop a specific tunnel             |
+
+For detailed API documentation, see: [Tunnel Control API Documentation](doc/tunnel-control-api_en.md)
 
 ---
 

@@ -4,6 +4,8 @@
 
 本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。该设置允许您轻松地将 **本地服务通过 SSH 隧道暴露到远程服务器**，或将 **远程服务映射到本地端口**，从而方便地访问位于防火墙后的服务。最新版本可监测 `config.yaml` 变化并自动重载服务。
 
+![网页面板界面](https://github.com/user-attachments/assets/990f5128-e724-49af-9b07-62e48276fdc9)
+
 ## 目录
 
 - [功能](#功能)
@@ -18,6 +20,7 @@
   - [6. 访问服务](#6-访问服务)
 - [SSH 配置文件配置指南](README_ssh_config_zh.md)
 - [网页配置功能](#网页配置功能)
+- [隧道控制 API](#隧道控制-api)
 - [自定义](#自定义)
   - [添加更多隧道](#添加更多隧道)
   - [修改 Dockerfile](#修改-dockerfile)
@@ -41,6 +44,9 @@
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 - **自动重载**：检测 `config.yaml` 变化并自动重载服务。
 - **网页配置功能**：通过网页界面管理隧道配置。
+- **CLI 工具 (autossh-cli)**：命令行界面，用于管理隧道、查看状态和控制单个隧道。
+- **HTTP API**：RESTful API 用于程序化隧道控制，支持与其他工具和自动化集成。
+- **单个隧道控制**：独立启动、停止和管理每个隧道，互不影响。
 
 ## 先决条件
 
@@ -250,11 +256,48 @@ docker compose -f compose.dev.yaml up -d
 
 容器运行后，访问网页面板：`http://localhost:5000`
 
-![网页面板界面](https://github.com/user-attachments/assets/b1c4e4c6-f72b-482b-9849-9af58101468f)
-
 ### 备份管理
 
 网页面板每次保存更改时会自动在 `config/backups/` 目录创建备份。您可能需要手动清理旧的备份文件以防止磁盘空间问题。
+
+## 隧道控制 API
+
+本项目提供 CLI 和 HTTP API 两种接口用于高级隧道管理。
+
+### CLI 命令
+
+```bash
+# 列出所有配置的隧道
+autossh-cli list
+
+# 查看隧道运行状态
+autossh-cli status
+
+# 启动特定隧道
+autossh-cli start-tunnel <hash>
+
+# 停止特定隧道
+autossh-cli stop-tunnel <hash>
+
+# 启动所有隧道
+autossh-cli start
+
+# 停止所有隧道
+autossh-cli stop
+```
+
+### HTTP API 端点
+
+| 方法 | 端点            | 描述                   |
+| ---- | --------------- | ---------------------- |
+| GET  | `/list`         | 获取所有配置的隧道列表 |
+| GET  | `/status`       | 获取所有隧道的运行状态 |
+| POST | `/start`        | 启动所有隧道           |
+| POST | `/stop`         | 停止所有隧道           |
+| POST | `/start/<hash>` | 启动指定的隧道         |
+| POST | `/stop/<hash>`  | 停止指定的隧道         |
+
+详细 API 文档请参阅：[隧道控制 API 文档](doc/tunnel-control-api_zh.md)
 
 ---
 
