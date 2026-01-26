@@ -64,7 +64,7 @@ nav:
   - Getting Started:
       - Quick Start: getting-started.md
       - SSH Configuration: ssh-config.md
-  - Architecture: architecture.md
+      - Architecture: architecture.md
   - User Guide:
       - Web Panel: web-panel.md
       - Tunnel Control API:
