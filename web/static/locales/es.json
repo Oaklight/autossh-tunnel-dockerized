@@ -50,7 +50,9 @@
     "interactive_auth_disabled": "Autenticación interactiva desactivada",
     "start_tunnel": "Iniciar túnel",
     "restart_tunnel": "Reiniciar túnel",
-    "stop_tunnel": "Detener túnel"
+    "stop_tunnel": "Detener túnel",
+    "refresh": "Actualizar",
+    "auto_refresh": "Actualización automática"
   },
   "tooltips": {
     "add_tunnel": "Añadir túnel",

@@ -50,7 +50,9 @@
     "interactive_auth_disabled": "Interactive Auth Disabled",
     "start_tunnel": "Start tunnel",
     "restart_tunnel": "Restart tunnel",
-    "stop_tunnel": "Stop tunnel"
+    "stop_tunnel": "Stop tunnel",
+    "refresh": "Refresh",
+    "auto_refresh": "Auto Refresh"
   },
   "tooltips": {
     "add_tunnel": "Add Tunnel",

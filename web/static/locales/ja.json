@@ -50,7 +50,9 @@
     "interactive_auth_disabled": "対話認証が無効",
     "start_tunnel": "トンネルを開始",
     "restart_tunnel": "トンネルを再起動",
-    "stop_tunnel": "トンネルを停止"
+    "stop_tunnel": "トンネルを停止",
+    "refresh": "更新",
+    "auto_refresh": "自動更新"
   },
   "tooltips": {
     "add_tunnel": "トンネルを追加",

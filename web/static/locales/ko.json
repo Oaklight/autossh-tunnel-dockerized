@@ -50,7 +50,9 @@
     "interactive_auth_disabled": "대화형 인증 비활성화됨",
     "start_tunnel": "터널 시작",
     "restart_tunnel": "터널 재시작",
-    "stop_tunnel": "터널 중지"
+    "stop_tunnel": "터널 중지",
+    "refresh": "새로고침",
+    "auto_refresh": "자동 새로고침"
   },
   "tooltips": {
     "add_tunnel": "터널 추가",
