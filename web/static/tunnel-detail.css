@@ -191,6 +191,26 @@
     gap: 12px;
 }
 
+/* Auto Refresh Toggle in Log Controls */
+.log-controls .auto-refresh-toggle {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+}
+
+.log-controls .auto-refresh-toggle .mdc-form-field {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.log-controls .auto-refresh-toggle label {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+    user-select: none;
+}
+
 .icon-button {
     background: none;
     border: none;
