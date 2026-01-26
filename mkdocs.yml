@@ -52,10 +52,10 @@ extra:
       link: https://hub.docker.com/r/oaklight/autossh-tunnel
   alternate:
     - name: English
-      link: https://autossh-tunnel-en.readthedocs.io/
+      link: https://autossh-tunnel.readthedocs.io/en/latest/
       lang: en
     - name: 中文
-      link: https://autossh-tunnel-zh.readthedocs.io/
+      link: https://autossh-tunnel.readthedocs.io/zh-cn/latest/
       lang: zh
 
 # Navigation structure
