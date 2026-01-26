@@ -1,0 +1,349 @@
+/* Tunnel Detail Page Styles */
+
+/* Back Button Styling */
+.mdc-top-app-bar__navigation-icon {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    padding: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.mdc-top-app-bar__navigation-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    transform: scale(1.05);
+}
+
+.mdc-top-app-bar__navigation-icon:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+}
+
+:root {
+    --status-running: #4CAF50;
+    --status-stopped: #9E9E9E;
+    --status-starting: #FF9800;
+    --status-dead: #F44336;
+    --status-unknown: #9E9E9E;
+}
+
+/* Status Badge */
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.status-badge .status-icon {
+    font-size: 20px;
+}
+
+.status-badge .status-text {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.status-badge.running {
+    background: rgba(76, 175, 80, 0.2);
+    color: #fff;
+}
+
+.status-badge.stopped {
+    background: rgba(158, 158, 158, 0.2);
+    color: #fff;
+}
+
+.status-badge.starting {
+    background: rgba(255, 152, 0, 0.2);
+    color: #fff;
+}
+
+.status-badge.dead {
+    background: rgba(244, 67, 54, 0.2);
+    color: #fff;
+}
+
+/* Detail Cards */
+.detail-card {
+    margin-bottom: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.card-title .material-icons {
+    color: var(--mdc-theme-primary);
+}
+
+.card-content {
+    padding: 24px;
+}
+
+/* Configuration Grid */
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.config-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.config-item label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.config-value {
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.87);
+    padding: 12px 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border-left: 4px solid var(--mdc-theme-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.config-value.hash-value {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    word-break: break-all;
+}
+
+/* Control Buttons */
+.control-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    flex: 1;
+    min-width: 150px;
+    height: 48px;
+    font-weight: 500;
+}
+
+.start-btn {
+    background-color: var(--status-running) !important;
+}
+
+.start-btn:hover {
+    background-color: #388e3c !important;
+}
+
+.restart-btn {
+    background-color: var(--status-starting) !important;
+}
+
+.restart-btn:hover {
+    background-color: #f57c00 !important;
+}
+
+.stop-btn {
+    background-color: var(--status-dead) !important;
+}
+
+.stop-btn:hover {
+    background-color: #d32f2f !important;
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Log Controls */
+.log-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Auto Refresh Toggle in Log Controls */
+.log-controls .auto-refresh-toggle {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+}
+
+.log-controls .auto-refresh-toggle .mdc-form-field {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.log-controls .auto-refresh-toggle label {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+    user-select: none;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: var(--mdc-theme-primary);
+}
+
+.icon-button .material-icons {
+    font-size: 20px;
+}
+
+/* Log Box */
+.log-box {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    max-height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.log-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #888;
+    text-align: center;
+}
+
+.log-placeholder .material-icons {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.log-placeholder p {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+.log-line {
+    margin-bottom: 4px;
+}
+
+.log-line.error {
+    color: #f48771;
+}
+
+.log-line.warn {
+    color: #dcdcaa;
+}
+
+.log-line.info {
+    color: #4ec9b0;
+}
+
+.log-line.debug {
+    color: #9cdcfe;
+}
+
+/* Scrollbar for log box */
+.log-box::-webkit-scrollbar {
+    width: 8px;
+}
+
+.log-box::-webkit-scrollbar-track {
+    background: #2d2d2d;
+    border-radius: 4px;
+}
+
+.log-box::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+.log-box::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .control-buttons {
+        flex-direction: column;
+    }
+
+    .control-btn {
+        width: 100%;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .log-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Loading Animation */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}

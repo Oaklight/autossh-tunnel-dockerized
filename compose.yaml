@@ -4,11 +4,17 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:rw
+      - ./config:/etc/autossh/config:ro
     environment:
       - PUID=1000
       - PGID=1000
       - AUTOSSH_GATETIME=0
+      - API_ENABLE=true
+      - API_PORT=8080
+      # Optional: Enable API authentication with Bearer token
+      # Multiple keys can be specified, separated by commas
+      # - API_KEY=your-secret-key
+      # - API_KEY=key1,key2,key3
     network_mode: "host"
     restart: always
 
@@ -17,9 +23,14 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./config:/home/myuser/config
+      - ./config:/home/myuser/config:rw
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
+      # API_BASE_URL is used by the browser to connect to the API server
+      # Use localhost since the browser runs on the host machine
+      - API_BASE_URL=http://localhost:8080
+      # Optional: Must match one of the API_KEY values in autossh service
+      # - API_KEY=your-secret-key
     restart: always

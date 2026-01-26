@@ -1,0 +1,228 @@
+{
+  "app": {
+    "title": "SSH 隧道配置",
+    "name": "SSH 隧道管理器",
+    "help_title": "SSH 隧道管理器 - 幫助"
+  },
+  "navigation": {
+    "help": "說明與文件",
+    "docker_hub": "Docker Hub",
+    "github": "GitHub",
+    "back": "返回",
+    "language_toggle": "Language / 語言",
+    "language_toggle_prefix": "可用語言"
+  },
+  "table": {
+    "headers": {
+      "controls": "控制",
+      "name": "名稱",
+      "status": "狀態",
+      "remote_host": "遠端主機",
+      "remote_port": "遠端連接埠",
+      "local_port": "本機連接埠",
+      "direction": "方向",
+      "actions": "操作"
+    },
+    "placeholders": {
+      "tunnel_name": "隧道名稱",
+      "remote_host": "遠端主機",
+      "remote_port": "遠端連接埠 (例如：44497 或 hostname:44497)",
+      "local_port": "本機連接埠 (例如：55001 或 192.168.1.100:55001)"
+    },
+    "direction": {
+      "remote_to_local": "遠端到本機",
+      "local_to_remote": "本機到遠端"
+    },
+    "status": {
+      "running": "執行中",
+      "normal": "正常",
+      "dead": "已停止",
+      "starting": "啟動中",
+      "stopped": "已停止",
+      "na": "不可用"
+    }
+  },
+  "buttons": {
+    "add": "新增",
+    "save_restart": "儲存並重新啟動",
+    "delete": "刪除隧道",
+    "interactive_auth_enabled": "已啟用互動認證",
+    "interactive_auth_disabled": "已停用互動認證",
+    "start_tunnel": "啟動隧道",
+    "restart_tunnel": "重新啟動隧道",
+    "stop_tunnel": "停止隧道",
+    "refresh": "重新整理",
+    "auto_refresh": "自動重新整理"
+  },
+  "tooltips": {
+    "add_tunnel": "新增隧道",
+    "save_config": "儲存設定並重新啟動",
+    "direction": "方向",
+    "actions": "操作",
+    "controls": "控制"
+  },
+  "messages": {
+    "delete_confirm": "確定要刪除此隧道設定嗎？",
+    "config_saved": "設定儲存成功！",
+    "config_save_failed": "設定儲存失敗",
+    "config_load_failed": "設定載入失敗",
+    "validation_errors": "請修復驗證錯誤後再儲存",
+    "no_tunnels": "設定中未找到隧道",
+    "confirm_start": "確定要啟動此隧道嗎？",
+    "confirm_restart": "確定要重新啟動此隧道嗎？",
+    "confirm_stop": "確定要停止此隧道嗎？",
+    "start_success": "隧道啟動成功",
+    "restart_success": "隧道重新啟動成功",
+    "stop_success": "隧道停止成功",
+    "start_failed": "隧道啟動失敗",
+    "restart_failed": "隧道重新啟動失敗",
+    "stop_failed": "隧道停止失敗",
+    "save_first": "請先儲存設定"
+  },
+  "validation": {
+    "port_range": "連接埠必須在 1 到 65535 之間",
+    "remote_port_format": "連接埠格式無效。請使用 \"連接埠\" 或 \"主機名:連接埠\" 格式 (例如：44497 或 lambda5:44497)",
+    "local_port_format": "連接埠格式無效。請使用 \"連接埠\" 或 \"IP:連接埠\" 格式 (例如：55001 或 192.168.1.100:55001)"
+  },
+  "tunnel_detail": {
+    "title": "隧道詳情",
+    "configuration": "設定資訊",
+    "name": "名稱",
+    "hash": "雜湊值",
+    "remote_host": "遠端主機",
+    "remote_port": "遠端連接埠",
+    "local_port": "本機連接埠",
+    "direction": "方向",
+    "interactive": "互動認證",
+    "status": "狀態",
+    "controls": "控制操作",
+    "logs": "記錄",
+    "no_logs": "暫無記錄。啟動隧道後將顯示記錄。"
+  },
+  "help": {
+    "toc": "目錄",
+    "sections": {
+      "overview": "概述",
+      "setup": "快速設定",
+      "web_config": "網頁設定",
+      "yaml_config": "YAML設定",
+      "ssh_config": "SSH設定",
+      "advanced": "進階設定",
+      "troubleshooting": "故障排除"
+    },
+    "overview": {
+      "title": "概述",
+      "description": "SSH Tunnel Manager 是一個基於 Docker 的解決方案，使用 autossh 和 YAML 設定檔來管理 SSH 隧道。",
+      "features": {
+        "title": "主要功能：",
+        "dockerized": "Docker化：環境封裝，易於部署和管理",
+        "web_config": "網頁設定：透過視覺化介面管理隧道設定",
+        "auto_reload": "自動重新載入：偵測設定變更並自動重新載入服務",
+        "bidirectional": "雙向隧道：支援本機到遠端和遠端到本機的隧道",
+        "multi_arch": "多架構支援：支援 AMD64、ARM64 等多種架構"
+      }
+    },
+    "setup": {
+      "title": "快速設定",
+      "step1": "1. 下載設定檔",
+      "step1_desc": "下載 docker-compose.yaml",
+      "step1_create": "建立設定目錄",
+      "step2": "2. 設定使用者權限",
+      "step2_check": "檢視目前使用者 UID/GID",
+      "step2_set": "設定環境變數",
+      "step3": "3. 啟動服務",
+      "step4": "4. 存取網頁介面",
+      "step4_desc": "開啟瀏覽器存取：",
+      "access_url": "http://localhost:5000"
+    },
+    "web_config": {
+      "title": "網頁設定",
+      "interface": {
+        "title": "介面說明：",
+        "name": "Name：隧道名稱，用於識別",
+        "status": "Status：隧道目前狀態（執行/停止/錯誤）",
+        "remote_host": "Remote Host：遠端主機位址（如：user@server.com）",
+        "remote_port": "Remote Port：遠端連接埠或主機:連接埠格式",
+        "local_port": "Local Port：本機連接埠或IP:連接埠格式",
+        "direction": "Direction：隧道方向（遠端到本機/本機到遠端）",
+        "actions": "Actions：操作按鈕（互動認證/刪除）"
+      },
+      "interactive_auth": {
+        "title": "互動認證：",
+        "description": "點擊指紋圖示可以切換互動認證狀態：",
+        "enabled": "🫆 綠色：啟用互動認證",
+        "disabled": "🫆 灰色：停用互動認證"
+      },
+      "save_config": {
+        "title": "儲存設定：",
+        "description": "點擊 Save & Restart 按鈕儲存設定並重新啟動隧道服務。"
+      },
+      "tunnel_detail": {
+        "title": "隧道詳情頁面：",
+        "description": "點擊主頁面表格中的狀態指示器可以開啟該隧道的詳情頁面。",
+        "features": "詳情頁面提供以下功能：",
+        "feature_config": "檢視隧道的完整設定資訊",
+        "feature_control": "啟動、重新啟動或停止隧道",
+        "feature_logs": "即時檢視隧道記錄",
+        "feature_status": "監控隧道執行狀態"
+      }
+    },
+    "yaml_config": {
+      "title": "YAML設定",
+      "basic_format": "基本格式：",
+      "basic_comment1": "將本機服務公開到遠端伺服器",
+      "basic_comment2": "將遠端服務對應到本機連接埠",
+      "advanced_format": "進階設定 - 指定綁定位址：",
+      "advanced_comment1": "指定遠端綁定位址",
+      "advanced_comment2": "指定本機綁定位址"
+    },
+    "ssh_config": {
+      "title": "SSH設定",
+      "important": "重要",
+      "important_desc": "本專案嚴重依賴 ~/.ssh/config 檔案進行 SSH 連線設定。",
+      "example": "SSH設定檔範例 (~/.ssh/config)：",
+      "permissions": "SSH金鑰權限："
+    },
+    "advanced": {
+      "title": "進階設定",
+      "env_vars": "環境變數：",
+      "env_puid": "容器使用者 UID（預設：1000）",
+      "env_pgid": "容器使用者 GID（預設：1000）",
+      "port_formats": "連接埠格式：",
+      "port_simple": "簡單連接埠",
+      "port_hostname": "主機:連接埠",
+      "port_ip": "IP:連接埠",
+      "tunnel_directions": "隧道方向：",
+      "direction_r2l": "將遠端服務對應到本機（預設）",
+      "direction_l2r": "將本機服務公開到遠端",
+      "security": "安全注意事項：",
+      "security_desc": "啟用遠端連接埠轉發時，可能需要在遠端伺服器設定 GatewayPorts：",
+      "security_edit": "編輯 /etc/ssh/sshd_config",
+      "security_restart": "重新啟動 SSH 服務"
+    },
+    "troubleshooting": {
+      "title": "故障排除",
+      "common_issues": "常見問題：",
+      "tunnel_failed": "🔴 隧道連線失敗",
+      "permission_error": "🔴 權限錯誤",
+      "config_not_effective": "🔴 設定不生效",
+      "view_logs": "檢視記錄：",
+      "view_logs_all": "檢視所有服務記錄",
+      "view_logs_specific": "檢視特定服務記錄",
+      "restart_services": "重新啟動服務：",
+      "restart_all": "重新啟動所有服務",
+      "restart_specific": "重新啟動特定服務",
+      "solutions": {
+        "check_ssh_config": "檢查 SSH 設定檔 ~/.ssh/config",
+        "verify_ssh_keys": "驗證 SSH 金鑰權限",
+        "confirm_remote_access": "確認遠端主機可存取",
+        "check_puid_pgid": "檢查 PUID/PGID 設定",
+        "confirm_ssh_permissions": "確認 SSH 金鑰檔案權限",
+        "verify_docker_permissions": "驗證 Docker 使用者群組權限",
+        "check_yaml_syntax": "檢查 YAML 語法是否正確",
+        "confirm_config_path": "確認設定檔路徑",
+        "restart_container": "重新啟動容器服務"
+      }
+    }
+  }
+}

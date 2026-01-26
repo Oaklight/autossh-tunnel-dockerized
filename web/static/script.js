@@ -1,12 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.querySelector("#tunnelTable tbody");
     let dataTable;
+    let apiConfig = { base_url: '', api_key: '' };
+    let autoRefreshInterval = null;
+    const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
 
     // Initialize Material Design Components
     initializeMDC();
 
-    // Load initial config
-    loadConfiguration();
+    // Load API config first, then load configuration
+    loadAPIConfig().then(() => loadConfiguration());
+
+    // Setup refresh button and auto-refresh checkbox
+    setupRefreshControls();
 
     // Initialize Material Design Components
     function initializeMDC() {
@@ -23,59 +29,195 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Load configuration from server
-    function loadConfiguration() {
-        showLoading(true);
-        fetch("/api/config")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                showLoading(false);
-                if (data.tunnels && Array.isArray(data.tunnels)) {
-                    data.tunnels.forEach((tunnel) => addRow(tunnel));
-                } else {
-                    console.warn("No tunnels found in configuration");
-                }
-            })
-            .catch((error) => {
-                showLoading(false);
-                console.error("Error loading configuration:", error);
-                showMessage("Failed to load configuration", "error");
+    // Load API configuration
+    async function loadAPIConfig() {
+        try {
+            const response = await fetch('/api/config/api');
+            if (response.ok) {
+                const data = await response.json();
+                apiConfig.base_url = data.base_url || '';
+                apiConfig.api_key = data.api_key || '';
+            }
+        } catch (error) {
+            console.warn('Failed to load API config:', error);
+        }
+    }
+
+    // Helper function to make authenticated API calls
+    function apiCall(endpoint, options = {}) {
+        const url = apiConfig.base_url + endpoint;
+        const headers = options.headers || {};
+
+        // Add Bearer token if API key is configured
+        if (apiConfig.api_key) {
+            headers['Authorization'] = 'Bearer ' + apiConfig.api_key;
+        }
+
+        return fetch(url, { ...options, headers });
+    }
+
+    // Fetch tunnel statuses from API server
+    async function fetchTunnelStatuses() {
+        if (!apiConfig.base_url) return {};
+
+        try {
+            const response = await apiCall('/status');
+            if (!response.ok) return {};
+
+            const statuses = await response.json();
+            const statusMap = {};
+            statuses.forEach(s => {
+                statusMap[s.name] = s.status;
             });
+            return statusMap;
+        } catch (error) {
+            console.warn('Failed to fetch tunnel statuses:', error);
+            return {};
+        }
+    }
+
+    // Load configuration from server
+    async function loadConfiguration() {
+        showLoading(true);
+        try {
+            const response = await fetch("/api/config");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            // Fetch statuses from API server
+            const statuses = await fetchTunnelStatuses();
+
+            // Clear existing rows before adding new ones
+            tableBody.innerHTML = '';
+            if (data.tunnels && Array.isArray(data.tunnels)) {
+                data.tunnels.forEach((tunnel) => {
+                    // Merge status from API
+                    if (Object.keys(statuses).length > 0) {
+                        tunnel.status = statuses[tunnel.name] || 'STOPPED';
+                    } else {
+                        tunnel.status = 'N/A';
+                    }
+                    addRow(tunnel);
+                });
+            } else {
+                const warningMsg = window.i18n ? window.i18n.t('messages.no_tunnels') : 'No tunnels found in configuration';
+                console.warn(warningMsg);
+            }
+        } catch (error) {
+            console.error("Error loading configuration:", error);
+            const errorMsg = window.i18n ? window.i18n.t('messages.config_load_failed') : 'Failed to load configuration';
+            showMessage(errorMsg, "error");
+        } finally {
+            showLoading(false);
+        }
     }
 
     // Add row function with Material Design styling
-    function addRow(tunnel = { name: "", remote_host: "", remote_port: "", local_port: "", direction: "remote_to_local" }) {
+    function addRow(tunnel = { name: "", remote_host: "", remote_port: "", local_port: "", interactive: false, direction: "remote_to_local", status: "STOPPED" }) {
         const row = document.createElement("tr");
         row.className = "mdc-data-table__row new-row";
 
+        let statusColor = "grey";
+        let statusIcon = "radio_button_unchecked";
+        let statusTooltip = tunnel.status || "STOPPED";
+
+        // Set status icon and color based on status
+        switch (tunnel.status) {
+            case "RUNNING":
+            case "NORMAL":
+                statusIcon = "check_circle";
+                statusColor = "#4CAF50"; // Green
+                statusTooltip = "Running";
+                break;
+            case "DEAD":
+                statusIcon = "cancel";
+                statusColor = "#F44336"; // Red
+                statusTooltip = "Dead";
+                break;
+            case "STARTING":
+                statusIcon = "hourglass_empty";
+                statusColor = "#FF9800"; // Orange
+                statusTooltip = "Starting";
+                break;
+            case "STOPPED":
+                statusIcon = "stop_circle";
+                statusColor = "#9E9E9E"; // Grey
+                statusTooltip = "Stopped";
+                break;
+            case "N/A":
+            default:
+                statusIcon = "help_outline";
+                statusColor = "#9E9E9E"; // Grey
+                statusTooltip = "Unknown";
+                break;
+        }
+
+        // Use server-provided hash or empty string for new tunnels
+        const tunnelHash = tunnel.hash || '';
+
+        // Get translated placeholders
+        const tunnelNamePlaceholder = window.i18n ? window.i18n.t('table.placeholders.tunnel_name') : 'Tunnel name';
+        const remoteHostPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_host') : 'Remote host';
+        const remotePortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_port') : 'Remote port (e.g., 44497 or hostname:44497)';
+        const localPortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.local_port') : 'Local port (e.g., 55001 or 192.168.1.100:55001)';
+
+        const remoteToLocalText = window.i18n ? window.i18n.t('table.direction.remote_to_local') : 'Remote to Local';
+        const localToRemoteText = window.i18n ? window.i18n.t('table.direction.local_to_remote') : 'Local to Remote';
+
+        const interactiveEnabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
+        const interactiveDisabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
+        const deleteTunnelText = window.i18n ? window.i18n.t('buttons.delete') : 'Delete tunnel';
+
+        const startTunnelText = window.i18n ? window.i18n.t('buttons.start_tunnel') : 'Start tunnel';
+        const restartTunnelText = window.i18n ? window.i18n.t('buttons.restart_tunnel') : 'Restart tunnel';
+        const stopTunnelText = window.i18n ? window.i18n.t('buttons.stop_tunnel') : 'Stop tunnel';
+
         row.innerHTML = `
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="Tunnel name">
+                <div class="control-buttons-cell">
+                    <button class="control-button start-button" data-hash="${tunnelHash}" title="${startTunnelText}" data-i18n-title="buttons.start_tunnel">
+                        <i class="material-icons">play_arrow</i>
+                    </button>
+                    <button class="control-button restart-button" data-hash="${tunnelHash}" title="${restartTunnelText}" data-i18n-title="buttons.restart_tunnel">
+                        <i class="material-icons">refresh</i>
+                    </button>
+                    <button class="control-button stop-button" data-hash="${tunnelHash}" title="${stopTunnelText}" data-i18n-title="buttons.stop_tunnel">
+                        <i class="material-icons">stop</i>
+                    </button>
+                </div>
             </td>
             <td class="mdc-data-table__cell">
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="Remote host">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="${tunnelNamePlaceholder}" data-i18n-placeholder="table.placeholders.tunnel_name">
             </td>
             <td class="mdc-data-table__cell">
-                <input type="number" class="table-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="Remote port" min="1" max="65535">
+                <i class="material-icons status-indicator" data-hash="${tunnelHash}" style="color: ${statusColor}; font-size: 20px; vertical-align: middle; cursor: pointer;" title="${statusTooltip}">${statusIcon}</i>
             </td>
             <td class="mdc-data-table__cell">
-                <input type="number" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="Local port" min="1" max="65535">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="${remoteHostPlaceholder}" data-i18n-placeholder="table.placeholders.remote_host">
+            </td>
+            <td class="mdc-data-table__cell">
+                <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="${remotePortPlaceholder}" data-i18n-placeholder="table.placeholders.remote_port">
+            </td>
+            <td class="mdc-data-table__cell">
+                <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="${localPortPlaceholder}" data-i18n-placeholder="table.placeholders.local_port">
             </td>
             <td class="mdc-data-table__cell">
                 <select class="table-select">
-                    <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""}>Remote to Local</option>
-                    <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""}>Local to Remote</option>
+                    <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""} data-i18n="table.direction.remote_to_local">${remoteToLocalText}</option>
+                    <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""} data-i18n="table.direction.local_to_remote">${localToRemoteText}</option>
                 </select>
             </td>
             <td class="mdc-data-table__cell">
-                <button class="delete-button deleteRow" title="Delete tunnel">
-                    <i class="material-icons">delete</i>
-                </button>
+                <div class="action-buttons-cell">
+                    <button class="interactive-toggle-button ${tunnel.interactive ? 'active' : ''}" title="${tunnel.interactive ? interactiveEnabledText : interactiveDisabledText}" data-interactive="${tunnel.interactive ? 'true' : 'false'}">
+                        <i class="material-icons">fingerprint</i>
+                    </button>
+                    <button class="delete-button deleteRow" title="${deleteTunnelText}" data-i18n-title="buttons.delete">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
             </td>
         `;
 
@@ -83,11 +225,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Add delete row event with confirmation
         row.querySelector(".deleteRow").addEventListener("click", () => {
-            if (confirm("Are you sure you want to delete this tunnel configuration?")) {
+            const confirmMessage = window.i18n ? window.i18n.t('messages.delete_confirm') : 'Are you sure you want to delete this tunnel configuration?';
+            if (confirm(confirmMessage)) {
                 row.style.animation = "fadeOut 0.3s ease-out";
                 setTimeout(() => row.remove(), 300);
             }
         });
+
+        // Add interactive toggle event
+        const interactiveToggle = row.querySelector(".interactive-toggle-button");
+        interactiveToggle.addEventListener("click", () => {
+            const isActive = interactiveToggle.classList.contains('active');
+            const newState = !isActive;
+
+            // Update button state
+            interactiveToggle.classList.toggle('active', newState);
+            interactiveToggle.setAttribute('data-interactive', newState.toString());
+
+            // Update title (icon stays the same, only color changes via CSS)
+            const enabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
+            const disabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
+            interactiveToggle.title = newState ? enabledText : disabledText;
+        });
+
+        // Add control button events
+        const startButton = row.querySelector(".start-button");
+        const restartButton = row.querySelector(".restart-button");
+        const stopButton = row.querySelector(".stop-button");
+
+        startButton.addEventListener("click", () => handleTunnelControl('start', tunnelHash, row));
+        restartButton.addEventListener("click", () => handleTunnelControl('restart', tunnelHash, row));
+        stopButton.addEventListener("click", () => handleTunnelControl('stop', tunnelHash, row));
+
+        // Add click event to status indicator
+        const statusIndicator = row.querySelector(".status-indicator");
+        if (statusIndicator && tunnelHash) {
+            statusIndicator.addEventListener("click", () => {
+                window.location.href = `/tunnel-detail?hash=${tunnelHash}`;
+            });
+            // Add hover effect
+            statusIndicator.style.transition = "transform 0.2s ease";
+            statusIndicator.addEventListener("mouseenter", () => {
+                statusIndicator.style.transform = "scale(1.2)";
+            });
+            statusIndicator.addEventListener("mouseleave", () => {
+                statusIndicator.style.transform = "scale(1)";
+            });
+        }
 
         // Add input validation
         addInputValidation(row);
@@ -96,9 +280,84 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => row.classList.remove("new-row"), 300);
     }
 
+    // Handle tunnel control actions
+    async function handleTunnelControl(action, hash, row) {
+        // Check if hash is available
+        if (!hash) {
+            const errorMsg = window.i18n ? window.i18n.t('messages.save_first') : 'Please save the configuration first';
+            showMessage(errorMsg, 'error');
+            return;
+        }
+
+        const actionText = window.i18n ? window.i18n.t(`buttons.${action}_tunnel`) : `${action} tunnel`;
+        const confirmMsg = window.i18n ? window.i18n.t(`messages.confirm_${action}`) : `Are you sure you want to ${action} this tunnel?`;
+
+        // For restart and stop, ask for confirmation
+        if ((action === 'restart' || action === 'stop') && !confirm(confirmMsg)) {
+            return;
+        }
+
+        // Disable all control buttons during operation
+        const controlButtons = row.querySelectorAll('.control-button');
+        controlButtons.forEach(btn => btn.disabled = true);
+
+        try {
+            let endpoint, method;
+
+            if (!apiConfig.base_url) {
+                throw new Error('API server not configured');
+            }
+
+            if (action === 'restart') {
+                // Restart = stop + start
+                endpoint = `/stop/${hash}`;
+                method = 'POST';
+
+                const stopResponse = await apiCall(endpoint, { method });
+                if (!stopResponse.ok) {
+                    const stopData = await stopResponse.text();
+                    throw new Error(`Stop failed: ${stopResponse.status} - ${stopData}`);
+                }
+
+                // Wait a bit before starting
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                endpoint = `/start/${hash}`;
+                const startResponse = await apiCall(endpoint, { method });
+                if (!startResponse.ok) {
+                    const startData = await startResponse.text();
+                    throw new Error(`Start failed: ${startResponse.status} - ${startData}`);
+                }
+            } else {
+                endpoint = `/${action}/${hash}`;
+                method = 'POST';
+
+                const response = await apiCall(endpoint, { method });
+                if (!response.ok) {
+                    const responseData = await response.text();
+                    throw new Error(`${action} failed: ${response.status} - ${responseData}`);
+                }
+            }
+
+            const successMsg = window.i18n ? window.i18n.t(`messages.${action}_success`) : `Tunnel ${action}ed successfully`;
+            showMessage(successMsg, 'success');
+
+            // Reload status after a short delay
+            setTimeout(() => loadConfiguration(), 1500);
+
+        } catch (error) {
+            console.error(`Error ${action}ing tunnel:`, error);
+            const errorMsg = window.i18n ? window.i18n.t(`messages.${action}_failed`) : `Failed to ${action} tunnel: ${error.message}`;
+            showMessage(errorMsg, 'error');
+        } finally {
+            // Re-enable control buttons
+            controlButtons.forEach(btn => btn.disabled = false);
+        }
+    }
+
     // Add input validation
     function addInputValidation(row) {
-        const inputs = row.querySelectorAll('input');
+        const inputs = row.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('blur', validateInput);
             input.addEventListener('input', clearValidationError);
@@ -109,16 +368,37 @@ document.addEventListener("DOMContentLoaded", () => {
     function validateInput(event) {
         const input = event.target;
         const value = input.value.trim();
-        
+
         // Remove existing error styling
         input.classList.remove('error');
-        
+
         // Validate based on input type and requirements
         if (input.type === 'number') {
             const num = parseInt(value);
             if (value && (isNaN(num) || num < 1 || num > 65535)) {
                 input.classList.add('error');
-                input.title = 'Port must be between 1 and 65535';
+                const errorMsg = window.i18n ? window.i18n.t('validation.port_range') : 'Port must be between 1 and 65535';
+                input.title = errorMsg;
+            }
+        } else if (input.classList.contains('remote-port-input') || input.placeholder && input.placeholder.includes('Remote port')) {
+            // Validate remote_port which can be "port" or "hostname:port" format
+            if (value) {
+                const portPattern = /^[\w.-]+:\d{1,5}$|^\d{1,5}$/;
+                if (!portPattern.test(value)) {
+                    input.classList.add('error');
+                    const errorMsg = window.i18n ? window.i18n.t('validation.remote_port_format') : 'Invalid port format. Use "port" or "hostname:port" (e.g., 44497 or lambda5:44497)';
+                    input.title = errorMsg;
+                }
+            }
+        } else if (input.placeholder && input.placeholder.includes('Local port')) {
+            // Validate local_port which can be "port" or "ip:port" format
+            if (value) {
+                const portPattern = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$|^\d{1,5}$/;
+                if (!portPattern.test(value)) {
+                    input.classList.add('error');
+                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "ip:port" (e.g., 55001 or 192.168.1.100:55001)';
+                    input.title = errorMsg;
+                }
             }
         }
     }
@@ -140,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function showLoading(show) {
         const container = document.querySelector('.container');
         let loadingEl = document.querySelector('.loading');
-        
+
         if (show && !loadingEl) {
             loadingEl = document.createElement('div');
             loadingEl.className = 'loading';
@@ -160,10 +440,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const message = document.createElement('div');
         message.className = `message ${type}`;
         message.textContent = text;
-        
+
         const container = document.querySelector('.container');
         container.insertBefore(message, container.firstChild);
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (message.parentNode) {
@@ -171,6 +451,104 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => message.remove(), 300);
             }
         }, 5000);
+    }
+
+    // Setup refresh controls
+    function setupRefreshControls() {
+        const refreshBtn = document.getElementById('refreshStatus');
+        const autoRefreshCheckbox = document.getElementById('autoRefresh');
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                refreshStatuses();
+            });
+        }
+
+        if (autoRefreshCheckbox) {
+            // Initialize MDC checkbox
+            const checkboxEl = autoRefreshCheckbox.closest('.mdc-checkbox');
+            if (checkboxEl) {
+                new mdc.checkbox.MDCCheckbox(checkboxEl);
+            }
+
+            autoRefreshCheckbox.addEventListener('change', () => {
+                if (autoRefreshCheckbox.checked) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+        }
+    }
+
+    // Refresh only statuses (not full config reload)
+    async function refreshStatuses() {
+        const statuses = await fetchTunnelStatuses();
+        if (Object.keys(statuses).length === 0) return;
+
+        // Update status indicators in existing rows
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            const nameInput = row.querySelector('td:nth-child(2) input');
+            const statusIndicator = row.querySelector('.status-indicator');
+
+            if (nameInput && statusIndicator) {
+                const tunnelName = nameInput.value.trim();
+                const status = statuses[tunnelName] || 'STOPPED';
+                updateStatusIndicator(statusIndicator, status);
+            }
+        });
+    }
+
+    // Update a single status indicator
+    function updateStatusIndicator(indicator, status) {
+        let statusColor = "#9E9E9E";
+        let statusIcon = "help_outline";
+        let statusTooltip = "Unknown";
+
+        switch (status) {
+            case "RUNNING":
+            case "NORMAL":
+                statusIcon = "check_circle";
+                statusColor = "#4CAF50";
+                statusTooltip = "Running";
+                break;
+            case "DEAD":
+                statusIcon = "cancel";
+                statusColor = "#F44336";
+                statusTooltip = "Dead";
+                break;
+            case "STARTING":
+                statusIcon = "hourglass_empty";
+                statusColor = "#FF9800";
+                statusTooltip = "Starting";
+                break;
+            case "STOPPED":
+                statusIcon = "stop_circle";
+                statusColor = "#9E9E9E";
+                statusTooltip = "Stopped";
+                break;
+        }
+
+        indicator.textContent = statusIcon;
+        indicator.style.color = statusColor;
+        indicator.title = statusTooltip;
+    }
+
+    // Start auto-refresh
+    function startAutoRefresh() {
+        if (autoRefreshInterval) return;
+        autoRefreshInterval = setInterval(() => {
+            refreshStatuses();
+        }, AUTO_REFRESH_INTERVAL);
+    }
+
+    // Stop auto-refresh
+    function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
     }
 
     // Add new row button event
@@ -181,11 +559,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Save config button event
     document.getElementById("saveConfig").addEventListener("click", () => {
         const rows = Array.from(tableBody.rows);
-        
+
         // Validate all inputs before saving
         let hasErrors = false;
         rows.forEach(row => {
-            const inputs = row.querySelectorAll('input');
+            const inputs = row.querySelectorAll('input, textarea');
             inputs.forEach(input => {
                 validateInput({ target: input });
                 if (input.classList.contains('error')) {
@@ -195,18 +573,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (hasErrors) {
-            showMessage("Please fix validation errors before saving", "error");
+            const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fix validation errors before saving';
+            showMessage(errorMsg, "error");
             return;
         }
 
         const updatedData = rows.map((row) => {
             const cells = row.cells;
+            const interactiveToggle = cells[7].querySelector(".interactive-toggle-button");
             return {
-                name: cells[0].querySelector("input").value.trim(),
-                remote_host: cells[1].querySelector("input").value.trim(),
-                remote_port: cells[2].querySelector("input").value.trim(),
-                local_port: cells[3].querySelector("input").value.trim(),
-                direction: cells[4].querySelector("select").value,
+                name: cells[1].querySelector("input").value.trim(),
+                remote_host: cells[3].querySelector("input").value.trim(),
+                remote_port: cells[4].querySelector("input").value.trim(),
+                local_port: cells[5].querySelector("input").value.trim(),
+                interactive: interactiveToggle.getAttribute('data-interactive') === 'true',
+                direction: cells[6].querySelector("select").value,
             };
         });
 
@@ -221,40 +602,23 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tunnels: validTunnels }),
         })
-        .then(response => {
-            showLoading(false);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(() => {
-            showMessage("Configuration saved successfully!", "success");
-        })
-        .catch(error => {
-            console.error("Error saving configuration:", error);
-            showMessage("Failed to save configuration", "error");
-        });
+            .then(response => {
+                showLoading(false);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(() => {
+                const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
+                showMessage(successMsg, "success");
+            })
+            .catch(error => {
+                console.error("Error saving configuration:", error);
+                const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
+                showMessage(errorMsg, "error");
+            });
     });
+
 });
 
-// Add fadeOut animation to CSS
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-    }
-    
-    .table-input.error {
-        border-color: #d32f2f;
-        box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
-    }
-`;
-document.head.appendChild(style);

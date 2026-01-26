@@ -1,0 +1,228 @@
+{
+  "app": {
+    "title": "SSH 隧道配置",
+    "name": "SSH 隧道管理器",
+    "help_title": "SSH 隧道管理器 - 帮助"
+  },
+  "navigation": {
+    "help": "帮助与文档",
+    "docker_hub": "Docker Hub",
+    "github": "GitHub",
+    "back": "返回",
+    "language_toggle": "Language / 语言",
+    "language_toggle_prefix": "可用语言"
+  },
+  "table": {
+    "headers": {
+      "controls": "控制",
+      "name": "名称",
+      "status": "状态",
+      "remote_host": "远程主机",
+      "remote_port": "远程端口",
+      "local_port": "本地端口",
+      "direction": "方向",
+      "actions": "操作"
+    },
+    "placeholders": {
+      "tunnel_name": "隧道名称",
+      "remote_host": "远程主机",
+      "remote_port": "远程端口 (例如：44497 或 hostname:44497)",
+      "local_port": "本地端口 (例如：55001 或 192.168.1.100:55001)"
+    },
+    "direction": {
+      "remote_to_local": "远程到本地",
+      "local_to_remote": "本地到远程"
+    },
+    "status": {
+      "running": "运行中",
+      "normal": "正常",
+      "dead": "已停止",
+      "starting": "启动中",
+      "stopped": "已停止",
+      "na": "不可用"
+    }
+  },
+  "buttons": {
+    "add": "添加",
+    "save_restart": "保存并重启",
+    "delete": "删除隧道",
+    "interactive_auth_enabled": "已启用交互认证",
+    "interactive_auth_disabled": "已禁用交互认证",
+    "start_tunnel": "启动隧道",
+    "restart_tunnel": "重启隧道",
+    "stop_tunnel": "停止隧道",
+    "refresh": "刷新",
+    "auto_refresh": "自动刷新"
+  },
+  "tooltips": {
+    "add_tunnel": "添加隧道",
+    "save_config": "保存配置并重启",
+    "direction": "方向",
+    "actions": "操作",
+    "controls": "控制"
+  },
+  "messages": {
+    "delete_confirm": "确定要删除此隧道配置吗？",
+    "config_saved": "配置保存成功！",
+    "config_save_failed": "配置保存失败",
+    "config_load_failed": "配置加载失败",
+    "validation_errors": "请修复验证错误后再保存",
+    "no_tunnels": "配置中未找到隧道",
+    "confirm_start": "确定要启动此隧道吗？",
+    "confirm_restart": "确定要重启此隧道吗？",
+    "confirm_stop": "确定要停止此隧道吗？",
+    "start_success": "隧道启动成功",
+    "restart_success": "隧道重启成功",
+    "stop_success": "隧道停止成功",
+    "start_failed": "隧道启动失败",
+    "restart_failed": "隧道重启失败",
+    "stop_failed": "隧道停止失败",
+    "save_first": "请先保存配置"
+  },
+  "validation": {
+    "port_range": "端口必须在 1 到 65535 之间",
+    "remote_port_format": "端口格式无效。请使用 \"端口\" 或 \"主机名:端口\" 格式 (例如：44497 或 lambda5:44497)",
+    "local_port_format": "端口格式无效。请使用 \"端口\" 或 \"IP:端口\" 格式 (例如：55001 或 192.168.1.100:55001)"
+  },
+  "tunnel_detail": {
+    "title": "隧道详情",
+    "configuration": "配置信息",
+    "name": "名称",
+    "hash": "哈希值",
+    "remote_host": "远程主机",
+    "remote_port": "远程端口",
+    "local_port": "本地端口",
+    "direction": "方向",
+    "interactive": "交互认证",
+    "status": "状态",
+    "controls": "控制操作",
+    "logs": "日志",
+    "no_logs": "暂无日志。启动隧道后将显示日志。"
+  },
+  "help": {
+    "toc": "目录",
+    "sections": {
+      "overview": "概述",
+      "setup": "快速设置",
+      "web_config": "网页配置",
+      "yaml_config": "YAML配置",
+      "ssh_config": "SSH配置",
+      "advanced": "高级配置",
+      "troubleshooting": "故障排除"
+    },
+    "overview": {
+      "title": "概述",
+      "description": "SSH Tunnel Manager 是一个基于 Docker 的解决方案，使用 autossh 和 YAML 配置文件来管理 SSH 隧道。",
+      "features": {
+        "title": "主要功能：",
+        "dockerized": "Docker化：环境封装，易于部署和管理",
+        "web_config": "网页配置：通过可视化界面管理隧道配置",
+        "auto_reload": "自动重载：检测配置变化并自动重载服务",
+        "bidirectional": "双向隧道：支持本地到远程和远程到本地的隧道",
+        "multi_arch": "多架构支持：支持 AMD64、ARM64 等多种架构"
+      }
+    },
+    "setup": {
+      "title": "快速设置",
+      "step1": "1. 下载配置文件",
+      "step1_desc": "下载 docker-compose.yaml",
+      "step1_create": "创建配置目录",
+      "step2": "2. 配置用户权限",
+      "step2_check": "查看当前用户 UID/GID",
+      "step2_set": "设置环境变量",
+      "step3": "3. 启动服务",
+      "step4": "4. 访问网页界面",
+      "step4_desc": "打开浏览器访问：",
+      "access_url": "http://localhost:5000"
+    },
+    "web_config": {
+      "title": "网页配置",
+      "interface": {
+        "title": "界面说明：",
+        "name": "Name：隧道名称，用于标识",
+        "status": "Status：隧道当前状态（运行/停止/错误）",
+        "remote_host": "Remote Host：远程主机地址（如：user@server.com）",
+        "remote_port": "Remote Port：远程端口或主机:端口格式",
+        "local_port": "Local Port：本地端口或IP:端口格式",
+        "direction": "Direction：隧道方向（远程到本地/本地到远程）",
+        "actions": "Actions：操作按钮（交互认证/删除）"
+      },
+      "interactive_auth": {
+        "title": "交互认证：",
+        "description": "点击指纹图标可以切换交互认证状态：",
+        "enabled": "🫆 绿色：启用交互认证",
+        "disabled": "🫆 灰色：禁用交互认证"
+      },
+      "save_config": {
+        "title": "保存配置：",
+        "description": "点击 Save & Restart 按钮保存配置并重启隧道服务。"
+      },
+      "tunnel_detail": {
+        "title": "隧道详情页面：",
+        "description": "点击主页面表格中的状态指示器可以打开该隧道的详情页面。",
+        "features": "详情页面提供以下功能：",
+        "feature_config": "查看隧道的完整配置信息",
+        "feature_control": "启动、重启或停止隧道",
+        "feature_logs": "实时查看隧道日志",
+        "feature_status": "监控隧道运行状态"
+      }
+    },
+    "yaml_config": {
+      "title": "YAML配置",
+      "basic_format": "基本格式：",
+      "basic_comment1": "将本地服务暴露到远程服务器",
+      "basic_comment2": "将远程服务映射到本地端口",
+      "advanced_format": "高级配置 - 指定绑定地址：",
+      "advanced_comment1": "指定远程绑定地址",
+      "advanced_comment2": "指定本地绑定地址"
+    },
+    "ssh_config": {
+      "title": "SSH配置",
+      "important": "重要",
+      "important_desc": "本项目严重依赖 ~/.ssh/config 文件进行 SSH 连接配置。",
+      "example": "SSH配置文件示例 (~/.ssh/config)：",
+      "permissions": "SSH密钥权限："
+    },
+    "advanced": {
+      "title": "高级配置",
+      "env_vars": "环境变量：",
+      "env_puid": "容器用户 UID（默认：1000）",
+      "env_pgid": "容器用户 GID（默认：1000）",
+      "port_formats": "端口格式：",
+      "port_simple": "简单端口",
+      "port_hostname": "主机:端口",
+      "port_ip": "IP:端口",
+      "tunnel_directions": "隧道方向：",
+      "direction_r2l": "将远程服务映射到本地（默认）",
+      "direction_l2r": "将本地服务暴露到远程",
+      "security": "安全注意事项：",
+      "security_desc": "启用远程端口转发时，可能需要在远程服务器配置 GatewayPorts：",
+      "security_edit": "编辑 /etc/ssh/sshd_config",
+      "security_restart": "重启 SSH 服务"
+    },
+    "troubleshooting": {
+      "title": "故障排除",
+      "common_issues": "常见问题：",
+      "tunnel_failed": "🔴 隧道连接失败",
+      "permission_error": "🔴 权限错误",
+      "config_not_effective": "🔴 配置不生效",
+      "view_logs": "查看日志：",
+      "view_logs_all": "查看所有服务日志",
+      "view_logs_specific": "查看特定服务日志",
+      "restart_services": "重启服务：",
+      "restart_all": "重启所有服务",
+      "restart_specific": "重启特定服务",
+      "solutions": {
+        "check_ssh_config": "检查 SSH 配置文件 ~/.ssh/config",
+        "verify_ssh_keys": "验证 SSH 密钥权限",
+        "confirm_remote_access": "确认远程主机可访问",
+        "check_puid_pgid": "检查 PUID/PGID 设置",
+        "confirm_ssh_permissions": "确认 SSH 密钥文件权限",
+        "verify_docker_permissions": "验证 Docker 用户组权限",
+        "check_yaml_syntax": "检查 YAML 语法是否正确",
+        "confirm_config_path": "确认配置文件路径",
+        "restart_container": "重启容器服务"
+      }
+    }
+  }
+}

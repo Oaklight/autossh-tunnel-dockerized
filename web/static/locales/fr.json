@@ -1,0 +1,228 @@
+{
+  "app": {
+    "title": "Configuration de Tunnel SSH",
+    "name": "Gestionnaire de Tunnels SSH",
+    "help_title": "Gestionnaire de Tunnels SSH - Aide"
+  },
+  "navigation": {
+    "help": "Aide et Documentation",
+    "docker_hub": "Docker Hub",
+    "github": "GitHub",
+    "back": "Retour",
+    "language_toggle": "Language / Langue",
+    "language_toggle_prefix": "Langues disponibles"
+  },
+  "table": {
+    "headers": {
+      "controls": "Contrôles",
+      "name": "Nom",
+      "status": "État",
+      "remote_host": "Hôte Distant",
+      "remote_port": "Port Distant",
+      "local_port": "Port Local",
+      "direction": "Direction",
+      "actions": "Actions"
+    },
+    "placeholders": {
+      "tunnel_name": "Nom du tunnel",
+      "remote_host": "Hôte distant",
+      "remote_port": "Port distant (ex. : 44497 ou hostname:44497)",
+      "local_port": "Port local (ex. : 55001 ou 192.168.1.100:55001)"
+    },
+    "direction": {
+      "remote_to_local": "Distant vers local",
+      "local_to_remote": "Local vers distant"
+    },
+    "status": {
+      "running": "En cours",
+      "normal": "Normal",
+      "dead": "Arrêté",
+      "starting": "Démarrage",
+      "stopped": "Arrêté",
+      "na": "Non disponible"
+    }
+  },
+  "buttons": {
+    "add": "Ajouter",
+    "save_restart": "Enregistrer et redémarrer",
+    "delete": "Supprimer le tunnel",
+    "interactive_auth_enabled": "Authentification interactive activée",
+    "interactive_auth_disabled": "Authentification interactive désactivée",
+    "start_tunnel": "Démarrer le tunnel",
+    "restart_tunnel": "Redémarrer le tunnel",
+    "stop_tunnel": "Arrêter le tunnel",
+    "refresh": "Actualiser",
+    "auto_refresh": "Actualisation automatique"
+  },
+  "tooltips": {
+    "add_tunnel": "Ajouter un tunnel",
+    "save_config": "Enregistrer la configuration et redémarrer",
+    "direction": "Direction",
+    "actions": "Actions",
+    "controls": "Contrôles"
+  },
+  "messages": {
+    "delete_confirm": "Êtes-vous sûr de vouloir supprimer cette configuration de tunnel ?",
+    "config_saved": "Configuration enregistrée avec succès !",
+    "config_save_failed": "Échec de l'enregistrement de la configuration",
+    "config_load_failed": "Échec du chargement de la configuration",
+    "validation_errors": "Veuillez corriger les erreurs de validation avant d'enregistrer",
+    "no_tunnels": "Aucun tunnel trouvé dans la configuration",
+    "confirm_start": "Êtes-vous sûr de vouloir démarrer ce tunnel ?",
+    "confirm_restart": "Êtes-vous sûr de vouloir redémarrer ce tunnel ?",
+    "confirm_stop": "Êtes-vous sûr de vouloir arrêter ce tunnel ?",
+    "start_success": "Tunnel démarré avec succès",
+    "restart_success": "Tunnel redémarré avec succès",
+    "stop_success": "Tunnel arrêté avec succès",
+    "start_failed": "Échec du démarrage du tunnel",
+    "restart_failed": "Échec du redémarrage du tunnel",
+    "stop_failed": "Échec de l'arrêt du tunnel",
+    "save_first": "Veuillez d'abord enregistrer la configuration"
+  },
+  "validation": {
+    "port_range": "Le port doit être compris entre 1 et 65535",
+    "remote_port_format": "Format de port non valide. Utilisez le format \"port\" ou \"hostname:port\" (ex. : 44497 ou lambda5:44497)",
+    "local_port_format": "Format de port non valide. Utilisez le format \"port\" ou \"IP:port\" (ex. : 55001 ou 192.168.1.100:55001)"
+  },
+  "tunnel_detail": {
+    "title": "Détails du Tunnel",
+    "configuration": "Configuration",
+    "name": "Nom",
+    "hash": "Hash",
+    "remote_host": "Hôte Distant",
+    "remote_port": "Port Distant",
+    "local_port": "Port Local",
+    "direction": "Direction",
+    "interactive": "Authentification Interactive",
+    "status": "État",
+    "controls": "Contrôles",
+    "logs": "Journaux",
+    "no_logs": "Aucun journal disponible pour le moment. Démarrez le tunnel pour voir les journaux."
+  },
+  "help": {
+    "toc": "Table des matières",
+    "sections": {
+      "overview": "Aperçu général",
+      "setup": "Configuration rapide",
+      "web_config": "Configuration web",
+      "yaml_config": "Configuration YAML",
+      "ssh_config": "Configuration SSH",
+      "advanced": "Configuration avancée",
+      "troubleshooting": "Résolution des problèmes"
+    },
+    "overview": {
+      "title": "Aperçu général",
+      "description": "SSH Tunnel Manager est une solution basée sur Docker qui utilise autossh et des fichiers de configuration YAML pour gérer les tunnels SSH.",
+      "features": {
+        "title": "Fonctionnalités principales :",
+        "dockerized": "Dockerisé : Encapsulation de l'environnement, déploiement et gestion faciles",
+        "web_config": "Configuration web : Gestion de la configuration des tunnels via une interface visuelle",
+        "auto_reload": "Rechargement automatique : Détection des changements de configuration et rechargement automatique du service",
+        "bidirectional": "Tunnels bidirectionnels : Prise en charge des tunnels du local vers le distant et du distant vers le local",
+        "multi_arch": "Prise en charge multi-architecture : Compatible avec plusieurs architectures comme AMD64, ARM64"
+      }
+    },
+    "setup": {
+      "title": "Configuration rapide",
+      "step1": "1. Télécharger le fichier de configuration",
+      "step1_desc": "Télécharger docker-compose.yaml",
+      "step1_create": "Créer le répertoire de configuration",
+      "step2": "2. Configurer les permissions utilisateur",
+      "step2_check": "Voir l'UID/GID de l'utilisateur actuel",
+      "step2_set": "Définir les variables d'environnement",
+      "step3": "3. Démarrer le service",
+      "step4": "4. Accéder à l'interface web",
+      "step4_desc": "Ouvrir le navigateur et accéder à :",
+      "access_url": "http://localhost:5000"
+    },
+    "web_config": {
+      "title": "Configuration web",
+      "interface": {
+        "title": "Description de l'interface :",
+        "name": "Name : Nom du tunnel, pour identification",
+        "status": "Status : État actuel du tunnel (en cours/arrêté/erreur)",
+        "remote_host": "Remote Host : Adresse de l'hôte distant (ex. : user@server.com)",
+        "remote_port": "Remote Port : Port distant ou format hôte:port",
+        "local_port": "Local Port : Port local ou format IP:port",
+        "direction": "Direction : Direction du tunnel (distant vers local/local vers distant)",
+        "actions": "Actions : Boutons d'action (authentification interactive/supprimer)"
+      },
+      "interactive_auth": {
+        "title": "Authentification interactive :",
+        "description": "Cliquez sur l'icône d'empreinte digitale pour basculer l'état de l'authentification interactive :",
+        "enabled": "🫆 Vert : Authentification interactive activée",
+        "disabled": "🫆 Gris : Authentification interactive désactivée"
+      },
+      "save_config": {
+        "title": "Enregistrer la configuration :",
+        "description": "Cliquez sur le bouton Save & Restart pour enregistrer la configuration et redémarrer le service de tunnels."
+      },
+      "tunnel_detail": {
+        "title": "Page de Détails du Tunnel :",
+        "description": "Cliquez sur l'indicateur d'état dans le tableau de la page principale pour ouvrir la page de détails du tunnel.",
+        "features": "La page de détails fournit les fonctionnalités suivantes :",
+        "feature_config": "Afficher la configuration complète du tunnel",
+        "feature_control": "Démarrer, redémarrer ou arrêter le tunnel",
+        "feature_logs": "Afficher les journaux du tunnel en temps réel",
+        "feature_status": "Surveiller l'état d'exécution du tunnel"
+      }
+    },
+    "yaml_config": {
+      "title": "Configuration YAML",
+      "basic_format": "Format de base :",
+      "basic_comment1": "Exposer le service local sur le serveur distant",
+      "basic_comment2": "Mapper le service distant vers le port local",
+      "advanced_format": "Configuration avancée - spécifier l'adresse de liaison :",
+      "advanced_comment1": "Spécifier l'adresse de liaison distante",
+      "advanced_comment2": "Spécifier l'adresse de liaison locale"
+    },
+    "ssh_config": {
+      "title": "Configuration SSH",
+      "important": "Important",
+      "important_desc": "Ce projet dépend fortement du fichier ~/.ssh/config pour la configuration de connexion SSH.",
+      "example": "Exemple de fichier de configuration SSH (~/.ssh/config) :",
+      "permissions": "Permissions de clé SSH :"
+    },
+    "advanced": {
+      "title": "Configuration avancée",
+      "env_vars": "Variables d'environnement :",
+      "env_puid": "UID de l'utilisateur du conteneur (par défaut : 1000)",
+      "env_pgid": "GID de l'utilisateur du conteneur (par défaut : 1000)",
+      "port_formats": "Formats de port :",
+      "port_simple": "Port simple",
+      "port_hostname": "Hôte:port",
+      "port_ip": "IP:port",
+      "tunnel_directions": "Directions de tunnel :",
+      "direction_r2l": "Mapper le service distant vers le local (par défaut)",
+      "direction_l2r": "Exposer le service local vers le distant",
+      "security": "Considérations de sécurité :",
+      "security_desc": "Lors de l'activation de la redirection de port distant, il peut être nécessaire de configurer GatewayPorts sur le serveur distant :",
+      "security_edit": "Modifier /etc/ssh/sshd_config",
+      "security_restart": "Redémarrer le service SSH"
+    },
+    "troubleshooting": {
+      "title": "Résolution des problèmes",
+      "common_issues": "Problèmes courants :",
+      "tunnel_failed": "🔴 Échec de connexion du tunnel",
+      "permission_error": "🔴 Erreur de permissions",
+      "config_not_effective": "🔴 Configuration non effective",
+      "view_logs": "Voir les journaux :",
+      "view_logs_all": "Voir tous les journaux de services",
+      "view_logs_specific": "Voir les journaux d'un service spécifique",
+      "restart_services": "Redémarrer les services :",
+      "restart_all": "Redémarrer tous les services",
+      "restart_specific": "Redémarrer un service spécifique",
+      "solutions": {
+        "check_ssh_config": "Vérifier le fichier de configuration SSH ~/.ssh/config",
+        "verify_ssh_keys": "Vérifier les permissions des clés SSH",
+        "confirm_remote_access": "Confirmer l'accès à l'hôte distant",
+        "check_puid_pgid": "Vérifier la configuration PUID/PGID",
+        "confirm_ssh_permissions": "Confirmer les permissions du fichier de clé SSH",
+        "verify_docker_permissions": "Vérifier les permissions du groupe d'utilisateurs Docker",
+        "check_yaml_syntax": "Vérifier si la syntaxe YAML est correcte",
+        "confirm_config_path": "Confirmer le chemin du fichier de configuration",
+        "restart_container": "Redémarrer le service du conteneur"
+      }
+    }
+  }
+}

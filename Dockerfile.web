@@ -1,5 +1,9 @@
 # Build stage
-FROM golang:tip-alpine AS builder
+ARG REGISTRY_MIRROR=docker.io
+FROM ${REGISTRY_MIRROR}/library/golang:tip-alpine AS builder
+
+# Proxy support
+ARG GOPROXY
 
 WORKDIR /app
 
@@ -12,11 +16,17 @@ RUN go mod init app
 # Force regenerate go.sum and download dependencies
 RUN go mod tidy && go mod download
 
-# Build the Go binary
-RUN CGO_ENABLED=0 go build -o app .
+# Build the Go binary with optimization flags
+RUN CGO_ENABLED=0 go build \
+    -ldflags="-s -w" \
+    -trimpath \
+    -o app .
 
 # Final stage
-FROM alpine:3.22.0
+ARG REGISTRY_MIRROR=docker.io
+FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0
+
+RUN apk add --no-cache su-exec
 
 # Create a non-root user with default UID/GID (will be overridden in entrypoint.sh)
 RUN addgroup -g 1000 mygroup && \

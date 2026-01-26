@@ -1,0 +1,228 @@
+{
+  "app": {
+    "title": "SSH Tunnel Config",
+    "name": "SSH Tunnel Manager",
+    "help_title": "SSH Tunnel Manager - Help"
+  },
+  "navigation": {
+    "help": "Help & Documentation",
+    "docker_hub": "Docker Hub",
+    "github": "GitHub",
+    "back": "Back",
+    "language_toggle": "Language / 语言",
+    "language_toggle_prefix": "Available Languages"
+  },
+  "table": {
+    "headers": {
+      "controls": "Controls",
+      "name": "Name",
+      "status": "Status",
+      "remote_host": "Remote Host",
+      "remote_port": "Remote Port",
+      "local_port": "Local Port",
+      "direction": "Direction",
+      "actions": "Actions"
+    },
+    "placeholders": {
+      "tunnel_name": "Tunnel name",
+      "remote_host": "Remote host",
+      "remote_port": "Remote port (e.g., 44497 or hostname:44497)",
+      "local_port": "Local port (e.g., 55001 or 192.168.1.100:55001)"
+    },
+    "direction": {
+      "remote_to_local": "Remote to Local",
+      "local_to_remote": "Local to Remote"
+    },
+    "status": {
+      "running": "RUNNING",
+      "normal": "NORMAL",
+      "dead": "DEAD",
+      "starting": "STARTING",
+      "stopped": "STOPPED",
+      "na": "N/A"
+    }
+  },
+  "buttons": {
+    "add": "Add",
+    "save_restart": "Save & Restart",
+    "delete": "Delete tunnel",
+    "interactive_auth_enabled": "Interactive Auth Enabled",
+    "interactive_auth_disabled": "Interactive Auth Disabled",
+    "start_tunnel": "Start tunnel",
+    "restart_tunnel": "Restart tunnel",
+    "stop_tunnel": "Stop tunnel",
+    "refresh": "Refresh",
+    "auto_refresh": "Auto Refresh"
+  },
+  "tooltips": {
+    "add_tunnel": "Add Tunnel",
+    "save_config": "Save Configuration and Restart",
+    "direction": "Direction",
+    "actions": "Actions",
+    "controls": "Controls"
+  },
+  "messages": {
+    "delete_confirm": "Are you sure you want to delete this tunnel configuration?",
+    "config_saved": "Configuration saved successfully!",
+    "config_save_failed": "Failed to save configuration",
+    "config_load_failed": "Failed to load configuration",
+    "validation_errors": "Please fix validation errors before saving",
+    "no_tunnels": "No tunnels found in configuration",
+    "confirm_start": "Are you sure you want to start this tunnel?",
+    "confirm_restart": "Are you sure you want to restart this tunnel?",
+    "confirm_stop": "Are you sure you want to stop this tunnel?",
+    "start_success": "Tunnel started successfully",
+    "restart_success": "Tunnel restarted successfully",
+    "stop_success": "Tunnel stopped successfully",
+    "start_failed": "Failed to start tunnel",
+    "restart_failed": "Failed to restart tunnel",
+    "stop_failed": "Failed to stop tunnel",
+    "save_first": "Please save the configuration first"
+  },
+  "validation": {
+    "port_range": "Port must be between 1 and 65535",
+    "remote_port_format": "Invalid port format. Use \"port\" or \"hostname:port\" (e.g., 44497 or lambda5:44497)",
+    "local_port_format": "Invalid port format. Use \"port\" or \"ip:port\" (e.g., 55001 or 192.168.1.100:55001)"
+  },
+  "tunnel_detail": {
+    "title": "Tunnel Details",
+    "configuration": "Configuration",
+    "name": "Name",
+    "hash": "Hash",
+    "remote_host": "Remote Host",
+    "remote_port": "Remote Port",
+    "local_port": "Local Port",
+    "direction": "Direction",
+    "interactive": "Interactive Auth",
+    "status": "Status",
+    "controls": "Controls",
+    "logs": "Logs",
+    "no_logs": "No logs available yet. Start the tunnel to see logs."
+  },
+  "help": {
+    "toc": "Table of Contents",
+    "sections": {
+      "overview": "Overview",
+      "setup": "Quick Setup",
+      "web_config": "Web Configuration",
+      "yaml_config": "YAML Configuration",
+      "ssh_config": "SSH Configuration",
+      "advanced": "Advanced Configuration",
+      "troubleshooting": "Troubleshooting"
+    },
+    "overview": {
+      "title": "Overview",
+      "description": "SSH Tunnel Manager is a Docker-based solution that uses autossh and YAML configuration files to manage SSH tunnels.",
+      "features": {
+        "title": "Key Features:",
+        "dockerized": "Dockerized: Environment encapsulation, easy deployment and management",
+        "web_config": "Web Configuration: Manage tunnel configuration through visual interface",
+        "auto_reload": "Auto Reload: Detect configuration changes and automatically reload services",
+        "bidirectional": "Bidirectional Tunnels: Support local-to-remote and remote-to-local tunnels",
+        "multi_arch": "Multi-Architecture Support: Support AMD64, ARM64 and other architectures"
+      }
+    },
+    "setup": {
+      "title": "Quick Setup",
+      "step1": "1. Download Configuration Files",
+      "step1_desc": "Download docker-compose.yaml",
+      "step1_create": "Create configuration directory",
+      "step2": "2. Configure User Permissions",
+      "step2_check": "Check current user UID/GID",
+      "step2_set": "Set environment variables",
+      "step3": "3. Start Services",
+      "step4": "4. Access Web Interface",
+      "step4_desc": "Open browser and visit:",
+      "access_url": "http://localhost:5000"
+    },
+    "web_config": {
+      "title": "Web Configuration",
+      "interface": {
+        "title": "Interface Description:",
+        "name": "Name: Tunnel name for identification",
+        "status": "Status: Current tunnel status (running/stopped/error)",
+        "remote_host": "Remote Host: Remote host address (e.g., user@server.com)",
+        "remote_port": "Remote Port: Remote port or host:port format",
+        "local_port": "Local Port: Local port or IP:port format",
+        "direction": "Direction: Tunnel direction (remote to local/local to remote)",
+        "actions": "Actions: Action buttons (interactive authentication/delete)"
+      },
+      "interactive_auth": {
+        "title": "Interactive Authentication:",
+        "description": "Click the fingerprint icon to toggle interactive authentication status:",
+        "enabled": "🫆 Green: Interactive authentication enabled",
+        "disabled": "🫆 Gray: Interactive authentication disabled"
+      },
+      "save_config": {
+        "title": "Save Configuration:",
+        "description": "Click the Save & Restart button to save configuration and restart tunnel services."
+      },
+      "tunnel_detail": {
+        "title": "Tunnel Detail Page:",
+        "description": "Click on the status indicator in the main page table to open the tunnel's detail page.",
+        "features": "The detail page provides the following features:",
+        "feature_config": "View complete tunnel configuration",
+        "feature_control": "Start, restart, or stop the tunnel",
+        "feature_logs": "View tunnel logs in real-time",
+        "feature_status": "Monitor tunnel running status"
+      }
+    },
+    "yaml_config": {
+      "title": "YAML Configuration",
+      "basic_format": "Basic Format:",
+      "basic_comment1": "Expose local service to remote server",
+      "basic_comment2": "Map remote service to local port",
+      "advanced_format": "Advanced Configuration - Specify Binding Address:",
+      "advanced_comment1": "Specify remote binding address",
+      "advanced_comment2": "Specify local binding address"
+    },
+    "ssh_config": {
+      "title": "SSH Configuration",
+      "important": "Important",
+      "important_desc": "This project heavily relies on the ~/.ssh/config file for SSH connection configuration.",
+      "example": "SSH Configuration File Example (~/.ssh/config):",
+      "permissions": "SSH Key Permissions:"
+    },
+    "advanced": {
+      "title": "Advanced Configuration",
+      "env_vars": "Environment Variables:",
+      "env_puid": "Container user UID (default: 1000)",
+      "env_pgid": "Container user GID (default: 1000)",
+      "port_formats": "Port Formats:",
+      "port_simple": "Simple port",
+      "port_hostname": "Hostname:port",
+      "port_ip": "IP:port",
+      "tunnel_directions": "Tunnel Directions:",
+      "direction_r2l": "Map remote service to local (default)",
+      "direction_l2r": "Expose local service to remote",
+      "security": "Security Notes:",
+      "security_desc": "When enabling remote port forwarding, you may need to configure GatewayPorts on the remote server:",
+      "security_edit": "Edit /etc/ssh/sshd_config",
+      "security_restart": "Restart SSH service"
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "common_issues": "Common Issues:",
+      "tunnel_failed": "🔴 Tunnel Connection Failed",
+      "permission_error": "🔴 Permission Error",
+      "config_not_effective": "🔴 Configuration Not Effective",
+      "view_logs": "View Logs:",
+      "view_logs_all": "View all service logs",
+      "view_logs_specific": "View specific service logs",
+      "restart_services": "Restart Services:",
+      "restart_all": "Restart all services",
+      "restart_specific": "Restart specific service",
+      "solutions": {
+        "check_ssh_config": "Check SSH configuration file ~/.ssh/config",
+        "verify_ssh_keys": "Verify SSH key permissions",
+        "confirm_remote_access": "Confirm remote host accessibility",
+        "check_puid_pgid": "Check PUID/PGID settings",
+        "confirm_ssh_permissions": "Confirm SSH key file permissions",
+        "verify_docker_permissions": "Verify Docker user group permissions",
+        "check_yaml_syntax": "Check YAML syntax correctness",
+        "confirm_config_path": "Confirm configuration file path",
+        "restart_container": "Restart container services"
+      }
+    }
+  }
+}
