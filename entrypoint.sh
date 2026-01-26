@@ -30,6 +30,9 @@ chmod 777 /tmp
 mkdir -p /tmp/autossh-logs
 chmod 777 /tmp/autossh-logs
 
+# Clean up old log files on container start
+rm -f /tmp/autossh-logs/*.log
+
 # Clean up state file on container start to ensure accuracy
 # The state file will be recreated with actual running tunnels
 rm -f /tmp/autossh_tunnels.state
