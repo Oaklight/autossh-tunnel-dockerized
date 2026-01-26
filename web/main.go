@@ -45,11 +45,6 @@ type Tunnel struct {
 	Hash        string `yaml:"-" json:"hash,omitempty"`
 }
 
-type TunnelStatus struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
-}
-
 type Config struct {
 	Tunnels []Tunnel `yaml:"tunnels" json:"tunnels"`
 }
@@ -234,29 +229,6 @@ func tunnelDetailHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func fetchTunnelStatuses() (map[string]string, error) {
-	if apiBaseURL == "" {
-		return nil, nil
-	}
-	client := &http.Client{Timeout: 2 * time.Second}
-	resp, err := client.Get(apiBaseURL + "/status")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var statuses []TunnelStatus
-	if err := json.NewDecoder(resp.Body).Decode(&statuses); err != nil {
-		return nil, err
-	}
-
-	statusMap := make(map[string]string)
-	for _, s := range statuses {
-		statusMap[s.Name] = s.Status
-	}
-	return statusMap, nil
-}
-
 func getConfigHandler(w http.ResponseWriter, r *http.Request) {
 	config, err := loadConfig()
 	if err != nil {
@@ -264,24 +236,17 @@ func getConfigHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch statuses
-	statuses, err := fetchTunnelStatuses()
-	if err != nil {
-		logMsg("WARN", "WEB", "Error fetching statuses: %v", err)
-	}
-
-	for i := range config.Tunnels {
-		if statuses == nil {
-			config.Tunnels[i].Status = "N/A"
-		} else if status, ok := statuses[config.Tunnels[i].Name]; ok {
-			config.Tunnels[i].Status = status
-		} else {
-			config.Tunnels[i].Status = "STOPPED"
-		}
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(config)
+}
+
+// getAPIConfigHandler returns API configuration for frontend
+func getAPIConfigHandler(w http.ResponseWriter, r *http.Request) {
+	response := map[string]string{
+		"base_url": apiBaseURL,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func updateConfigHandler(w http.ResponseWriter, r *http.Request) {
@@ -384,6 +349,7 @@ func main() {
 		}
 	})
 	http.HandleFunc("/api/languages", getLanguagesHandler)
+	http.HandleFunc("/api/config/api", getAPIConfigHandler)
 
 	logMsg("INFO", "WEB", "Starting server on %s", defaultPort)
 	err := http.ListenAndServe(defaultPort, nil)

@@ -1,12 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.querySelector("#tunnelTable tbody");
     let dataTable;
+    let apiBaseUrl = '';
 
     // Initialize Material Design Components
     initializeMDC();
 
-    // Load initial config
-    loadConfiguration();
+    // Load API config first, then load configuration
+    loadAPIConfig().then(() => loadConfiguration());
 
     // Initialize Material Design Components
     function initializeMDC() {
@@ -23,33 +24,75 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Load configuration from server
-    function loadConfiguration() {
-        showLoading(true);
-        fetch("/api/config")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                showLoading(false);
-                // Clear existing rows before adding new ones
-                tableBody.innerHTML = '';
-                if (data.tunnels && Array.isArray(data.tunnels)) {
-                    data.tunnels.forEach((tunnel) => addRow(tunnel));
-                } else {
-                    const warningMsg = window.i18n ? window.i18n.t('messages.no_tunnels') : 'No tunnels found in configuration';
-                    console.warn(warningMsg);
-                }
-            })
-            .catch((error) => {
-                showLoading(false);
-                console.error("Error loading configuration:", error);
-                const errorMsg = window.i18n ? window.i18n.t('messages.config_load_failed') : 'Failed to load configuration';
-                showMessage(errorMsg, "error");
+    // Load API configuration
+    async function loadAPIConfig() {
+        try {
+            const response = await fetch('/api/config/api');
+            if (response.ok) {
+                const data = await response.json();
+                apiBaseUrl = data.base_url || '';
+            }
+        } catch (error) {
+            console.warn('Failed to load API config:', error);
+        }
+    }
+
+    // Fetch tunnel statuses from API server
+    async function fetchTunnelStatuses() {
+        if (!apiBaseUrl) return {};
+        
+        try {
+            const response = await fetch(`${apiBaseUrl}/status`);
+            if (!response.ok) return {};
+            
+            const statuses = await response.json();
+            const statusMap = {};
+            statuses.forEach(s => {
+                statusMap[s.name] = s.status;
             });
+            return statusMap;
+        } catch (error) {
+            console.warn('Failed to fetch tunnel statuses:', error);
+            return {};
+        }
+    }
+
+    // Load configuration from server
+    async function loadConfiguration() {
+        showLoading(true);
+        try {
+            const response = await fetch("/api/config");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            // Fetch statuses from API server
+            const statuses = await fetchTunnelStatuses();
+            
+            // Clear existing rows before adding new ones
+            tableBody.innerHTML = '';
+            if (data.tunnels && Array.isArray(data.tunnels)) {
+                data.tunnels.forEach((tunnel) => {
+                    // Merge status from API
+                    if (Object.keys(statuses).length > 0) {
+                        tunnel.status = statuses[tunnel.name] || 'STOPPED';
+                    } else {
+                        tunnel.status = 'N/A';
+                    }
+                    addRow(tunnel);
+                });
+            } else {
+                const warningMsg = window.i18n ? window.i18n.t('messages.no_tunnels') : 'No tunnels found in configuration';
+                console.warn(warningMsg);
+            }
+        } catch (error) {
+            console.error("Error loading configuration:", error);
+            const errorMsg = window.i18n ? window.i18n.t('messages.config_load_failed') : 'Failed to load configuration';
+            showMessage(errorMsg, "error");
+        } finally {
+            showLoading(false);
+        }
     }
 
     // Add row function with Material Design styling
@@ -242,12 +285,16 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             let endpoint, method;
 
+            if (!apiBaseUrl) {
+                throw new Error('API server not configured');
+            }
+
             if (action === 'restart') {
                 // Restart = stop + start
                 endpoint = `/stop/${hash}`;
                 method = 'POST';
 
-                const stopResponse = await fetch(`http://localhost:8080${endpoint}`, { method });
+                const stopResponse = await fetch(`${apiBaseUrl}${endpoint}`, { method });
                 if (!stopResponse.ok) {
                     const stopData = await stopResponse.text();
                     throw new Error(`Stop failed: ${stopResponse.status} - ${stopData}`);
@@ -257,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 endpoint = `/start/${hash}`;
-                const startResponse = await fetch(`http://localhost:8080${endpoint}`, { method });
+                const startResponse = await fetch(`${apiBaseUrl}${endpoint}`, { method });
                 if (!startResponse.ok) {
                     const startData = await startResponse.text();
                     throw new Error(`Start failed: ${startResponse.status} - ${startData}`);
@@ -266,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 endpoint = `/${action}/${hash}`;
                 method = 'POST';
 
-                const response = await fetch(`http://localhost:8080${endpoint}`, { method });
+                const response = await fetch(`${apiBaseUrl}${endpoint}`, { method });
                 if (!response.ok) {
                     const responseData = await response.text();
                     throw new Error(`${action} failed: ${response.status} - ${responseData}`);
