@@ -17,6 +17,7 @@ graph TB
     subgraph "宿主机"
         SSH[~/.ssh<br/>SSH 密钥和配置]
         CONFIG[./config<br/>config.yaml]
+        BROWSER[浏览器]
     end
     
     subgraph "Docker 容器"
@@ -31,7 +32,6 @@ graph TB
         
         subgraph "web 容器（可选）"
             WEBSERVER[Go Web 服务器<br/>:5000]
-            WEBUI[Web UI]
         end
     end
     
@@ -50,8 +50,8 @@ graph TB
     CLI --> AUTOSSH
     API --> CLI
     
-    WEBUI --> API
-    WEBSERVER --> WEBUI
+    BROWSER -->|静态文件| WEBSERVER
+    BROWSER -->|直接 API 调用| API
     
     AUTOSSH -->|SSH 隧道| REMOTE1
     AUTOSSH -->|SSH 隧道| REMOTE2
@@ -160,8 +160,8 @@ services:
 
 | 组件 | 描述 |
 |------|------|
-| `Go Web Server` | 提供 Web UI 并代理 API 请求 |
-| `Web UI` | 支持国际化的 HTML/CSS/JavaScript 前端 |
+| `Go Web Server` | 提供静态文件并管理配置 |
+| `Web UI` | 支持国际化的 HTML/CSS/JavaScript 前端（在浏览器中运行） |
 
 ### 卷挂载
 
@@ -176,7 +176,10 @@ services:
 | `PUID` | 文件权限的用户 ID | `1000` | 否 |
 | `PGID` | 文件权限的组 ID | `1000` | 否 |
 | `TZ` | 日志时间戳的时区 | `UTC` | 否 |
-| `API_BASE_URL` | autossh API 服务器的 URL | `http://localhost:8080` | **是** |
+| `API_BASE_URL` | autossh API 服务器的 URL（传递给浏览器） | `http://localhost:8080` | **是** |
+
+!!! info "直接 API 架构"
+    `API_BASE_URL` 会传递给基于浏览器的前端，前端直接向 autossh 容器发起 API 调用。Go Web 服务器不代理 API 请求 - 它只提供静态文件和配置管理。
 
 ### Docker Compose 示例
 
@@ -185,7 +188,8 @@ name: autotunnel
 services:
   web:
     image: oaklight/autossh-tunnel-web-panel:latest
-    network_mode: "host"
+    ports:
+      - "5000:5000"
     volumes:
       - ./config:/home/myuser/config
     environment:
@@ -195,6 +199,9 @@ services:
       - API_BASE_URL=http://localhost:8080
     restart: always
 ```
+
+!!! note "网络模式"
+    Web 容器使用 bridge 网络和端口映射，而不是 host 网络模式。API 调用直接从浏览器发送到 API 服务器。
 
 ---
 
@@ -221,7 +228,8 @@ services:
 
   web:
     image: oaklight/autossh-tunnel-web-panel:latest
-    network_mode: "host"
+    ports:
+      - "5000:5000"
     volumes:
       - ./config:/home/myuser/config:rw
     environment:
@@ -235,32 +243,52 @@ services:
 !!! note "配置编辑"
     Web 面板将配置目录挂载为读写模式（`rw`）以允许通过 UI 编辑配置。autossh 容器只需要读取权限（`ro`），因为它只读取配置。
 
+!!! info "网络架构"
+    - **autossh 容器** 使用 host 网络模式以允许隧道绑定到特定 IP 地址
+    - **web 容器** 使用 bridge 网络和端口映射（5000:5000）
+    - 浏览器 **直接调用 API** 到 autossh API 服务器（端口 8080）
+    - Go Web 服务器只提供静态文件和配置管理端点
+
 ---
 
 ## 通信流程
 
-### Web 面板到隧道控制
+### Web 面板到隧道控制（直接 API 架构）
+
+Web 面板使用 **直接 API 架构**，浏览器直接向 autossh API 服务器发起 API 调用，绕过 Go Web 服务器进行隧道控制操作。
 
 ```mermaid
 sequenceDiagram
     participant User as 用户
-    participant WebUI as Web UI (:5000)
-    participant WebServer as Go Web 服务器
+    participant Browser as 浏览器
+    participant WebServer as Go Web 服务器 (:5000)
     participant API as API 服务器 (:8080)
     participant CLI as autossh-cli
     participant Tunnel as autossh 进程
 
-    User->>WebUI: 点击"启动隧道"
-    WebUI->>WebServer: POST /api/tunnel/start
-    WebServer->>API: POST /start/{hash}
+    Note over Browser,WebServer: 初始页面加载
+    User->>Browser: 打开 Web 面板
+    Browser->>WebServer: GET / (静态文件)
+    WebServer-->>Browser: HTML/CSS/JS
+    Browser->>WebServer: GET /api/config/api
+    WebServer-->>Browser: {base_url: "http://localhost:8080"}
+    
+    Note over Browser,API: 浏览器直接 API 调用
+    User->>Browser: 点击"启动隧道"
+    Browser->>API: POST /start/{hash}
     API->>CLI: autossh-cli start-tunnel {hash}
     CLI->>Tunnel: 启动 autossh 进程
     Tunnel-->>CLI: PID
     CLI-->>API: 成功 + 输出
-    API-->>WebServer: JSON 响应
-    WebServer-->>WebUI: JSON 响应
-    WebUI-->>User: 更新 UI
+    API-->>Browser: JSON 响应
+    Browser-->>User: 更新 UI
 ```
+
+!!! tip "直接 API 架构的优势"
+    - **简化网络配置**：Web 容器不需要 host 网络模式
+    - **降低延迟**：API 调用无代理开销
+    - **更好的可扩展性**：Web 服务器只处理静态文件
+    - **更清晰的分离**：配置管理与隧道控制分离
 
 ### 配置变更检测
 
@@ -285,11 +313,33 @@ sequenceDiagram
 
 ## 网络模式
 
-两个容器都使用 `network_mode: "host"` 以：
+容器根据其需求使用不同的网络模式：
+
+### autossh 容器（Host 网络）
+
+autossh 容器使用 `network_mode: "host"` 以：
 
 1. 允许直接访问宿主机网络接口
 2. 使隧道能够绑定到特定 IP 地址
 3. 简化端口转发配置
+
+### web 容器（Bridge 网络）
+
+Web 容器使用 bridge 网络和端口映射：
+
+```yaml
+ports:
+  - "5000:5000"
+```
+
+这是可行的，因为：
+
+1. Web 服务器只提供静态文件和配置端点
+2. 所有 API 调用都直接从浏览器发送到 API 服务器
+3. Web 和 autossh 容器之间不需要代理功能
+
+!!! note "API 可访问性"
+    由于浏览器直接向端口 8080 发起 API 调用，API 服务器必须从用户的浏览器可访问。当 autossh 使用 host 网络模式时，API 在宿主机的 `localhost:8080` 上可用。
 
 ---
 
