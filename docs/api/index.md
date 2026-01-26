@@ -305,12 +305,4 @@ tunnels:
 
 - [项目主页](https://github.com/Oaklight/autossh-tunnel-dockerized)
 - [Docker Hub](https://hub.docker.com/r/oaklight/autossh-tunnel)
-- [SSH 配置指南](README_ssh_config_zh.md)
-- [英文文档](tunnel-control-api_en.md)
-
-## 更新日志
-
-- **2026-01-25**：新增单个隧道控制 API
-  - 添加 `start-tunnel` 和 `stop-tunnel` 命令
-  - 实现 HTTP API 端点 `/start/<hash>` 和 `/stop/<hash>`
-  - 改进状态管理和日志系统
+- [SSH 配置指南](../ssh-config.md)

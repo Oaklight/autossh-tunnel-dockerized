@@ -1,18 +1,6 @@
 # SSH 配置文件配置指南
 
-[中文版](README_ssh_config_zh.md) | [English](README_ssh_config_en.md)
-
-本指南说明如何配置SSH配置文件（`~/.ssh/config`）以便与autossh-tunnel-dockerized项目配合使用。SSH配置文件对于定义连接参数和确保隧道顺利建立至关重要。
-
-## 目录
-
-- [概述](#概述)
-- [SSH配置文件位置](#ssh配置文件位置)
-- [基础配置](#基础配置)
-- [高级配置](#高级配置)
-- [常见配置示例](#常见配置示例)
-- [安全最佳实践](#安全最佳实践)
-- [故障排除](#故障排除)
+本指南说明如何配置 SSH 配置文件（`~/.ssh/config`）以便与 SSH 隧道管理器配合使用。SSH 配置文件对于定义连接参数和确保隧道顺利建立至关重要。
 
 ## 概述
 
@@ -352,7 +340,3 @@ tunnels:
     local_port: 3000
     direction: local_to_remote
 ```
-
----
-
-有关autossh-tunnel项目的更多信息，请参阅主要的[README](README_zh.md)。

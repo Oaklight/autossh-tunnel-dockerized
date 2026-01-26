@@ -2,7 +2,7 @@
 
 Web 面板提供了一个可视化界面来管理 SSH 隧道配置，无需手动编辑 YAML 文件。
 
-![网页面板界面](https://github.com/user-attachments/assets/bb26d0f5-14ee-4289-b809-e48381c05bc1)
+![网页面板界面](assets/images/web-panel.png)
 
 ## 功能特性
 
