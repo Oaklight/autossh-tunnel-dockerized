@@ -5,7 +5,7 @@ hide:
 
 # SSH Tunnel Manager with Docker and Autossh
 
-![Web Panel Interface](https://github.com/user-attachments/assets/bb26d0f5-14ee-4289-b809-e48381c05bc1)
+![Web Panel Interface](assets/images/web-panel.png)
 
 This project provides a Docker-based solution to manage SSH tunnels using `autossh` and a YAML configuration file. This setup allows you to easily expose **local services to a remote server through an SSH tunnel** or **map remote services to a local port**, making it convenient to access services behind a firewall.
 

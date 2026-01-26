@@ -2,7 +2,7 @@
 
 The SSH Tunnel Manager includes an optional **web-based configuration panel** for easier tunnel management. The web panel is included in the default `compose.yaml` file but can be disabled if not needed.
 
-![Web Panel Interface](https://github.com/user-attachments/assets/bb26d0f5-14ee-4289-b809-e48381c05bc1)
+![Web Panel Interface](assets/images/web-panel.png)
 
 ## Features
 
