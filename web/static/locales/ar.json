@@ -50,7 +50,9 @@
     "interactive_auth_disabled": "المصادقة التفاعلية معطلة",
     "start_tunnel": "بدء النفق",
     "restart_tunnel": "إعادة تشغيل النفق",
-    "stop_tunnel": "إيقاف النفق"
+    "stop_tunnel": "إيقاف النفق",
+    "refresh": "تحديث",
+    "auto_refresh": "تحديث تلقائي"
   },
   "tooltips": {
     "add_tunnel": "إضافة نفق",

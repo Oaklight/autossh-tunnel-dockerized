@@ -50,7 +50,9 @@
     "interactive_auth_disabled": "Интерактивная аутентификация отключена",
     "start_tunnel": "Запустить туннель",
     "restart_tunnel": "Перезапустить туннель",
-    "stop_tunnel": "Остановить туннель"
+    "stop_tunnel": "Остановить туннель",
+    "refresh": "Обновить",
+    "auto_refresh": "Автообновление"
   },
   "tooltips": {
     "add_tunnel": "Добавить туннель",

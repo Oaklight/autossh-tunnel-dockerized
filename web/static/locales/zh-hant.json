@@ -50,7 +50,9 @@
     "interactive_auth_disabled": "已停用互動認證",
     "start_tunnel": "啟動隧道",
     "restart_tunnel": "重新啟動隧道",
-    "stop_tunnel": "停止隧道"
+    "stop_tunnel": "停止隧道",
+    "refresh": "重新整理",
+    "auto_refresh": "自動重新整理"
   },
   "tooltips": {
     "add_tunnel": "新增隧道",
