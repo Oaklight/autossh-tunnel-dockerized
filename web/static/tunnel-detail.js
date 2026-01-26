@@ -1,8 +1,8 @@
 // Tunnel Detail Page JavaScript
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Get API base URL from window (set by server)
-    const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8080';
+    // API base URL - will be loaded from server
+    let API_BASE_URL = '';
 
     // Get tunnel hash from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // DOM Elements
-    const statusBadge = document.getElementById('statusBadge');
     const tunnelName = document.getElementById('tunnelName');
     const tunnelHashEl = document.getElementById('tunnelHash');
     const remoteHost = document.getElementById('remoteHost');
@@ -35,8 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize Material Design Components
     initializeMDC();
 
-    // Load tunnel details
-    loadTunnelDetails();
+    // Load API config first, then load tunnel details
+    loadAPIConfig().then(() => loadTunnelDetails());
 
     // Set up event listeners
     startBtn.addEventListener('click', () => handleControl('start'));
@@ -66,6 +65,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Load API configuration
+    async function loadAPIConfig() {
+        try {
+            const response = await fetch('/api/config/api');
+            if (response.ok) {
+                const data = await response.json();
+                API_BASE_URL = data.base_url || '';
+            }
+        } catch (error) {
+            console.warn('Failed to load API config:', error);
+        }
+    }
+
     async function loadTunnelDetails() {
         try {
             // First, get the config to get tunnel details (only needed once on initial load)
@@ -89,13 +101,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Get current status directly from API
-            const statusResponse = await fetch(`${API_BASE_URL}/status`);
-            if (statusResponse.ok) {
-                const statusData = await statusResponse.json();
-                const tunnelStatus = statusData.find(t => t.name === currentTunnel.name);
-                if (tunnelStatus) {
-                    updateStatusBadge(tunnelStatus.status);
-                    statusValue.textContent = tunnelStatus.status || 'Unknown';
+            if (API_BASE_URL) {
+                const statusResponse = await fetch(`${API_BASE_URL}/status`);
+                if (statusResponse.ok) {
+                    const statusData = await statusResponse.json();
+                    const tunnelStatus = statusData.find(t => t.name === currentTunnel.name);
+                    if (tunnelStatus) {
+                        updateStatusDisplay(tunnelStatus.status);
+                    }
                 }
             }
         } catch (error) {
@@ -128,43 +141,26 @@ document.addEventListener("DOMContentLoaded", () => {
         statusValue.textContent = tunnel.status || 'Unknown';
     }
 
-    function updateStatusBadge(status) {
-        // Remove all status classes
-        statusBadge.classList.remove('running', 'stopped', 'starting', 'dead');
-
-        let icon = 'help_outline';
+    function updateStatusDisplay(status) {
         let text = 'Unknown';
-        let className = '';
 
         switch (status) {
             case 'RUNNING':
             case 'NORMAL':
-                icon = 'check_circle';
                 text = window.i18n ? window.i18n.t('table.status.running') : 'Running';
-                className = 'running';
                 break;
             case 'STOPPED':
-                icon = 'stop_circle';
                 text = window.i18n ? window.i18n.t('table.status.stopped') : 'Stopped';
-                className = 'stopped';
                 break;
             case 'STARTING':
-                icon = 'hourglass_empty';
                 text = window.i18n ? window.i18n.t('table.status.starting') : 'Starting';
-                className = 'starting';
                 break;
             case 'DEAD':
-                icon = 'cancel';
                 text = window.i18n ? window.i18n.t('table.status.dead') : 'Dead';
-                className = 'dead';
                 break;
         }
 
-        statusBadge.querySelector('.status-icon').textContent = icon;
-        statusBadge.querySelector('.status-text').textContent = text;
-        if (className) {
-            statusBadge.classList.add(className);
-        }
+        statusValue.textContent = text;
     }
 
     async function handleControl(action) {

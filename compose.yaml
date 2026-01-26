@@ -16,7 +16,8 @@ services:
 
   web:
     image: oaklight/autossh-tunnel-web-panel:latest
-    network_mode: "host"
+    ports:
+      - "5000:5000"
     volumes:
       - ./config:/home/myuser/config:rw
     environment:
