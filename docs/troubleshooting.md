@@ -4,328 +4,401 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
 
 ## SSH Connection Issues
 
-### Permission Denied
+### Tunnel Cannot Establish Connection
 
-**Symptom:** SSH connection fails with "Permission denied" error.
+**Symptom:** Tunnel fails to start or immediately disconnects.
 
-**Solutions:**
+**Possible causes and solutions:**
 
-1. Check SSH key permissions:
+1. **SSH key permissions are incorrect**
+
+   Ensure the `.ssh` directory and its contents have appropriate permissions:
+   
    ```bash
    chmod 700 ~/.ssh
-   chmod 600 ~/.ssh/config
    chmod 600 ~/.ssh/id_*
-   chmod 644 ~/.ssh/id_*.pub
+   chmod 644 ~/.ssh/*.pub
+   chmod 644 ~/.ssh/config
+   chmod 644 ~/.ssh/known_hosts
    ```
 
-2. Verify the correct key is being used:
+2. **SSH config file is missing or incorrect**
+
+   Check if `~/.ssh/config` file exists and is correctly configured:
+   
    ```bash
-   ssh -v hostname
+   cat ~/.ssh/config
+   ```
+   
+   Refer to [SSH Configuration Guide](ssh-config.md) for proper configuration.
+
+3. **Remote host is unreachable**
+
+   Test SSH connection:
+   
+   ```bash
+   ssh user@remote-host
    ```
 
-3. Ensure the key is added to the remote server's `authorized_keys`
+4. **Firewall blocking connection**
 
-### Host Key Verification Failed
+   Check local and remote firewall settings to ensure SSH connections are allowed.
 
-**Symptom:** Connection fails with "Host key verification failed" error.
+### Permission Denied
+
+**Symptom:** SSH connection prompts permission denied.
 
 **Solutions:**
 
-1. Add the host key to known_hosts:
+1. Confirm using the correct SSH key:
    ```bash
-   ssh-keyscan -H hostname >> ~/.ssh/known_hosts
+   ssh -i ~/.ssh/id_ed25519 user@remote-host
    ```
 
-2. Or connect manually first to accept the key:
+2. Check the remote server's `authorized_keys` file:
    ```bash
-   ssh hostname
+   cat ~/.ssh/authorized_keys  # Execute on remote server
    ```
 
-### Connection Timeout
-
-**Symptom:** SSH connection times out.
-
-**Solutions:**
-
-1. Check network connectivity:
+3. Ensure public key is added to remote server:
    ```bash
-   ping hostname
-   ```
-
-2. Increase timeout in SSH config:
-   ```ssh-config
-   Host slow-server
-       ConnectTimeout 30
-       ServerAliveInterval 60
-       ServerAliveCountMax 10
-   ```
-
-3. Check if the SSH port is accessible:
-   ```bash
-   nc -zv hostname 22
+   ssh-copy-id -i ~/.ssh/id_ed25519.pub user@remote-host
    ```
 
 ## Docker Issues
 
 ### Container Won't Start
 
-**Symptom:** Docker container fails to start.
+**Symptom:** `docker compose up` fails.
 
 **Solutions:**
 
-1. Check container logs:
+1. **Check Docker service status:**
    ```bash
-   docker compose logs autossh
+   sudo systemctl status docker
    ```
 
-2. Verify the config file exists:
+2. **Check port conflicts:**
    ```bash
-   ls -la config/config.yaml
+   # Check port 5000 (Web panel)
+   netstat -tuln | grep 5000
+   
+   # Check port 8080 (API server)
+   netstat -tuln | grep 8080
    ```
 
-3. Check file permissions:
+3. **View container logs:**
    ```bash
-   ls -la ~/.ssh/
+   docker compose logs
    ```
 
-### Permission Issues in Container
+### Docker Permission Issues
 
-**Symptom:** Container reports permission errors for SSH keys.
+**Symptom:** Permission denied when running Docker commands.
 
 **Solutions:**
 
-1. Set correct PUID/PGID:
+1. Add user to docker group:
    ```bash
-   export PUID=$(id -u)
-   export PGID=$(id -g)
+   sudo usermod -aG docker $USER
+   ```
+
+2. Re-login or run:
+   ```bash
+   newgrp docker
+   ```
+
+### File Permission Issues
+
+**Symptom:** Container cannot access mounted files.
+
+**Solutions:**
+
+1. Check PUID and PGID settings:
+   ```bash
+   id  # View current user's UID and GID
+   ```
+
+2. Set correct values in `compose.yaml`:
+   ```yaml
+   environment:
+     - PUID=1000  # Replace with your UID
+     - PGID=1000  # Replace with your GID
+   ```
+
+3. Restart containers:
+   ```bash
+   docker compose down
    docker compose up -d
    ```
 
-2. Verify the values in compose.yaml:
-   ```yaml
-   environment:
-     - PUID=1000
-     - PGID=1000
-   ```
-
-### Docker Permissions
-
-**Symptom:** Cannot run Docker commands.
-
-**Solution:**
-
-Add your user to the docker group:
-```bash
-sudo usermod -aG docker $USER
-# Log out and log back in
-```
-
-## Tunnel Issues
-
-### Tunnel Won't Start
-
-**Symptom:** Tunnel fails to start or immediately stops.
-
-**Solutions:**
-
-1. Check SSH config is correct:
-   ```bash
-   ssh -T hostname
-   ```
-
-2. Verify the remote host is accessible
-
-3. Check if the port is already in use:
-   ```bash
-   netstat -tlnp | grep <port>
-   ```
-
-4. View tunnel logs:
-   ```bash
-   autossh-cli logs <hash>
-   ```
-
-### Tunnel Stops Automatically
-
-**Symptom:** Tunnel starts but stops after some time.
-
-**Possible causes:**
-
-- Unstable network connection
-- SSH server configuration issues
-- Authentication failure
-
-**Solutions:**
-
-1. Check tunnel logs:
-   ```bash
-   autossh-cli logs <hash>
-   ```
-
-2. Increase keep-alive settings in SSH config:
-   ```ssh-config
-   Host *
-       ServerAliveInterval 60
-       ServerAliveCountMax 3
-   ```
-
-3. Check remote server's SSH configuration
-
-### Port Already in Use
-
-**Symptom:** Error message about port being in use.
-
-**Solutions:**
-
-1. Find what's using the port:
-   ```bash
-   lsof -i :<port>
-   # or
-   netstat -tlnp | grep <port>
-   ```
-
-2. Stop the conflicting process or use a different port
-
-### Status Out of Sync
-
-**Symptom:** Tunnel status doesn't match actual state.
-
-**Solution:**
-
-Clean up dead processes:
-```bash
-autossh-cli cleanup
-```
-
-## Web Panel Issues
-
-### Web Panel Not Accessible
-
-**Symptom:** Cannot access web panel at http://localhost:5000.
-
-**Solutions:**
-
-1. Check if the container is running:
-   ```bash
-   docker compose ps
-   ```
-
-2. Check container logs:
-   ```bash
-   docker compose logs web
-   ```
-
-3. Verify port 5000 is not in use:
-   ```bash
-   netstat -tlnp | grep 5000
-   ```
-
-### Changes Not Taking Effect
-
-**Symptom:** Configuration changes don't apply.
-
-**Solutions:**
-
-1. Ensure you clicked "Save & Restart"
-
-2. Check autossh container logs:
-   ```bash
-   docker compose logs autossh
-   ```
-
-3. Verify config file was updated:
-   ```bash
-   cat config/config.yaml
-   ```
-
-### Language Not Changing
-
-**Symptom:** Language toggle doesn't work.
-
-**Solutions:**
-
-1. Clear browser cache and cookies
-
-2. Check browser console for JavaScript errors
-
-3. Try a different browser
-
 ## Configuration Issues
 
-### Invalid YAML
+### Configuration File Format Error
 
-**Symptom:** Configuration fails to load.
+**Symptom:** Tunnel cannot start, logs show YAML parsing error.
 
 **Solutions:**
 
 1. Validate YAML syntax:
    ```bash
-   autossh-cli validate
+   # Validate using Python
+   python3 -c "import yaml; yaml.safe_load(open('config/config.yaml'))"
    ```
 
-2. Check for common YAML errors:
-   - Incorrect indentation
-   - Missing quotes around special characters
-   - Tabs instead of spaces
+2. Check common errors:
+   - Indentation must use spaces, not tabs
+   - Ensure there's a space after colons
+   - String values with special characters need quotes
 
-### Tunnel Not Found
+3. Reference sample configuration:
+   ```bash
+   cat config/config.yaml.sample
+   ```
 
-**Symptom:** CLI reports tunnel not found.
+### Configuration Changes Not Taking Effect
+
+**Symptom:** Tunnel not updated after modifying configuration.
 
 **Solutions:**
 
-1. List all configured tunnels:
+1. Check if config file monitoring is working:
    ```bash
-   autossh-cli list
+   docker compose logs autossh | grep inotify
    ```
 
-2. Verify the hash is correct
+2. Manually restart service:
+   ```bash
+   docker compose restart autossh
+   ```
 
-3. Check if the configuration was saved
+3. Verify config file path:
+   ```bash
+   docker compose exec autossh cat /etc/autossh/config/config.yaml
+   ```
 
-## Debugging
+## Tunnel Runtime Issues
 
-### Enable Debug Logging
+### Tunnel Frequently Disconnects and Reconnects
 
-Add to SSH config:
-```ssh-config
-Host debug-server
-    LogLevel DEBUG3
-```
+**Symptom:** Tunnel is unstable, frequently disconnects.
 
-### View All Logs
+**Solutions:**
+
+1. Check network connection stability
+
+2. Adjust autossh parameters:
+   ```yaml
+   environment:
+     - AUTOSSH_GATETIME=30  # Increase connection stability time
+   ```
+
+3. Check remote server load and network conditions
+
+### Port Already in Use
+
+**Symptom:** Tunnel fails to start, prompts port is in use.
+
+**Solutions:**
+
+1. Find process using the port:
+   ```bash
+   # Linux
+   sudo lsof -i :port_number
+   
+   # Or use
+   sudo netstat -tulpn | grep port_number
+   ```
+
+2. Stop the process using the port or change tunnel configuration to use a different port
+
+### Cannot Access Tunnel Service
+
+**Symptom:** Tunnel shows running but cannot access service.
+
+**Solutions:**
+
+1. **Check tunnel direction:**
+   - `local_to_remote`: Access on remote server
+   - `remote_to_local`: Access on local machine
+
+2. **Verify port binding:**
+   ```bash
+   # Check port listening on the appropriate machine
+   netstat -tuln | grep port_number
+   ```
+
+3. **Check firewall rules:**
+   ```bash
+   # View firewall status
+   sudo ufw status  # Ubuntu/Debian
+   sudo firewall-cmd --list-all  # CentOS/RHEL
+   ```
+
+4. **Test connection:**
+   ```bash
+   # Local test
+   curl http://localhost:port_number
+   
+   # Remote test
+   curl http://remote-host:port_number
+   ```
+
+## Web Panel Issues
+
+### Cannot Access Web Panel
+
+**Symptom:** Browser cannot open `http://localhost:5000`.
+
+**Solutions:**
+
+1. Check Web container status:
+   ```bash
+   docker compose ps web
+   ```
+
+2. View Web container logs:
+   ```bash
+   docker compose logs web
+   ```
+
+3. Verify port mapping:
+   ```bash
+   docker compose port web 5000
+   ```
+
+4. Check API connection:
+   ```bash
+   # Confirm API_BASE_URL is set correctly in compose.yaml
+   docker compose exec web env | grep API_BASE_URL
+   ```
+
+### Web Panel Shows Blank or Error
+
+**Symptom:** Web panel loads but displays abnormally.
+
+**Solutions:**
+
+1. Clear browser cache
+
+2. Check browser console for errors (F12)
+
+3. Verify API server is running:
+   ```bash
+   curl http://localhost:8080/status
+   ```
+
+## API Issues
+
+### API Request Fails
+
+**Symptom:** CLI commands or HTTP API requests return errors.
+
+**Solutions:**
+
+1. Confirm API is enabled:
+   ```yaml
+   environment:
+     - API_ENABLE=true
+   ```
+
+2. Check API server logs:
+   ```bash
+   docker compose logs autossh | grep api
+   ```
+
+3. Test API connection:
+   ```bash
+   curl http://localhost:8080/list
+   ```
+
+## Logs and Debugging
+
+### Viewing Logs
 
 ```bash
-# Container logs
+# View all container logs
+docker compose logs
+
+# View specific container logs
+docker compose logs autossh
+docker compose logs web
+
+# Follow logs in real-time
 docker compose logs -f
 
-# Tunnel-specific logs
-autossh-cli logs <hash>
-
-# All tunnel logs
-autossh-cli logs
+# View last 100 lines of logs
+docker compose logs --tail=100
 ```
 
-### Test SSH Connection
+### Entering Container for Debugging
 
 ```bash
-# Basic test
-ssh -T hostname
+# Enter autossh container
+docker compose exec autossh sh
 
-# Verbose test
-ssh -vvv hostname
+# Enter web container
+docker compose exec web sh
 
-# Test with specific config
-ssh -F ~/.ssh/config hostname
+# Check processes inside container
+ps aux
+
+# Check network connections
+netstat -tuln
 ```
+
+### Enable Verbose Logging
+
+Add debug environment variables in `compose.yaml`:
+
+```yaml
+environment:
+  - DEBUG=true
+  - VERBOSE=true
+```
+
+## Performance Issues
+
+### Container Using Too Many Resources
+
+**Solutions:**
+
+1. Check resource usage:
+   ```bash
+   docker stats
+   ```
+
+2. Limit container resources:
+   ```yaml
+   services:
+     autossh:
+       deploy:
+         resources:
+           limits:
+             cpus: '0.5'
+             memory: 512M
+   ```
+
+3. Clean up unused Docker resources:
+   ```bash
+   docker system prune -a
+   ```
 
 ## Getting Help
 
-If you're still experiencing issues:
+If the above methods cannot solve your problem:
 
-1. Check the [GitHub Issues](https://github.com/Oaklight/autossh-tunnel-dockerized/issues)
-2. Open a new issue with:
-   - Description of the problem
-   - Steps to reproduce
-   - Relevant logs
-   - Configuration (with sensitive data removed)
+1. **Check project documentation:**
+   - [Getting Started](getting-started.md)
+   - [Architecture](architecture.md)
+   - [API Documentation](api/index.md)
+
+2. **Submit an Issue:**
+   Visit [GitHub Issues](https://github.com/Oaklight/autossh-tunnel-dockerized/issues) to submit a problem
+
+3. **Provide information:**
+   - Operating system and version
+   - Docker and Docker Compose versions
+   - Complete error logs
+   - Configuration file contents (hide sensitive information)
+   - Steps to reproduce the problem
