@@ -1,0 +1,113 @@
+site_name: SSH Tunnel Manager
+site_description: Docker-based SSH tunnel management with autossh, featuring web panel and API control
+repo_url: https://github.com/Oaklight/autossh-tunnel-dockerized
+repo_name: Oaklight/autossh-tunnel-dockerized
+
+# Documentation directory
+docs_dir: docs
+
+# Theme configuration
+theme:
+  name: material
+  palette:
+    # Auto mode (follow system)
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.copy
+  language: en
+
+# Extra configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Oaklight/autossh-tunnel-dockerized
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/oaklight/autossh-tunnel
+  alternate:
+    - name: English
+      link: https://autossh-tunnel-en.readthedocs.io/
+      lang: en
+    - name: 中文
+      link: https://autossh-tunnel-zh.readthedocs.io/
+      lang: zh
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: getting-started.md
+      - SSH Configuration: ssh-config.md
+  - User Guide:
+      - Web Panel: web-panel.md
+      - Tunnel Control API:
+          - Overview: api/index.md
+          - CLI Reference: api/cli-reference.md
+          - HTTP API: api/http-api.md
+          - Tunnel Lifecycle: api/tunnel-lifecycle.md
+  - Development:
+      - Contributing: development/contributing.md
+      - Internationalization: development/i18n.md
+  - Troubleshooting: troubleshooting.md
+
+# Hide navigation on specific pages
+hooks: []
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: true
+  - fenced_code
+  - footnotes
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.blocks.details
+  - pymdownx.blocks.tab
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - tables
+
+# Plugins
+plugins:
+  - search:
+      lang: en
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+# Copyright
+copyright: Copyright &copy; 2024-2026 SSH Tunnel Manager
