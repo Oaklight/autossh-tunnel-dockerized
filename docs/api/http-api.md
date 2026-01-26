@@ -10,6 +10,48 @@ API 服务器默认运行在 8080 端口：
 http://localhost:8080
 ```
 
+## 认证
+
+API 支持可选的 Bearer Token 认证。启用后，所有 API 请求必须在请求头中包含有效的 Bearer Token。
+
+### 启用认证
+
+在 Docker Compose 配置中设置 `API_KEY` 环境变量：
+
+```yaml
+services:
+  autossh:
+    environment:
+      # 单个 API 密钥
+      - API_KEY=your-secret-key
+      
+      # 或多个密钥（逗号分隔）
+      - API_KEY=key1,key2,key3
+```
+
+### 使用认证
+
+当设置了 `API_KEY` 时，在请求中包含 Bearer Token：
+
+```bash
+# 带认证
+curl -H "Authorization: Bearer your-secret-key" http://localhost:8080/status
+
+# 不带认证（未设置 API_KEY 时）
+curl http://localhost:8080/status
+```
+
+### 未授权响应
+
+如果认证失败，API 返回 `401 Unauthorized` 响应：
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "Valid Bearer token required"
+}
+```
+
 ## 端点
 
 ### 获取隧道列表
@@ -277,30 +319,34 @@ GET /logs/<隧道哈希>
 
 **HTTP 状态：** 405
 
-## Web 面板代理端点
-
-Web 面板（端口 5000）提供到 API 服务器的代理端点：
-
-| Web 面板端点 | 代理到 |
-|-------------|--------|
-| `POST /api/tunnel/start` | `POST /start/<hash>` |
-| `POST /api/tunnel/stop` | `POST /stop/<hash>` |
-| `POST /api/tunnel/restart` | 先停止后启动 |
-
-**请求格式：**
+### 未授权
 
 ```json
 {
-  "hash": "隧道哈希值"
+  "error": "Unauthorized",
+  "message": "Valid Bearer token required"
 }
 ```
 
-**示例：**
+**HTTP 状态：** 401
 
-```bash
-curl -X POST http://localhost:5000/api/tunnel/start \
-  -H "Content-Type: application/json" \
-  -d '{"hash": "7b840f8344679dff5df893eefd245043"}'
+## Web 面板
+
+Web 面板运行在 5000 端口，提供隧道管理的图形界面。所有 API 调用都直接从浏览器发送到 API 服务器（8080 端口）。
+
+!!! note "网络配置"
+    Web 面板不再需要 host 网络模式。它使用 bridge 网络和端口映射，所有 API 调用都直接从浏览器发起。
+
+### 配置
+
+```yaml
+services:
+  web:
+    ports:
+      - "5000:5000"
+    environment:
+      - API_BASE_URL=http://localhost:8080
+      - API_KEY=your-secret-key  # 必须与 autossh 的 API_KEY 匹配
 ```
 
 ## 集成示例
@@ -311,14 +357,19 @@ curl -X POST http://localhost:5000/api/tunnel/start \
 import requests
 
 API_BASE = "http://localhost:8080"
+API_KEY = "your-secret-key"  # 可选
+
+headers = {}
+if API_KEY:
+    headers["Authorization"] = f"Bearer {API_KEY}"
 
 # 获取隧道列表
-response = requests.get(f"{API_BASE}/list")
+response = requests.get(f"{API_BASE}/list", headers=headers)
 tunnels = response.json()
 
 # 启动特定隧道
 tunnel_hash = "7b840f8344679dff5df893eefd245043"
-response = requests.post(f"{API_BASE}/start/{tunnel_hash}")
+response = requests.post(f"{API_BASE}/start/{tunnel_hash}", headers=headers)
 result = response.json()
 print(result)
 ```
@@ -327,15 +378,18 @@ print(result)
 
 ```javascript
 const API_BASE = "http://localhost:8080";
+const API_KEY = "your-secret-key"; // 可选
+
+const headers = API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {};
 
 // 获取隧道状态
-fetch(`${API_BASE}/status`)
+fetch(`${API_BASE}/status`, { headers })
   .then((response) => response.json())
   .then((data) => console.log(data));
 
 // 停止特定隧道
 const tunnelHash = "7b840f8344679dff5df893eefd245043";
-fetch(`${API_BASE}/stop/${tunnelHash}`, { method: "POST" })
+fetch(`${API_BASE}/stop/${tunnelHash}`, { method: "POST", headers })
   .then((response) => response.json())
   .then((data) => console.log(data));
 ```
@@ -346,13 +400,20 @@ fetch(`${API_BASE}/stop/${tunnelHash}`, { method: "POST" })
 #!/bin/bash
 
 API_BASE="http://localhost:8080"
+API_KEY="your-secret-key"  # 可选
 TUNNEL_HASH="7b840f8344679dff5df893eefd245043"
 
+# 如果设置了 API_KEY，构建认证头
+AUTH_HEADER=""
+if [ -n "$API_KEY" ]; then
+    AUTH_HEADER="-H \"Authorization: Bearer $API_KEY\""
+fi
+
 # 检查状态
-curl -s "$API_BASE/status" | jq .
+eval curl -s $AUTH_HEADER "$API_BASE/status" | jq .
 
 # 启动隧道
-curl -s -X POST "$API_BASE/start/$TUNNEL_HASH" | jq .
+eval curl -s -X POST $AUTH_HEADER "$API_BASE/start/$TUNNEL_HASH" | jq .
 
 # 停止隧道
-curl -s -X POST "$API_BASE/stop/$TUNNEL_HASH" | jq .
+eval curl -s -X POST $AUTH_HEADER "$API_BASE/stop/$TUNNEL_HASH" | jq .
