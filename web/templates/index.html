@@ -114,18 +114,44 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="mdc-button mdc-button--raised" id="addRow" title="Add Tunnel"
-                    data-i18n-title="tooltips.add_tunnel">
-                    <span class="mdc-button__ripple"></span>
-                    <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
-                    <span class="mdc-button__label" data-i18n="buttons.add">Add</span>
-                </button>
-                <button class="mdc-button mdc-button--unelevated" id="saveConfig" title="Save Configuration and Restart"
-                    data-i18n-title="tooltips.save_config">
-                    <span class="mdc-button__ripple"></span>
-                    <i class="material-icons mdc-button__icon" aria-hidden="true">save</i>
-                    <span class="mdc-button__label" data-i18n="buttons.save_restart">Save & Restart</span>
-                </button>
+                <div class="action-buttons-left">
+                    <button class="mdc-button mdc-button--raised" id="addRow" title="Add Tunnel"
+                        data-i18n-title="tooltips.add_tunnel">
+                        <span class="mdc-button__ripple"></span>
+                        <i class="material-icons mdc-button__icon" aria-hidden="true">add</i>
+                        <span class="mdc-button__label" data-i18n="buttons.add">Add</span>
+                    </button>
+                    <button class="mdc-button mdc-button--unelevated" id="saveConfig"
+                        title="Save Configuration and Restart" data-i18n-title="tooltips.save_config">
+                        <span class="mdc-button__ripple"></span>
+                        <i class="material-icons mdc-button__icon" aria-hidden="true">save</i>
+                        <span class="mdc-button__label" data-i18n="buttons.save_restart">Save & Restart</span>
+                    </button>
+                </div>
+                <div class="action-buttons-right">
+                    <button class="mdc-button mdc-button--outlined" id="refreshStatus" title="Refresh Status"
+                        data-i18n-title="tooltips.refresh_status">
+                        <span class="mdc-button__ripple"></span>
+                        <i class="material-icons mdc-button__icon" aria-hidden="true">refresh</i>
+                        <span class="mdc-button__label" data-i18n="buttons.refresh">Refresh</span>
+                    </button>
+                    <div class="auto-refresh-toggle">
+                        <label class="mdc-form-field">
+                            <div class="mdc-checkbox">
+                                <input type="checkbox" class="mdc-checkbox__native-control" id="autoRefresh" />
+                                <div class="mdc-checkbox__background">
+                                    <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                        <path class="mdc-checkbox__checkmark-path" fill="none"
+                                            d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+                                    </svg>
+                                    <div class="mdc-checkbox__mixedmark"></div>
+                                </div>
+                                <div class="mdc-checkbox__ripple"></div>
+                            </div>
+                            <label for="autoRefresh" data-i18n="buttons.auto_refresh">Auto Refresh</label>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </main>

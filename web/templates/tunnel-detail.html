@@ -152,10 +152,28 @@
                         <span data-i18n="tunnel_detail.logs">Logs</span>
                     </h2>
                     <div class="log-controls">
-                        <button class="icon-button" id="refreshLogsBtn" title="Refresh logs">
+                        <div class="auto-refresh-toggle">
+                            <label class="mdc-form-field">
+                                <div class="mdc-checkbox">
+                                    <input type="checkbox" class="mdc-checkbox__native-control" id="autoRefresh" />
+                                    <div class="mdc-checkbox__background">
+                                        <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                            <path class="mdc-checkbox__checkmark-path" fill="none"
+                                                d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+                                        </svg>
+                                        <div class="mdc-checkbox__mixedmark"></div>
+                                    </div>
+                                    <div class="mdc-checkbox__ripple"></div>
+                                </div>
+                                <label for="autoRefresh" data-i18n="buttons.auto_refresh">Auto Refresh</label>
+                            </label>
+                        </div>
+                        <button class="icon-button" id="refreshLogsBtn" title="Refresh logs"
+                            data-i18n-title="buttons.refresh_logs">
                             <i class="material-icons">refresh</i>
                         </button>
-                        <button class="icon-button" id="clearLogsBtn" title="Clear display">
+                        <button class="icon-button" id="clearLogsBtn" title="Clear display"
+                            data-i18n-title="buttons.clear_logs">
                             <i class="material-icons">clear_all</i>
                         </button>
                     </div>

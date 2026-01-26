@@ -2,12 +2,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.querySelector("#tunnelTable tbody");
     let dataTable;
     let apiBaseUrl = '';
+    let autoRefreshInterval = null;
+    const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
 
     // Initialize Material Design Components
     initializeMDC();
 
     // Load API config first, then load configuration
     loadAPIConfig().then(() => loadConfiguration());
+
+    // Setup refresh button and auto-refresh checkbox
+    setupRefreshControls();
 
     // Initialize Material Design Components
     function initializeMDC() {
@@ -40,11 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fetch tunnel statuses from API server
     async function fetchTunnelStatuses() {
         if (!apiBaseUrl) return {};
-        
+
         try {
             const response = await fetch(`${apiBaseUrl}/status`);
             if (!response.ok) return {};
-            
+
             const statuses = await response.json();
             const statusMap = {};
             statuses.forEach(s => {
@@ -66,10 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            
+
             // Fetch statuses from API server
             const statuses = await fetchTunnelStatuses();
-            
+
             // Clear existing rows before adding new ones
             tableBody.innerHTML = '';
             if (data.tunnels && Array.isArray(data.tunnels)) {
@@ -432,6 +437,104 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => message.remove(), 300);
             }
         }, 5000);
+    }
+
+    // Setup refresh controls
+    function setupRefreshControls() {
+        const refreshBtn = document.getElementById('refreshStatus');
+        const autoRefreshCheckbox = document.getElementById('autoRefresh');
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                refreshStatuses();
+            });
+        }
+
+        if (autoRefreshCheckbox) {
+            // Initialize MDC checkbox
+            const checkboxEl = autoRefreshCheckbox.closest('.mdc-checkbox');
+            if (checkboxEl) {
+                new mdc.checkbox.MDCCheckbox(checkboxEl);
+            }
+
+            autoRefreshCheckbox.addEventListener('change', () => {
+                if (autoRefreshCheckbox.checked) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+        }
+    }
+
+    // Refresh only statuses (not full config reload)
+    async function refreshStatuses() {
+        const statuses = await fetchTunnelStatuses();
+        if (Object.keys(statuses).length === 0) return;
+
+        // Update status indicators in existing rows
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            const nameInput = row.querySelector('td:nth-child(2) input');
+            const statusIndicator = row.querySelector('.status-indicator');
+
+            if (nameInput && statusIndicator) {
+                const tunnelName = nameInput.value.trim();
+                const status = statuses[tunnelName] || 'STOPPED';
+                updateStatusIndicator(statusIndicator, status);
+            }
+        });
+    }
+
+    // Update a single status indicator
+    function updateStatusIndicator(indicator, status) {
+        let statusColor = "#9E9E9E";
+        let statusIcon = "help_outline";
+        let statusTooltip = "Unknown";
+
+        switch (status) {
+            case "RUNNING":
+            case "NORMAL":
+                statusIcon = "check_circle";
+                statusColor = "#4CAF50";
+                statusTooltip = "Running";
+                break;
+            case "DEAD":
+                statusIcon = "cancel";
+                statusColor = "#F44336";
+                statusTooltip = "Dead";
+                break;
+            case "STARTING":
+                statusIcon = "hourglass_empty";
+                statusColor = "#FF9800";
+                statusTooltip = "Starting";
+                break;
+            case "STOPPED":
+                statusIcon = "stop_circle";
+                statusColor = "#9E9E9E";
+                statusTooltip = "Stopped";
+                break;
+        }
+
+        indicator.textContent = statusIcon;
+        indicator.style.color = statusColor;
+        indicator.title = statusTooltip;
+    }
+
+    // Start auto-refresh
+    function startAutoRefresh() {
+        if (autoRefreshInterval) return;
+        autoRefreshInterval = setInterval(() => {
+            refreshStatuses();
+        }, AUTO_REFRESH_INTERVAL);
+    }
+
+    // Stop auto-refresh
+    function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
     }
 
     // Add new row button event

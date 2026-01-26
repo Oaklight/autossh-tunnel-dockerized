@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // API base URL - will be loaded from server
     let API_BASE_URL = '';
 
+    // Auto refresh settings
+    let autoRefreshInterval = null;
+    const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
+
     // Get tunnel hash from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     const tunnelHash = urlParams.get('hash');
@@ -28,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const stopBtn = document.getElementById('stopBtn');
     const refreshLogsBtn = document.getElementById('refreshLogsBtn');
     const clearLogsBtn = document.getElementById('clearLogsBtn');
+    const autoRefreshCheckbox = document.getElementById('autoRefresh');
 
     let currentTunnel = null;
 
@@ -41,8 +46,28 @@ document.addEventListener("DOMContentLoaded", () => {
     startBtn.addEventListener('click', () => handleControl('start'));
     restartBtn.addEventListener('click', () => handleControl('restart'));
     stopBtn.addEventListener('click', () => handleControl('stop'));
-    refreshLogsBtn.addEventListener('click', loadLogs);
+    refreshLogsBtn.addEventListener('click', () => {
+        loadTunnelDetails();
+        loadLogs();
+    });
     clearLogsBtn.addEventListener('click', clearLogs);
+
+    // Setup auto-refresh checkbox
+    if (autoRefreshCheckbox) {
+        // Initialize MDC checkbox
+        const checkboxEl = autoRefreshCheckbox.closest('.mdc-checkbox');
+        if (checkboxEl) {
+            new mdc.checkbox.MDCCheckbox(checkboxEl);
+        }
+
+        autoRefreshCheckbox.addEventListener('change', () => {
+            if (autoRefreshCheckbox.checked) {
+                startAutoRefresh();
+            } else {
+                stopAutoRefresh();
+            }
+        });
+    }
 
     // Listen for i18n ready event to update translations
     window.addEventListener('i18nReady', () => {
@@ -277,6 +302,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function clearLogs() {
         logBox.innerHTML = '<div class="log-placeholder"><i class="material-icons">info</i><p>Logs cleared</p></div>';
+    }
+
+    // Start auto-refresh
+    function startAutoRefresh() {
+        if (autoRefreshInterval) return;
+        autoRefreshInterval = setInterval(() => {
+            loadTunnelDetails();
+            loadLogs();
+        }, AUTO_REFRESH_INTERVAL);
+    }
+
+    // Stop auto-refresh
+    function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
     }
 
     function showMessage(text, type = 'success') {
