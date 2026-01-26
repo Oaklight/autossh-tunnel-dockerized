@@ -1,4 +1,4 @@
-site_name: SSH Tunnel Manager
+site_name: Autossh Tunnel
 site_description: Docker-based SSH tunnel management with autossh, featuring web panel and API control
 repo_url: https://github.com/Oaklight/autossh-tunnel-dockerized
 repo_name: Oaklight/autossh-tunnel-dockerized
@@ -115,4 +115,4 @@ plugins:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
 
 # Copyright
-copyright: Copyright &copy; 2024-2026 SSH Tunnel Manager
+copyright: Copyright &copy; 2024 Peng Ding
