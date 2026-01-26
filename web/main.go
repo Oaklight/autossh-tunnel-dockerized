@@ -27,6 +27,7 @@ const (
 )
 
 var apiBaseURL string
+var apiKey string
 
 func logMsg(level, component, format string, v ...interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
@@ -240,13 +241,20 @@ func getConfigHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(config)
 }
 
+// APIConfigResponse contains API configuration for frontend
+type APIConfigResponse struct {
+	BaseURL string `json:"base_url"`
+	APIKey  string `json:"api_key,omitempty"`
+}
+
 // getAPIConfigHandler returns API configuration for frontend
 func getAPIConfigHandler(w http.ResponseWriter, r *http.Request) {
-	response := map[string]string{
-		"base_url": apiBaseURL,
+	config := APIConfigResponse{
+		BaseURL: apiBaseURL,
+		APIKey:  apiKey,
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(config)
 }
 
 func updateConfigHandler(w http.ResponseWriter, r *http.Request) {
@@ -325,6 +333,11 @@ func main() {
 	log.SetOutput(os.Stdout)
 
 	apiBaseURL = os.Getenv("API_BASE_URL")
+	apiKey = os.Getenv("API_KEY")
+
+	if apiKey != "" {
+		logMsg("INFO", "WEB", "API key authentication enabled")
+	}
 
 	// Check if the config directory exists and has correct ownership
 	if err := checkConfigDirectory(); err != nil {

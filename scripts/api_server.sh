@@ -10,6 +10,11 @@ SCRIPT_DIR="$(dirname "$0")"
 PORT="${API_PORT:-8080}"
 PIPE="/tmp/autossh_api_pipe"
 
+# Optional API Key(s) for Bearer token authentication
+# If API_KEY is set, all requests must include "Authorization: Bearer <API_KEY>" header
+# Multiple keys can be specified, separated by commas (e.g., "key1,key2,key3")
+API_KEY="${API_KEY:-}"
+
 # Function to format HTTP response
 response() {
 	local status="$1"
@@ -21,10 +26,63 @@ response() {
 	echo "Content-Length: $length"
 	echo "Access-Control-Allow-Origin: *"
 	echo "Access-Control-Allow-Methods: GET, POST, OPTIONS"
-	echo "Access-Control-Allow-Headers: Content-Type"
+	echo "Access-Control-Allow-Headers: Content-Type, Authorization"
 	echo "Connection: close"
 	echo ""
 	echo -n "$body"
+}
+
+# Function to send 401 Unauthorized response
+response_unauthorized() {
+	local body='{"error": "Unauthorized", "message": "Valid Bearer token required"}'
+	local length=$(echo -n "$body" | wc -c)
+
+	echo "HTTP/1.1 401 Unauthorized"
+	echo "Content-Type: application/json; charset=utf-8"
+	echo "Content-Length: $length"
+	echo "Access-Control-Allow-Origin: *"
+	echo "Access-Control-Allow-Methods: GET, POST, OPTIONS"
+	echo "Access-Control-Allow-Headers: Content-Type, Authorization"
+	echo "WWW-Authenticate: Bearer"
+	echo "Connection: close"
+	echo ""
+	echo -n "$body"
+}
+
+# Function to verify Bearer token
+# Returns 0 if valid or no API_KEY is set, 1 if invalid
+# Supports multiple API keys separated by commas
+verify_auth() {
+	local auth_header="$1"
+
+	# If no API_KEY is configured, allow all requests
+	if [ -z "$API_KEY" ]; then
+		return 0
+	fi
+
+	# Check if Authorization header is present and valid
+	if [ -z "$auth_header" ]; then
+		return 1
+	fi
+
+	# Extract token from "Bearer <token>" format
+	local token=$(echo "$auth_header" | sed -n 's/^Bearer //p')
+
+	if [ -z "$token" ]; then
+		return 1
+	fi
+
+	# Check against each API key (comma-separated)
+	local IFS=','
+	for key in $API_KEY; do
+		# Trim whitespace from key
+		key=$(echo "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+		if [ "$token" = "$key" ]; then
+			return 0
+		fi
+	done
+
+	return 1
 }
 
 # Function to convert list output to JSON
@@ -109,18 +167,35 @@ handle_request() {
 	method=$(echo "$line" | cut -d ' ' -f 1)
 	path=$(echo "$line" | cut -d ' ' -f 2)
 
-	# Consume headers
+	# Variables to store headers
+	local auth_header=""
+
+	# Consume headers and extract Authorization
 	while read -r header; do
 		header=$(echo "$header" | tr -d '\r')
 		[ -z "$header" ] && break
+
+		# Extract Authorization header (case-insensitive)
+		case "$header" in
+		Authorization:* | authorization:*)
+			auth_header=$(echo "$header" | sed 's/^[Aa]uthorization:[[:space:]]*//')
+			;;
+		esac
 	done
 
 	# Log request
 	log_info "API" "$method $path" >&2
 
-	# Handle OPTIONS requests for CORS preflight
+	# Handle OPTIONS requests for CORS preflight (no auth required)
 	if [ "$method" = "OPTIONS" ]; then
 		echo "" | response "204 No Content"
+		return
+	fi
+
+	# Verify authentication for all other requests
+	if ! verify_auth "$auth_header"; then
+		log_info "API" "Unauthorized request to $path" >&2
+		response_unauthorized
 		return
 	fi
 

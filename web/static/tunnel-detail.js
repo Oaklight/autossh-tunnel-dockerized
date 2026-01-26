@@ -1,8 +1,8 @@
 // Tunnel Detail Page JavaScript
 
 document.addEventListener("DOMContentLoaded", () => {
-    // API base URL - will be loaded from server
-    let API_BASE_URL = '';
+    // API configuration - will be loaded from server
+    let apiConfig = { base_url: '', api_key: '' };
 
     // Auto refresh settings
     let autoRefreshInterval = null;
@@ -96,11 +96,25 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch('/api/config/api');
             if (response.ok) {
                 const data = await response.json();
-                API_BASE_URL = data.base_url || '';
+                apiConfig.base_url = data.base_url || '';
+                apiConfig.api_key = data.api_key || '';
             }
         } catch (error) {
             console.warn('Failed to load API config:', error);
         }
+    }
+
+    // Helper function to make authenticated API calls
+    function apiCall(endpoint, options = {}) {
+        const url = apiConfig.base_url + endpoint;
+        const headers = options.headers || {};
+
+        // Add Bearer token if API key is configured
+        if (apiConfig.api_key) {
+            headers['Authorization'] = 'Bearer ' + apiConfig.api_key;
+        }
+
+        return fetch(url, { ...options, headers });
     }
 
     async function loadTunnelDetails() {
@@ -126,8 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Get current status directly from API
-            if (API_BASE_URL) {
-                const statusResponse = await fetch(`${API_BASE_URL}/status`);
+            if (apiConfig.base_url) {
+                const statusResponse = await apiCall('/status');
                 if (statusResponse.ok) {
                     const statusData = await statusResponse.json();
                     const tunnelStatus = statusData.find(t => t.name === currentTunnel.name);
@@ -206,17 +220,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (action === 'restart') {
                 // Stop first
-                const stopResponse = await fetch(`${API_BASE_URL}/stop/${tunnelHash}`, { method });
+                const stopResponse = await apiCall(`/stop/${tunnelHash}`, { method });
                 if (!stopResponse.ok) throw new Error('Failed to stop tunnel');
 
                 // Wait a bit
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 // Then start
-                const startResponse = await fetch(`${API_BASE_URL}/start/${tunnelHash}`, { method });
+                const startResponse = await apiCall(`/start/${tunnelHash}`, { method });
                 if (!startResponse.ok) throw new Error('Failed to start tunnel');
             } else {
-                const response = await fetch(`${API_BASE_URL}/${action}/${tunnelHash}`, { method });
+                const response = await apiCall(`/${action}/${tunnelHash}`, { method });
                 if (!response.ok) throw new Error(`Failed to ${action} tunnel`);
             }
 
@@ -247,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadLogs(retryCount = 0) {
         try {
             // Call the API endpoint directly
-            const response = await fetch(`${API_BASE_URL}/logs/${tunnelHash}`);
+            const response = await apiCall(`/logs/${tunnelHash}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

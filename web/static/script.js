@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.querySelector("#tunnelTable tbody");
     let dataTable;
-    let apiBaseUrl = '';
+    let apiConfig = { base_url: '', api_key: '' };
     let autoRefreshInterval = null;
     const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
 
@@ -35,19 +35,33 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch('/api/config/api');
             if (response.ok) {
                 const data = await response.json();
-                apiBaseUrl = data.base_url || '';
+                apiConfig.base_url = data.base_url || '';
+                apiConfig.api_key = data.api_key || '';
             }
         } catch (error) {
             console.warn('Failed to load API config:', error);
         }
     }
 
+    // Helper function to make authenticated API calls
+    function apiCall(endpoint, options = {}) {
+        const url = apiConfig.base_url + endpoint;
+        const headers = options.headers || {};
+
+        // Add Bearer token if API key is configured
+        if (apiConfig.api_key) {
+            headers['Authorization'] = 'Bearer ' + apiConfig.api_key;
+        }
+
+        return fetch(url, { ...options, headers });
+    }
+
     // Fetch tunnel statuses from API server
     async function fetchTunnelStatuses() {
-        if (!apiBaseUrl) return {};
+        if (!apiConfig.base_url) return {};
 
         try {
-            const response = await fetch(`${apiBaseUrl}/status`);
+            const response = await apiCall('/status');
             if (!response.ok) return {};
 
             const statuses = await response.json();
@@ -290,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             let endpoint, method;
 
-            if (!apiBaseUrl) {
+            if (!apiConfig.base_url) {
                 throw new Error('API server not configured');
             }
 
@@ -299,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 endpoint = `/stop/${hash}`;
                 method = 'POST';
 
-                const stopResponse = await fetch(`${apiBaseUrl}${endpoint}`, { method });
+                const stopResponse = await apiCall(endpoint, { method });
                 if (!stopResponse.ok) {
                     const stopData = await stopResponse.text();
                     throw new Error(`Stop failed: ${stopResponse.status} - ${stopData}`);
@@ -309,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 endpoint = `/start/${hash}`;
-                const startResponse = await fetch(`${apiBaseUrl}${endpoint}`, { method });
+                const startResponse = await apiCall(endpoint, { method });
                 if (!startResponse.ok) {
                     const startData = await startResponse.text();
                     throw new Error(`Start failed: ${startResponse.status} - ${startData}`);
@@ -318,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 endpoint = `/${action}/${hash}`;
                 method = 'POST';
 
-                const response = await fetch(`${apiBaseUrl}${endpoint}`, { method });
+                const response = await apiCall(endpoint, { method });
                 if (!response.ok) {
                     const responseData = await response.text();
                     throw new Error(`${action} failed: ${response.status} - ${responseData}`);
