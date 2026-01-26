@@ -30,29 +30,27 @@ curl -X GET http://localhost:8080/list
 
 **Response:**
 
+Returns a JSON array of tunnel objects:
+
 ```json
-{
-  "tunnels": [
-    {
-      "name": "done-hub",
-      "remote_host": "cloud.usa2",
-      "remote_port": "127.0.0.1:33000",
-      "local_port": "0.0.0.0:33001",
-      "direction": "remote_to_local",
-      "hash": "7b840f8344679dff5df893eefd245043",
-      "interactive": false
-    },
-    {
-      "name": "dockge@tempest",
-      "remote_host": "oaklight.tempest",
-      "remote_port": "5001",
-      "local_port": "55001",
-      "direction": "remote_to_local",
-      "hash": "2ea730e749b28910932f2b141638ade8",
-      "interactive": false
-    }
-  ]
-}
+[
+  {
+    "name": "done-hub",
+    "status": "NORMAL",
+    "local_port": "33001",
+    "remote_host": "cloud.usa2",
+    "remote_port": "33000",
+    "hash": "7b840f8344679dff5df893eefd245043"
+  },
+  {
+    "name": "dockge@tempest",
+    "status": "NORMAL",
+    "local_port": "55001",
+    "remote_host": "oaklight.tempest",
+    "remote_port": "5001",
+    "hash": "2ea730e749b28910932f2b141638ade8"
+  }
+]
 ```
 
 ### Get Tunnel Status
@@ -73,23 +71,27 @@ curl -X GET http://localhost:8080/status
 
 **Response:**
 
+Returns a JSON array of tunnel status objects:
+
 ```json
-{
-  "tunnels": [
-    {
-      "name": "done-hub",
-      "hash": "7b840f8344679dff5df893eefd245043",
-      "status": "RUNNING",
-      "pid": 186
-    },
-    {
-      "name": "dockge@tempest",
-      "hash": "2ea730e749b28910932f2b141638ade8",
-      "status": "RUNNING",
-      "pid": 192
-    }
-  ]
-}
+[
+  {
+    "name": "done-hub",
+    "status": "RUNNING",
+    "local_port": "33001",
+    "remote_host": "cloud.usa2",
+    "remote_port": "33000",
+    "hash": "7b840f8344679dff5df893eefd245043"
+  },
+  {
+    "name": "dockge@tempest",
+    "status": "RUNNING",
+    "local_port": "55001",
+    "remote_host": "oaklight.tempest",
+    "remote_port": "5001",
+    "hash": "2ea730e749b28910932f2b141638ade8"
+  }
+]
 ```
 
 ### Start All Tunnels
@@ -113,7 +115,7 @@ curl -X POST http://localhost:8080/start
 ```json
 {
   "status": "success",
-  "message": "All tunnels started"
+  "output": "INFO: Starting tunnels...\n[2026-01-25 12:00:00] [INFO] ..."
 }
 ```
 
@@ -138,7 +140,7 @@ curl -X POST http://localhost:8080/stop
 ```json
 {
   "status": "success",
-  "message": "All tunnels stopped"
+  "output": "INFO: Stopping all managed tunnels...\n..."
 }
 ```
 
@@ -158,23 +160,13 @@ POST /start/<tunnel_hash>
 curl -X POST http://localhost:8080/start/7b840f8344679dff5df893eefd245043
 ```
 
-**Response (Success):**
+**Response:**
 
 ```json
 {
   "status": "success",
   "tunnel_hash": "7b840f8344679dff5df893eefd245043",
-  "output": "Tunnel started successfully"
-}
-```
-
-**Response (Already Running):**
-
-```json
-{
-  "status": "success",
-  "tunnel_hash": "7b840f8344679dff5df893eefd245043",
-  "message": "Tunnel is already running"
+  "output": "INFO: Starting tunnel: 7b840f8344679dff5df893eefd245043\n..."
 }
 ```
 
@@ -200,22 +192,50 @@ curl -X POST http://localhost:8080/stop/7b840f8344679dff5df893eefd245043
 {
   "status": "success",
   "tunnel_hash": "7b840f8344679dff5df893eefd245043",
-  "output": "Tunnel stopped successfully"
+  "output": "INFO: Stopping tunnel: 7b840f8344679dff5df893eefd245043\n..."
+}
+```
+
+### Get Tunnel Logs
+
+Get logs for a specific tunnel or list all available log files.
+
+**List all log files:**
+
+```http
+GET /logs
+```
+
+**Response:**
+
+```json
+[
+  {
+    "hash": "7b840f8344679dff5df893eefd245043",
+    "filename": "tunnel-7b840f8344679dff5df893eefd245043.log",
+    "size": "4.0K",
+    "modified": "2026-01-25 12:00:00"
+  }
+]
+```
+
+**Get specific tunnel logs:**
+
+```http
+GET /logs/<tunnel_hash>
+```
+
+**Response:**
+
+```json
+{
+  "status": "success",
+  "tunnel_hash": "7b840f8344679dff5df893eefd245043",
+  "log": "Log content here..."
 }
 ```
 
 ## Error Responses
-
-### Tunnel Not Found
-
-```json
-{
-  "error": "Tunnel not found",
-  "tunnel_hash": "invalid_hash"
-}
-```
-
-**HTTP Status:** 404
 
 ### Missing Hash
 
@@ -227,16 +247,35 @@ curl -X POST http://localhost:8080/stop/7b840f8344679dff5df893eefd245043
 
 **HTTP Status:** 400
 
-### Internal Error
+### Log File Not Found
 
 ```json
 {
-  "error": "Failed to start tunnel",
-  "details": "Error message here"
+  "error": "Log file not found for tunnel: <hash>"
 }
 ```
 
-**HTTP Status:** 500
+**HTTP Status:** 404
+
+### Not Found
+
+```json
+{
+  "error": "Not Found"
+}
+```
+
+**HTTP Status:** 404
+
+### Method Not Allowed
+
+```json
+{
+  "error": "Method not allowed"
+}
+```
+
+**HTTP Status:** 405
 
 ## Web Panel Proxy Endpoints
 

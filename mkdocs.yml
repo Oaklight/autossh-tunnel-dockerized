@@ -64,6 +64,7 @@ nav:
   - Getting Started:
       - Quick Start: getting-started.md
       - SSH Configuration: ssh-config.md
+  - Architecture: architecture.md
   - User Guide:
       - Web Panel: web-panel.md
       - Tunnel Control API:
@@ -96,7 +97,11 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - attr_list
   - md_in_html
   - toc:

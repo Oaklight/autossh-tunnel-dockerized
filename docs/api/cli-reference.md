@@ -206,16 +206,17 @@ docker exec -it autotunnel-autossh-1 autossh-cli validate
 | Code | Description |
 |------|-------------|
 | 0    | Success |
-| 1    | General error |
-| 2    | Invalid arguments |
-| 3    | Tunnel not found |
-| 4    | Tunnel already running |
-| 5    | Tunnel failed to start |
+| 1    | Error (general error, invalid arguments, tunnel not found, etc.) |
 
 ## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `CONFIG_FILE` | Path to configuration file | `/config/config.yaml` |
-| `STATE_FILE` | Path to state file | `/tmp/autossh_tunnels.state` |
-| `LOG_DIR` | Directory for tunnel logs | `/tmp/autossh-logs` |
+| `AUTOSSH_CONFIG_FILE` | Path to configuration file | `/etc/autossh/config/config.yaml` |
+| `SSH_CONFIG_DIR` | SSH config directory | `/home/myuser/.ssh` |
+| `AUTOSSH_STATE_FILE` | Path to state file | `/tmp/autossh_tunnels.state` |
+| `API_ENABLE` | Enable HTTP API server | `false` |
+| `API_PORT` | HTTP API server port | `8080` |
+| `PUID` | User ID for file permissions | `1000` |
+| `PGID` | Group ID for file permissions | `1000` |
+| `AUTOSSH_GATETIME` | Autossh gate time | `0` |
