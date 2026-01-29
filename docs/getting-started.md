@@ -189,12 +189,43 @@ docker compose logs -f
 http://localhost:5000
 ```
 
+## 隧道方向模式
+
+本项目支持两种隧道方向配置的解释模式：
+
+### 默认模式（服务导向）
+
+默认模式从**服务暴露方向**的角度解释方向配置：
+
+- `local_to_remote`：将**本地**服务暴露**到远程**（使用 SSH `-R`，远程监听）
+- `remote_to_local`：将**远程**服务映射**到本地**（使用 SSH `-L`，本地监听）
+
+### SSH 标准模式
+
+SSH 标准模式与 **SSH 原生术语**保持一致：
+
+- `local_to_remote`：SSH 本地转发（使用 SSH `-L`，本地监听）
+- `remote_to_local`：SSH 远程转发（使用 SSH `-R`，远程监听）
+
+### 切换模式
+
+在 `compose.yaml` 中设置 `TUNNEL_DIRECTION_MODE` 环境变量：
+
+```yaml
+environment:
+  - TUNNEL_DIRECTION_MODE=default        # 默认模式（当前行为）
+  # - TUNNEL_DIRECTION_MODE=ssh-standard # SSH 标准模式
+```
+
+!!! note "向后兼容性"
+    默认模式保持与现有配置的向后兼容性。如果您更喜欢 SSH 的原生术语，请选择 `ssh-standard` 模式。
+
 ## 访问服务
 
 容器运行后：
 
-- **本地到远程隧道**：通过远程服务器的指定端口访问本地服务（例如 `remote-host1:22323`）
-- **远程到本地隧道**：通过本地端口访问远程服务（例如 `localhost:8001`）
+- **本地到远程隧道**（默认模式）：通过远程服务器的指定端口访问本地服务（例如 `remote-host1:22323`）
+- **远程到本地隧道**（默认模式）：通过本地端口访问远程服务（例如 `localhost:8001`）
 
 ## 下一步
 

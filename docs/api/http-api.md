@@ -238,6 +238,156 @@ curl -X POST http://localhost:8080/stop/7b840f8344679dff5df893eefd245043
 }
 ```
 
+### 添加或更新隧道配置
+
+添加新隧道或更新现有隧道配置。
+
+**请求：**
+
+```http
+POST /edit
+Content-Type: application/json
+```
+
+**请求体参数：**
+
+| 参数        | 类型    | 必需 | 描述                                           |
+| ----------- | ------- | ---- | ---------------------------------------------- |
+| hash        | string  | 否   | 要更新的隧道哈希值（不提供则添加新隧道）       |
+| name        | string  | 否   | 隧道名称（默认：unnamed）                      |
+| remote_host | string  | 是   | 远程主机（格式：user@host）                    |
+| remote_port | string  | 是   | 远程端口                                       |
+| local_port  | string  | 是   | 本地端口                                       |
+| direction   | string  | 否   | 隧道方向（默认：remote_to_local）              |
+| interactive | boolean | 否   | 是否需要交互式认证（默认：false）              |
+
+**示例 - 添加新隧道：**
+
+```bash
+curl -X POST http://localhost:8080/edit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-new-tunnel",
+    "remote_host": "user@server.example.com",
+    "remote_port": "8080",
+    "local_port": "18080",
+    "direction": "remote_to_local",
+    "interactive": false
+  }'
+```
+
+**响应（201 Created）：**
+
+```json
+{
+  "status": "success",
+  "action": "added",
+  "hash": "abc123def456..."
+}
+```
+
+**示例 - 更新现有隧道：**
+
+```bash
+curl -X POST http://localhost:8080/edit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "hash": "7b840f8344679dff5df893eefd245043",
+    "name": "updated-tunnel",
+    "remote_host": "user@new-server.example.com",
+    "remote_port": "9090",
+    "local_port": "19090"
+  }'
+```
+
+**响应（200 OK）：**
+
+```json
+{
+  "status": "success",
+  "action": "updated",
+  "old_hash": "7b840f8344679dff5df893eefd245043",
+  "new_hash": "abc123def456..."
+}
+```
+
+!!! note "更新行为"
+    更新隧道时，系统会：
+    
+    1. 停止正在运行的隧道（如果有）
+    2. 删除旧配置
+    3. 添加新配置
+    4. 返回新的哈希值
+
+### 删除隧道
+
+通过哈希值删除特定隧道配置。
+
+**请求：**
+
+```http
+DELETE /delete/<隧道哈希>
+```
+
+**示例：**
+
+```bash
+curl -X DELETE http://localhost:8080/delete/7b840f8344679dff5df893eefd245043
+```
+
+**响应：**
+
+```json
+{
+  "status": "success",
+  "action": "deleted",
+  "hash": "7b840f8344679dff5df893eefd245043"
+}
+```
+
+!!! note "POST 方法支持"
+    此端点也支持 `POST` 方法，以兼容不支持 DELETE 方法的客户端：
+    ```bash
+    curl -X POST http://localhost:8080/delete/7b840f8344679dff5df893eefd245043
+    ```
+
+!!! warning "删除行为"
+    删除隧道时：
+    
+    1. 如果隧道正在运行，会先停止
+    2. 配置将从配置文件中移除
+    3. 相关日志文件会保留直到清理
+
+### 获取隧道配置
+
+获取特定隧道的配置详情。
+
+**请求：**
+
+```http
+GET /config/<隧道哈希>
+```
+
+**示例：**
+
+```bash
+curl -X GET http://localhost:8080/config/7b840f8344679dff5df893eefd245043
+```
+
+**响应：**
+
+```json
+{
+  "name": "my-tunnel",
+  "remote_host": "user@server.example.com",
+  "remote_port": "8080",
+  "local_port": "18080",
+  "direction": "remote_to_local",
+  "hash": "7b840f8344679dff5df893eefd245043",
+  "interactive": false
+}
+```
+
 ### 获取隧道日志
 
 获取特定隧道的日志或列出所有可用的日志文件。
