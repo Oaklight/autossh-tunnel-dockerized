@@ -222,12 +222,42 @@ Access the Web panel (if enabled):
 http://localhost:5000
 ```
 
+## Tunnel Direction Modes
+
+The project supports two interpretation modes for tunnel direction configuration:
+
+### Default Mode (Service-Oriented)
+
+The default mode interprets direction from a **service exposure perspective**:
+
+- `local_to_remote`: Expose a **local** service **to remote** (uses SSH `-R`, remote listens)
+- `remote_to_local`: Bring a **remote** service **to local** (uses SSH `-L`, local listens)
+
+### SSH-Standard Mode
+
+The SSH-standard mode aligns with **SSH native terminology**:
+
+- `local_to_remote`: SSH Local forwarding (uses SSH `-L`, local listens)
+- `remote_to_local`: SSH Remote forwarding (uses SSH `-R`, remote listens)
+
+### Switching Modes
+
+Set the `TUNNEL_DIRECTION_MODE` environment variable in your `compose.yaml`:
+
+```yaml
+environment:
+  - TUNNEL_DIRECTION_MODE=default        # Default (current behavior)
+  # - TUNNEL_DIRECTION_MODE=ssh-standard # SSH-standard mode
+```
+
+> **Note**: The default mode maintains backward compatibility with existing configurations. Choose `ssh-standard` if you prefer SSH's native terminology.
+
 ## Access Services
 
 Once the containers are running:
 
-- **Local to Remote tunnels**: Access local services via the specified port on the remote server (e.g., `remote-host1:22323`)
-- **Remote to Local tunnels**: Access remote services through the local port (e.g., `localhost:8001`)
+- **Local to Remote tunnels** (default mode): Access local services via the specified port on the remote server (e.g., `remote-host1:22323`)
+- **Remote to Local tunnels** (default mode): Access remote services through the local port (e.g., `localhost:8001`)
 
 ## Tunnel Control API
 

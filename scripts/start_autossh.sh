@@ -4,6 +4,7 @@
 # Allow customization via environment variables
 CONFIG_FILE="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
 SSH_CONFIG_DIR="${SSH_CONFIG_DIR:-/home/myuser/.ssh}"
+TUNNEL_DIRECTION_MODE="${TUNNEL_DIRECTION_MODE:-default}"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(dirname "$0")"
@@ -65,12 +66,32 @@ start_single_tunnel() {
 		log_file="$log_dir/tunnel-${remote_host}-${local_port}.log"
 	fi
 
-	if [ "$direction" = "local_to_remote" ]; then
-		log_info "AUTOSSH" "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
-		exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
+	# Determine SSH flags based on direction mode
+	# Mode: default (service-oriented) - current behavior
+	#   local_to_remote: -R (expose local service to remote)
+	#   remote_to_local: -L (bring remote service to local)
+	# Mode: ssh-standard (SSH native terminology)
+	#   local_to_remote: -L (SSH Local forwarding)
+	#   remote_to_local: -R (SSH Remote forwarding)
+
+	if [ "$TUNNEL_DIRECTION_MODE" = "ssh-standard" ]; then
+		# SSH-standard mode: align with SSH native terminology
+		if [ "$direction" = "local_to_remote" ]; then
+			log_info "AUTOSSH" "Starting SSH tunnel (local to remote, ssh-standard mode): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
+			exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
+		else
+			log_info "AUTOSSH" "Starting SSH tunnel (remote to local, ssh-standard mode): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
+			exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
+		fi
 	else
-		log_info "AUTOSSH" "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
-		exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
+		# Default mode: service-oriented (current behavior)
+		if [ "$direction" = "local_to_remote" ]; then
+			log_info "AUTOSSH" "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
+			exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
+		else
+			log_info "AUTOSSH" "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
+			exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
+		fi
 	fi
 }
 
@@ -171,6 +192,7 @@ main() {
 	log_info "AUTOSSH" "Using config file: $CONFIG_FILE"
 	log_info "AUTOSSH" "Using SSH config dir: $SSH_CONFIG_DIR"
 	log_info "AUTOSSH" "Using state file: $state_file"
+	log_info "AUTOSSH" "Tunnel direction mode: $TUNNEL_DIRECTION_MODE"
 
 	# Check if config file exists
 	if [ ! -f "$CONFIG_FILE" ]; then
