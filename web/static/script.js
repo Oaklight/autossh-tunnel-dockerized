@@ -67,7 +67,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const statuses = await response.json();
             const statusMap = {};
             statuses.forEach(s => {
-                statusMap[s.name] = s.status;
+                if (s.hash) {
+                    statusMap[s.hash] = s.status;
+                }
             });
             return statusMap;
         } catch (error) {
@@ -95,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 data.tunnels.forEach((tunnel) => {
                     // Merge status from API
                     if (Object.keys(statuses).length > 0) {
-                        tunnel.status = statuses[tunnel.name] || 'STOPPED';
+                        tunnel.status = statuses[tunnel.hash] || 'STOPPED';
                     } else {
                         tunnel.status = 'N/A';
                     }
@@ -489,12 +491,11 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update status indicators in existing rows
         const rows = tableBody.querySelectorAll('tr');
         rows.forEach(row => {
-            const nameInput = row.querySelector('td:nth-child(2) input');
             const statusIndicator = row.querySelector('.status-indicator');
 
-            if (nameInput && statusIndicator) {
-                const tunnelName = nameInput.value.trim();
-                const status = statuses[tunnelName] || 'STOPPED';
+            if (statusIndicator) {
+                const hash = statusIndicator.dataset.hash;
+                const status = (hash && statuses[hash]) ? statuses[hash] : 'STOPPED';
                 updateStatusIndicator(statusIndicator, status);
             }
         });
