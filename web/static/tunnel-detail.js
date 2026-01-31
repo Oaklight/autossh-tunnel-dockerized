@@ -179,29 +179,47 @@ document.addEventListener("DOMContentLoaded", () => {
             ? `<i class="material-icons" style="color: #4CAF50;">check_circle</i> ${enabledText}`
             : `<i class="material-icons" style="color: #9E9E9E;">cancel</i> ${disabledText}`;
 
-        statusValue.textContent = tunnel.status || 'Unknown';
+        updateStatusDisplay(tunnel.status || 'Unknown');
     }
 
     function updateStatusDisplay(status) {
-        let text = 'Unknown';
+        let statusColor = "#9E9E9E";
+        let statusIcon = "help_outline";
+        let statusText = status || 'Unknown';
 
-        switch (status) {
+        // Normalize status
+        const normalizedStatus = (status || 'UNKNOWN').toUpperCase();
+
+        switch (normalizedStatus) {
             case 'RUNNING':
             case 'NORMAL':
-                text = window.i18n ? window.i18n.t('table.status.running') : 'Running';
+                statusIcon = "check_circle";
+                statusColor = "#4CAF50";
+                statusText = window.i18n ? window.i18n.t('table.status.running') : 'Running';
                 break;
             case 'STOPPED':
-                text = window.i18n ? window.i18n.t('table.status.stopped') : 'Stopped';
+                statusIcon = "stop_circle";
+                statusColor = "#9E9E9E";
+                statusText = window.i18n ? window.i18n.t('table.status.stopped') : 'Stopped';
                 break;
             case 'STARTING':
-                text = window.i18n ? window.i18n.t('table.status.starting') : 'Starting';
+                statusIcon = "hourglass_empty";
+                statusColor = "#FF9800";
+                statusText = window.i18n ? window.i18n.t('table.status.starting') : 'Starting';
                 break;
             case 'DEAD':
-                text = window.i18n ? window.i18n.t('table.status.dead') : 'Dead';
+                statusIcon = "cancel";
+                statusColor = "#F44336";
+                statusText = window.i18n ? window.i18n.t('table.status.dead') : 'Dead';
                 break;
         }
 
-        statusValue.textContent = text;
+        statusValue.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <i class="material-icons" style="color: ${statusColor}; margin-right: 8px;">${statusIcon}</i>
+                <span style="color: ${statusColor}; font-weight: 500;">${statusText}</span>
+            </div>
+        `;
     }
 
     async function handleControl(action) {
