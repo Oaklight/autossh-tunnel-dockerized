@@ -146,8 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     const statusData = await statusResponse.json();
                     const tunnelStatus = statusData.find(t => t.hash === currentTunnel.hash);
                     if (tunnelStatus) {
+                        currentTunnel.status = tunnelStatus.status;
                         updateStatusDisplay(tunnelStatus.status);
                     } else {
+                        currentTunnel.status = 'STOPPED';
                         updateStatusDisplay('STOPPED');
                     }
                 }
