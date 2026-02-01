@@ -68,11 +68,35 @@ autossh-cli show-tunnel <hash>
 autossh-cli show-tunnel 7b840f8344679dff5df893eefd245043
 ```
 
+## Hash Prefix Support
+
+!!! tip "Short Hash Prefix"
+    All commands that accept a tunnel hash also support **short hash prefixes** (minimum 8 characters), similar to Git short commits. This makes it easier to specify tunnels without typing the full 32-character hash.
+
+**Examples:**
+
+```bash
+# Using 8-character prefix instead of full hash
+autossh-cli logs 7b840f83
+autossh-cli start-tunnel 99acb12f
+autossh-cli stop-tunnel fc3cce10
+autossh-cli show-tunnel 2ea730e7
+
+# Full hash still works
+autossh-cli logs 7b840f8344679dff5df893eefd245043
+```
+
+**Error Handling:**
+
+- **Prefix too short**: If you provide fewer than 8 characters, you'll get an error message
+- **No match**: If no tunnel matches the prefix, an error is displayed with available log files
+- **Ambiguous match**: If multiple tunnels match the prefix, all matching hashes are listed and you're asked to use more characters
+
 ## Tunnel Control Commands
 
 ### Start a Single Tunnel
 
-Start a specific tunnel by its hash:
+Start a specific tunnel by its hash (or 8+ character prefix):
 
 ```bash
 autossh-cli start-tunnel <hash>
@@ -81,15 +105,22 @@ autossh-cli start-tunnel <hash>
 **Example:**
 
 ```bash
+# Using full hash
 $ autossh-cli start-tunnel 7b840f8344679dff5df893eefd245043
 INFO: Starting tunnel: 7b840f8344679dff5df893eefd245043
 [2026-01-25 12:03:23] [INFO] [STATE] Starting tunnel: done-hub (7b840f8344679dff5df893eefd245043)
 SUCCESS: Tunnel started successfully: 7b840f8344679dff5df893eefd245043
+
+# Using 8-character prefix
+$ autossh-cli start-tunnel 7b840f83
+INFO: Starting tunnel: 7b840f83
+[2026-01-25 12:03:23] [INFO] [STATE] Starting tunnel: done-hub (7b840f8344679dff5df893eefd245043)
+SUCCESS: Tunnel started successfully: 7b840f83
 ```
 
 ### Stop a Single Tunnel
 
-Stop a specific tunnel by its hash:
+Stop a specific tunnel by its hash (or 8+ character prefix):
 
 ```bash
 autossh-cli stop-tunnel <hash>
@@ -98,8 +129,9 @@ autossh-cli stop-tunnel <hash>
 **Example:**
 
 ```bash
-$ autossh-cli stop-tunnel 7b840f8344679dff5df893eefd245043
-INFO: Stopping tunnel: 7b840f8344679dff5df893eefd245043
+# Using 8-character prefix
+$ autossh-cli stop-tunnel 7b840f83
+INFO: Stopping tunnel: 7b840f83
 [2026-01-25 12:03:14] [INFO] [STATE] Stopping tunnel: done-hub (7b840f8344679dff5df893eefd245043, PID: 186)
 ```
 
@@ -135,8 +167,11 @@ View tunnel logs:
 # View all tunnel logs
 autossh-cli logs
 
-# View specific tunnel logs
+# View specific tunnel logs (supports 8+ char prefix)
 autossh-cli logs <hash>
+
+# Example with prefix
+autossh-cli logs 7b840f83
 ```
 
 ### Validate Configuration

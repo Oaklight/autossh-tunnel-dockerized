@@ -188,7 +188,7 @@ curl -X POST http://localhost:8080/stop
 
 ### Start a Specific Tunnel
 
-Start a specific tunnel by its hash.
+Start a specific tunnel by its hash (or 8+ character prefix).
 
 **Request:**
 
@@ -196,10 +196,20 @@ Start a specific tunnel by its hash.
 POST /start/<tunnel_hash>
 ```
 
+!!! tip "Hash Prefix Support"
+    You can use a short hash prefix (minimum 8 characters) instead of the full 32-character hash:
+    ```bash
+    curl -X POST http://localhost:8080/start/7b840f83
+    ```
+
 **Example:**
 
 ```bash
+# Using full hash
 curl -X POST http://localhost:8080/start/7b840f8344679dff5df893eefd245043
+
+# Using 8-character prefix
+curl -X POST http://localhost:8080/start/7b840f83
 ```
 
 **Response:**
@@ -214,7 +224,7 @@ curl -X POST http://localhost:8080/start/7b840f8344679dff5df893eefd245043
 
 ### Stop a Specific Tunnel
 
-Stop a specific tunnel by its hash.
+Stop a specific tunnel by its hash (or 8+ character prefix).
 
 **Request:**
 
@@ -225,7 +235,8 @@ POST /stop/<tunnel_hash>
 **Example:**
 
 ```bash
-curl -X POST http://localhost:8080/stop/7b840f8344679dff5df893eefd245043
+# Using 8-character prefix
+curl -X POST http://localhost:8080/stop/7b840f83
 ```
 
 **Response:**
@@ -417,6 +428,12 @@ GET /logs
 GET /logs/<tunnel_hash>
 ```
 
+!!! tip "Hash Prefix Support"
+    You can use a short hash prefix (minimum 8 characters):
+    ```bash
+    curl -X GET http://localhost:8080/logs/7b840f83
+    ```
+
 **Response:**
 
 ```json
@@ -428,6 +445,34 @@ GET /logs/<tunnel_hash>
 ```
 
 ## Error Responses
+
+### Hash Prefix Errors
+
+When using hash prefixes, the following errors may occur:
+
+**Prefix too short:**
+```json
+{
+  "error": "Hash prefix too short (minimum 8 characters, got 7)"
+}
+```
+**HTTP Status:** 400
+
+**No match found:**
+```json
+{
+  "error": "No tunnel found with hash prefix: 7b840f83"
+}
+```
+**HTTP Status:** 400
+
+**Ambiguous match:**
+```json
+{
+  "error": "Ambiguous hash prefix '7b840f83' matches 2 tunnels:\\n  7b840f8344679dff5df893eefd245043\\n  7b840f83abcdef1234567890abcdef12\\nPlease use more characters to uniquely identify the tunnel."
+}
+```
+**HTTP Status:** 400
 
 ### Missing Hash
 
