@@ -68,11 +68,35 @@ autossh-cli show-tunnel <哈希值>
 autossh-cli show-tunnel 7b840f8344679dff5df893eefd245043
 ```
 
+## 哈希前缀支持
+
+!!! tip "短哈希前缀"
+    所有接受隧道哈希的命令都支持 **短哈希前缀**（最少 8 个字符），类似于 Git 短提交。这使得指定隧道时无需输入完整的 32 字符哈希。
+
+**示例：**
+
+```bash
+# 使用 8 字符前缀代替完整哈希
+autossh-cli logs 7b840f83
+autossh-cli start-tunnel 99acb12f
+autossh-cli stop-tunnel fc3cce10
+autossh-cli show-tunnel 2ea730e7
+
+# 完整哈希仍然有效
+autossh-cli logs 7b840f8344679dff5df893eefd245043
+```
+
+**错误处理：**
+
+- **前缀过短**：如果提供少于 8 个字符，将显示错误消息
+- **无匹配**：如果没有隧道匹配该前缀，将显示错误并列出可用的日志文件
+- **歧义匹配**：如果多个隧道匹配该前缀，将列出所有匹配的哈希并要求使用更多字符
+
 ## 隧道控制命令
 
 ### 启动单个隧道
 
-通过哈希值启动特定隧道：
+通过哈希值（或 8+ 字符前缀）启动特定隧道：
 
 ```bash
 autossh-cli start-tunnel <哈希值>
@@ -81,15 +105,22 @@ autossh-cli start-tunnel <哈希值>
 **示例：**
 
 ```bash
+# 使用完整哈希
 $ autossh-cli start-tunnel 7b840f8344679dff5df893eefd245043
 INFO: Starting tunnel: 7b840f8344679dff5df893eefd245043
 [2026-01-25 12:03:23] [INFO] [STATE] Starting tunnel: done-hub (7b840f8344679dff5df893eefd245043)
 SUCCESS: Tunnel started successfully: 7b840f8344679dff5df893eefd245043
+
+# 使用 8 字符前缀
+$ autossh-cli start-tunnel 7b840f83
+INFO: Starting tunnel: 7b840f83
+[2026-01-25 12:03:23] [INFO] [STATE] Starting tunnel: done-hub (7b840f8344679dff5df893eefd245043)
+SUCCESS: Tunnel started successfully: 7b840f83
 ```
 
 ### 停止单个隧道
 
-通过哈希值停止特定隧道：
+通过哈希值（或 8+ 字符前缀）停止特定隧道：
 
 ```bash
 autossh-cli stop-tunnel <哈希值>
@@ -98,8 +129,9 @@ autossh-cli stop-tunnel <哈希值>
 **示例：**
 
 ```bash
-$ autossh-cli stop-tunnel 7b840f8344679dff5df893eefd245043
-INFO: Stopping tunnel: 7b840f8344679dff5df893eefd245043
+# 使用 8 字符前缀
+$ autossh-cli stop-tunnel 7b840f83
+INFO: Stopping tunnel: 7b840f83
 [2026-01-25 12:03:14] [INFO] [STATE] Stopping tunnel: done-hub (7b840f8344679dff5df893eefd245043, PID: 186)
 ```
 
@@ -135,8 +167,11 @@ autossh-cli stop
 # 查看所有隧道日志
 autossh-cli logs
 
-# 查看特定隧道日志
+# 查看特定隧道日志（支持 8+ 字符前缀）
 autossh-cli logs <哈希值>
+
+# 使用前缀的示例
+autossh-cli logs 7b840f83
 ```
 
 ### 验证配置

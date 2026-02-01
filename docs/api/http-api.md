@@ -188,7 +188,7 @@ curl -X POST http://localhost:8080/stop
 
 ### 启动特定隧道
 
-通过哈希值启动特定隧道。
+通过哈希值启动特定隧道。支持使用哈希前缀（最少 8 个字符）。
 
 **请求：**
 
@@ -199,7 +199,11 @@ POST /start/<隧道哈希>
 **示例：**
 
 ```bash
+# 使用完整哈希
 curl -X POST http://localhost:8080/start/7b840f8344679dff5df893eefd245043
+
+# 使用哈希前缀（最少 8 个字符）
+curl -X POST http://localhost:8080/start/7b840f83
 ```
 
 **响应：**
@@ -214,7 +218,7 @@ curl -X POST http://localhost:8080/start/7b840f8344679dff5df893eefd245043
 
 ### 停止特定隧道
 
-通过哈希值停止特定隧道。
+通过哈希值停止特定隧道。支持使用哈希前缀（最少 8 个字符）。
 
 **请求：**
 
@@ -225,7 +229,11 @@ POST /stop/<隧道哈希>
 **示例：**
 
 ```bash
+# 使用完整哈希
 curl -X POST http://localhost:8080/stop/7b840f8344679dff5df893eefd245043
+
+# 使用哈希前缀（最少 8 个字符）
+curl -X POST http://localhost:8080/stop/7b840f83
 ```
 
 **响应：**
@@ -413,8 +421,20 @@ GET /logs
 
 **获取特定隧道日志：**
 
+支持使用哈希前缀（最少 8 个字符）。
+
 ```http
 GET /logs/<隧道哈希>
+```
+
+**示例：**
+
+```bash
+# 使用完整哈希
+curl -X GET http://localhost:8080/logs/7b840f8344679dff5df893eefd245043
+
+# 使用哈希前缀（最少 8 个字符）
+curl -X GET http://localhost:8080/logs/7b840f83
 ```
 
 **响应：**
@@ -479,6 +499,38 @@ GET /logs/<隧道哈希>
 ```
 
 **HTTP 状态：** 401
+
+### 哈希前缀相关错误
+
+**前缀过短（少于 8 个字符）：**
+
+```json
+{
+  "error": "Hash prefix too short (minimum 8 characters)"
+}
+```
+
+**HTTP 状态：** 400
+
+**无匹配隧道：**
+
+```json
+{
+  "error": "No tunnel found matching prefix: <前缀>"
+}
+```
+
+**HTTP 状态：** 404
+
+**前缀匹配多个隧道（歧义）：**
+
+```json
+{
+  "error": "Ambiguous prefix '<前缀>' matches multiple tunnels"
+}
+```
+
+**HTTP 状态：** 400
 
 ## Web 面板
 
