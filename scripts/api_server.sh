@@ -6,6 +6,7 @@
 # Source the logger module
 SCRIPT_DIR="$(dirname "$0")"
 . "$SCRIPT_DIR/logger.sh"
+. "$SCRIPT_DIR/state_manager.sh"
 
 PORT="${API_PORT:-8080}"
 PIPE="/tmp/autossh_api_pipe"
@@ -268,17 +269,25 @@ handle_request() {
 		;;
 	/logs/*)
 		if [ "$method" = "GET" ]; then
-			# Extract tunnel hash from path
-			tunnel_hash=$(echo "$path" | sed 's|^/logs/||')
-			if [ -n "$tunnel_hash" ]; then
-				log_file="/tmp/autossh-logs/tunnel-${tunnel_hash}.log"
-				if [ -f "$log_file" ]; then
-					# Read last 100 lines of log file and properly escape for JSON
-					# Remove carriage returns, escape quotes, backslashes, and newlines
-					log_content=$(tail -100 "$log_file" | tr -d '\r' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-					echo "{\"status\": \"success\", \"tunnel_hash\": \"$tunnel_hash\", \"log\": \"$log_content\"}" | response "200 OK"
+			# Extract tunnel hash (or prefix) from path
+			tunnel_hash_input=$(echo "$path" | sed 's|^/logs/||')
+			if [ -n "$tunnel_hash_input" ]; then
+				# Resolve hash prefix to full hash
+				tunnel_hash=$(resolve_hash_prefix "$tunnel_hash_input" 2>&1)
+				if [ $? -ne 0 ]; then
+					# Error resolving hash prefix
+					json_error=$(echo "$tunnel_hash" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+					echo "{\"error\": \"$json_error\"}" | response "400 Bad Request"
 				else
-					echo "{\"error\": \"Log file not found for tunnel: $tunnel_hash\"}" | response "404 Not Found"
+					log_file="/tmp/autossh-logs/tunnel-${tunnel_hash}.log"
+					if [ -f "$log_file" ]; then
+						# Read last 100 lines of log file and properly escape for JSON
+						# Remove carriage returns, escape quotes, backslashes, and newlines
+						log_content=$(tail -100 "$log_file" | tr -d '\r' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+						echo "{\"status\": \"success\", \"tunnel_hash\": \"$tunnel_hash\", \"log\": \"$log_content\"}" | response "200 OK"
+					else
+						echo "{\"error\": \"Log file not found for tunnel: $tunnel_hash\"}" | response "404 Not Found"
+					fi
 				fi
 			else
 				echo '{"error": "Tunnel hash required"}' | response "400 Bad Request"
