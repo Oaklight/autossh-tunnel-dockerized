@@ -68,9 +68,9 @@ $(print_color "$CYAN" "COMMANDS:")
   logs [hash]              Show tunnel logs (all tunnels or specific tunnel by hash)
   
 $(print_color "$CYAN" "TUNNEL MANAGEMENT:")
-  start-tunnel <hash>      Start a specific tunnel by hash
-  stop-tunnel <hash>       Stop a specific tunnel by hash
-  show-tunnel <hash>       Show details of a specific tunnel
+  start-tunnel <hash>      Start a specific tunnel by hash (or 8+ char prefix)
+  stop-tunnel <hash>       Stop a specific tunnel by hash (or 8+ char prefix)
+  show-tunnel <hash>       Show details of a specific tunnel (or 8+ char prefix)
   
 $(print_color "$CYAN" "CONFIGURATION:")
   config                   Show current configuration paths
@@ -97,6 +97,11 @@ $(print_color "$CYAN" "EXAMPLES:")
   autossh-cli stop                     # Stop all tunnels
   autossh-cli list                     # List configured tunnels
   autossh-cli validate                 # Validate config file
+  
+  # Hash prefix support (8+ characters, like Git short hash)
+  autossh-cli logs 7b840f83            # View logs using 8-char prefix
+  autossh-cli start-tunnel 99acb12f    # Start tunnel using prefix
+  autossh-cli stop-tunnel fc3cce10     # Stop tunnel using prefix
   
   # Using custom config
   autossh-cli -c ./config/config.yaml start
@@ -349,15 +354,24 @@ execute_command() {
 		fi
 
 		if [ -n "$tunnel_arg" ]; then
+			# Resolve hash prefix to full hash
+			resolved_hash=$(resolve_hash_prefix "$tunnel_arg")
+			if [ $? -ne 0 ]; then
+				# Error already printed by resolve_hash_prefix
+				print_info "Available log files:"
+				ls -la "$log_dir"/tunnel-*.log 2>/dev/null || echo "No log files found"
+				exit 1
+			fi
+			
 			# Show logs for specific tunnel
-			log_file="$log_dir/tunnel-${tunnel_arg}.log"
+			log_file="$log_dir/tunnel-${resolved_hash}.log"
 			if [ -f "$log_file" ]; then
-				print_info "Showing logs for tunnel: $tunnel_arg"
+				print_info "Showing logs for tunnel: $resolved_hash"
 				echo "Log file: $log_file"
 				echo "----------------------------------------"
 				tail -50 "$log_file"
 			else
-				print_error "Log file not found for tunnel: $tunnel_arg"
+				print_error "Log file not found for tunnel: $resolved_hash"
 				print_info "Available log files:"
 				ls -la "$log_dir"/tunnel-*.log 2>/dev/null || echo "No log files found"
 			fi

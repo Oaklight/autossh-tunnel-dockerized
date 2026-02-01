@@ -6,9 +6,85 @@
 # Default state file location
 DEFAULT_STATE_FILE="/tmp/autossh_tunnels.state"
 
+# Minimum hash prefix length (similar to Git short hash)
+MIN_HASH_PREFIX_LENGTH=8
+
 # Get state file path (can be overridden by environment variable)
 get_state_file() {
 	echo "${AUTOSSH_STATE_FILE:-$DEFAULT_STATE_FILE}"
+}
+
+# Function to resolve a hash prefix to a full hash
+# Supports short hash prefixes (minimum 8 characters, like Git)
+# Returns full hash on stdout, returns 0 on success, 1 on error
+# Errors: prefix too short, no match, ambiguous match
+resolve_hash_prefix() {
+	local prefix=$1
+	local state_file=$(get_state_file)
+	local config_file="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
+	
+	# Check minimum length
+	local prefix_len=${#prefix}
+	if [ "$prefix_len" -lt "$MIN_HASH_PREFIX_LENGTH" ]; then
+		echo "Hash prefix too short (minimum $MIN_HASH_PREFIX_LENGTH characters, got $prefix_len)" >&2
+		return 1
+	fi
+	
+	# If it's already a full 32-character hash, return it directly
+	if [ "$prefix_len" -eq 32 ]; then
+		echo "$prefix"
+		return 0
+	fi
+	
+	# Collect all known hashes from state file and config
+	local all_hashes=""
+	
+	# From state file
+	if [ -f "$state_file" ]; then
+		all_hashes=$(cut -f6 "$state_file" 2>/dev/null)
+	fi
+	
+	# From config file (if config_parser is available)
+	if command -v parse_config >/dev/null 2>&1 && [ -f "$config_file" ]; then
+		local config_hashes=$(parse_config "$config_file" 2>/dev/null | cut -f6)
+		if [ -n "$config_hashes" ]; then
+			all_hashes="$all_hashes
+$config_hashes"
+		fi
+	fi
+	
+	# Remove duplicates and empty lines
+	all_hashes=$(echo "$all_hashes" | sort -u | grep -v '^$')
+	
+	# Find matching hashes
+	local matches=""
+	local match_count=0
+	
+	for hash in $all_hashes; do
+		case "$hash" in
+		$prefix*)
+			matches="$matches $hash"
+			match_count=$((match_count + 1))
+			;;
+		esac
+	done
+	
+	# Handle results
+	if [ $match_count -eq 0 ]; then
+		echo "No tunnel found with hash prefix: $prefix" >&2
+		return 1
+	elif [ $match_count -eq 1 ]; then
+		# Trim leading space and return
+		echo "$matches" | tr -d ' '
+		return 0
+	else
+		echo "Ambiguous hash prefix '$prefix' matches $match_count tunnels:" >&2
+		for hash in $matches; do
+			echo "  $hash" >&2
+		done
+		echo "Please use more characters to uniquely identify the tunnel." >&2
+		return 1
+	fi
 }
 
 # Function to get running tunnel hashes
@@ -43,28 +119,43 @@ remove_tunnel_from_state() {
 	fi
 }
 
-# Function to get PID by tunnel hash
+# Function to get PID by tunnel hash (supports hash prefix)
 get_tunnel_pid() {
-	local hash=$1
+	local input_hash=$1
 	local state_file=$(get_state_file)
+	
+	# Resolve hash prefix to full hash
+	local hash
+	hash=$(resolve_hash_prefix "$input_hash" 2>/dev/null) || hash="$input_hash"
+	
 	if [ -f "$state_file" ]; then
 		grep "	$hash	" "$state_file" 2>/dev/null | cut -f7 || true
 	fi
 }
 
-# Function to get tunnel info by hash
+# Function to get tunnel info by hash (supports hash prefix)
 get_tunnel_info() {
-	local hash=$1
+	local input_hash=$1
 	local state_file=$(get_state_file)
+	
+	# Resolve hash prefix to full hash
+	local hash
+	hash=$(resolve_hash_prefix "$input_hash" 2>/dev/null) || hash="$input_hash"
+	
 	if [ -f "$state_file" ]; then
 		grep "	$hash	" "$state_file" 2>/dev/null || true
 	fi
 }
 
-# Function to get tunnel name by hash
+# Function to get tunnel name by hash (supports hash prefix)
 get_tunnel_name() {
-	local hash=$1
+	local input_hash=$1
 	local state_file=$(get_state_file)
+	
+	# Resolve hash prefix to full hash
+	local hash
+	hash=$(resolve_hash_prefix "$input_hash" 2>/dev/null) || hash="$input_hash"
+	
 	if [ -f "$state_file" ]; then
 		grep "	$hash	" "$state_file" 2>/dev/null | cut -f5 || echo "unknown"
 	fi
@@ -82,9 +173,18 @@ is_tunnel_running() {
 	fi
 }
 
-# Function to stop tunnel by hash
+# Function to stop tunnel by hash (supports hash prefix)
 stop_tunnel_by_hash() {
-	local hash=$1
+	local input_hash=$1
+	
+	# Resolve hash prefix to full hash first
+	local hash
+	hash=$(resolve_hash_prefix "$input_hash")
+	if [ $? -ne 0 ]; then
+		# Error message already printed by resolve_hash_prefix
+		return 1
+	fi
+	
 	local pid=$(get_tunnel_pid "$hash")
 	local name=$(get_tunnel_name "$hash")
 
@@ -213,9 +313,9 @@ cleanup_dead_processes() {
 	rm -f "$temp_file"
 }
 
-# Function to start a specific tunnel by hash
+# Function to start a specific tunnel by hash (supports hash prefix)
 start_tunnel_by_hash() {
-	local hash=$1
+	local input_hash=$1
 	local config_file="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
 
 	# Source logger if not already loaded
@@ -243,6 +343,14 @@ start_tunnel_by_hash() {
 			log_error "STATE" "Cannot find config_parser.sh module"
 			return 1
 		fi
+	fi
+
+	# Resolve hash prefix to full hash
+	local hash
+	hash=$(resolve_hash_prefix "$input_hash")
+	if [ $? -ne 0 ]; then
+		# Error message already printed by resolve_hash_prefix
+		return 1
 	fi
 
 	# Check if tunnel is already running
