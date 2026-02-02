@@ -3,11 +3,15 @@ services:
     build: .
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
       - AUTOSSH_GATETIME=0
+      - API_ENABLE=true
+      - API_PORT=8080
+      - CONFIG_FILE=/etc/autossh/config/config.yaml
+      - CONFIG_BACKUP_DIR=/etc/autossh/config/backups
     network_mode: "host"
 
   web:
@@ -17,8 +21,9 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./config:/home/myuser/config
+      - ./config:/home/myuser/config:rw
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
+      - API_BASE_URL=http://localhost:8080
