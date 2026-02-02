@@ -22,28 +22,28 @@ resolve_hash_prefix() {
 	local prefix=$1
 	local state_file=$(get_state_file)
 	local config_file="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
-	
+
 	# Check minimum length
 	local prefix_len=${#prefix}
 	if [ "$prefix_len" -lt "$MIN_HASH_PREFIX_LENGTH" ]; then
 		echo "Hash prefix too short (minimum $MIN_HASH_PREFIX_LENGTH characters, got $prefix_len)" >&2
 		return 1
 	fi
-	
+
 	# If it's already a full 32-character hash, return it directly
 	if [ "$prefix_len" -eq 32 ]; then
 		echo "$prefix"
 		return 0
 	fi
-	
+
 	# Collect all known hashes from state file and config
 	local all_hashes=""
-	
+
 	# From state file
 	if [ -f "$state_file" ]; then
 		all_hashes=$(cut -f6 "$state_file" 2>/dev/null)
 	fi
-	
+
 	# From config file (if config_parser is available)
 	if command -v parse_config >/dev/null 2>&1 && [ -f "$config_file" ]; then
 		local config_hashes=$(parse_config "$config_file" 2>/dev/null | cut -f6)
@@ -52,14 +52,14 @@ resolve_hash_prefix() {
 $config_hashes"
 		fi
 	fi
-	
+
 	# Remove duplicates and empty lines
 	all_hashes=$(echo "$all_hashes" | sort -u | grep -v '^$')
-	
+
 	# Find matching hashes
 	local matches=""
 	local match_count=0
-	
+
 	for hash in $all_hashes; do
 		case "$hash" in
 		$prefix*)
@@ -68,7 +68,7 @@ $config_hashes"
 			;;
 		esac
 	done
-	
+
 	# Handle results
 	if [ $match_count -eq 0 ]; then
 		echo "No tunnel found with hash prefix: $prefix" >&2
@@ -123,11 +123,11 @@ remove_tunnel_from_state() {
 get_tunnel_pid() {
 	local input_hash=$1
 	local state_file=$(get_state_file)
-	
+
 	# Resolve hash prefix to full hash
 	local hash
 	hash=$(resolve_hash_prefix "$input_hash" 2>/dev/null) || hash="$input_hash"
-	
+
 	if [ -f "$state_file" ]; then
 		grep "	$hash	" "$state_file" 2>/dev/null | cut -f7 || true
 	fi
@@ -137,11 +137,11 @@ get_tunnel_pid() {
 get_tunnel_info() {
 	local input_hash=$1
 	local state_file=$(get_state_file)
-	
+
 	# Resolve hash prefix to full hash
 	local hash
 	hash=$(resolve_hash_prefix "$input_hash" 2>/dev/null) || hash="$input_hash"
-	
+
 	if [ -f "$state_file" ]; then
 		grep "	$hash	" "$state_file" 2>/dev/null || true
 	fi
@@ -151,11 +151,11 @@ get_tunnel_info() {
 get_tunnel_name() {
 	local input_hash=$1
 	local state_file=$(get_state_file)
-	
+
 	# Resolve hash prefix to full hash
 	local hash
 	hash=$(resolve_hash_prefix "$input_hash" 2>/dev/null) || hash="$input_hash"
-	
+
 	if [ -f "$state_file" ]; then
 		grep "	$hash	" "$state_file" 2>/dev/null | cut -f5 || echo "unknown"
 	fi
@@ -176,7 +176,7 @@ is_tunnel_running() {
 # Function to stop tunnel by hash (supports hash prefix)
 stop_tunnel_by_hash() {
 	local input_hash=$1
-	
+
 	# Resolve hash prefix to full hash first
 	local hash
 	hash=$(resolve_hash_prefix "$input_hash")
@@ -184,7 +184,7 @@ stop_tunnel_by_hash() {
 		# Error message already printed by resolve_hash_prefix
 		return 1
 	fi
-	
+
 	local pid=$(get_tunnel_pid "$hash")
 	local name=$(get_tunnel_name "$hash")
 

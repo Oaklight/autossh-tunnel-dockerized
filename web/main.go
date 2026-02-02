@@ -211,16 +211,19 @@ func checkConfigDirectory() error {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	logMsg("INFO", "WEB", "GET / from %s", r.RemoteAddr)
 	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "index.html")))
 	tmpl.Execute(w, nil)
 }
 
 func helpHandler(w http.ResponseWriter, r *http.Request) {
+	logMsg("INFO", "WEB", "GET /help from %s", r.RemoteAddr)
 	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "help.html")))
 	tmpl.Execute(w, nil)
 }
 
 func tunnelDetailHandler(w http.ResponseWriter, r *http.Request) {
+	logMsg("INFO", "WEB", "GET /tunnel-detail?%s from %s", r.URL.RawQuery, r.RemoteAddr)
 	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "tunnel-detail.html")))
 	data := struct {
 		APIBaseURL string
@@ -231,8 +234,10 @@ func tunnelDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getConfigHandler(w http.ResponseWriter, r *http.Request) {
+	logMsg("INFO", "WEB", "GET /api/config from %s", r.RemoteAddr)
 	config, err := loadConfig()
 	if err != nil {
+		logMsg("ERROR", "WEB", "Failed to load config: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -249,6 +254,7 @@ type APIConfigResponse struct {
 
 // getAPIConfigHandler returns API configuration for frontend
 func getAPIConfigHandler(w http.ResponseWriter, r *http.Request) {
+	logMsg("DEBUG", "WEB", "GET /api/config/api from %s", r.RemoteAddr)
 	config := APIConfigResponse{
 		BaseURL: apiBaseURL,
 		APIKey:  apiKey,
@@ -258,26 +264,33 @@ func getAPIConfigHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateConfigHandler(w http.ResponseWriter, r *http.Request) {
+	logMsg("INFO", "WEB", "POST /api/config from %s", r.RemoteAddr)
 	var config Config
 	err := json.NewDecoder(r.Body).Decode(&config)
 	if err != nil {
+		logMsg("ERROR", "WEB", "Invalid JSON in request body: %v", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
+	logMsg("INFO", "WEB", "Saving config with %d tunnels", len(config.Tunnels))
 	err = saveConfig(config)
 	if err != nil {
+		logMsg("ERROR", "WEB", "Failed to save config: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	logMsg("INFO", "WEB", "Config saved successfully")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status": "success"}`))
 }
 
 func getLanguagesHandler(w http.ResponseWriter, r *http.Request) {
+	logMsg("DEBUG", "WEB", "GET /api/languages from %s", r.RemoteAddr)
 	localesDir := filepath.Join(staticDir, "locales")
 	
 	// Check if locales directory exists
 	if _, err := os.Stat(localesDir); os.IsNotExist(err) {
+		logMsg("ERROR", "WEB", "Locales directory not found: %s", localesDir)
 		http.Error(w, "Locales directory not found", http.StatusNotFound)
 		return
 	}

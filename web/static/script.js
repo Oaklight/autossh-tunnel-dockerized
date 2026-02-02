@@ -4,12 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let apiConfig = { base_url: '', api_key: '' };
     let autoRefreshInterval = null;
     const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
+    let isConfigSaving = false; // Flag to prevent clicks during save/reload
 
     // Initialize Material Design Components
     initializeMDC();
 
     // Load API config first, then load configuration
-    loadAPIConfig().then(() => loadConfiguration());
+    loadAPIConfig().then(() => {
+        loadConfiguration();
+        // Start auto-refresh by default after initial load
+        startAutoRefresh();
+    });
 
     // Setup refresh button and auto-refresh checkbox
     setupRefreshControls();
@@ -80,7 +85,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Load configuration from server
     async function loadConfiguration() {
-        showLoading(true);
+        // Only show loading if not already in a save operation
+        if (!isConfigSaving) {
+            showLoading(true);
+        }
         try {
             const response = await fetch("/api/config");
             if (!response.ok) {
@@ -112,7 +120,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const errorMsg = window.i18n ? window.i18n.t('messages.config_load_failed') : 'Failed to load configuration';
             showMessage(errorMsg, "error");
         } finally {
-            showLoading(false);
+            // Only hide loading if not in a save operation (save handles its own loading state)
+            if (!isConfigSaving) {
+                showLoading(false);
+            }
         }
     }
 
@@ -263,6 +274,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const statusIndicator = row.querySelector(".status-indicator");
         if (statusIndicator && tunnelHash) {
             statusIndicator.addEventListener("click", () => {
+                // Prevent navigation during config save/reload
+                if (isConfigSaving) {
+                    const waitMsg = window.i18n ? window.i18n.t('messages.please_wait') : 'Please wait for configuration to reload...';
+                    showMessage(waitMsg, 'info');
+                    return;
+                }
                 window.location.href = `/tunnel-detail?hash=${tunnelHash}`;
             });
             // Add hover effect
@@ -473,6 +490,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 new mdc.checkbox.MDCCheckbox(checkboxEl);
             }
 
+            // Set checkbox to checked by default (auto-refresh is enabled by default)
+            autoRefreshCheckbox.checked = true;
+
             autoRefreshCheckbox.addEventListener('change', () => {
                 if (autoRefreshCheckbox.checked) {
                     startAutoRefresh();
@@ -597,14 +617,16 @@ document.addEventListener("DOMContentLoaded", () => {
             tunnel.name && tunnel.remote_host && tunnel.remote_port && tunnel.local_port
         );
 
+        // Set flag to prevent status indicator clicks during save/reload
+        isConfigSaving = true;
         showLoading(true);
+        
         fetch("/api/config", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tunnels: validTunnels }),
         })
             .then(response => {
-                showLoading(false);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -613,11 +635,21 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(() => {
                 const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
                 showMessage(successMsg, "success");
+                // Reload configuration immediately to get updated hashes
+                // Keep loading state until reload completes
+                return loadConfiguration();
+            })
+            .then(() => {
+                // Configuration reloaded successfully, re-enable clicks
+                isConfigSaving = false;
+                showLoading(false);
             })
             .catch(error => {
                 console.error("Error saving configuration:", error);
                 const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
                 showMessage(errorMsg, "error");
+                isConfigSaving = false;
+                showLoading(false);
             });
     });
 
