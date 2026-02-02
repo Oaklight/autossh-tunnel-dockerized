@@ -83,34 +83,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Load configuration from server
+    // Load configuration from autossh API server
     async function loadConfiguration() {
         // Only show loading if not already in a save operation
         if (!isConfigSaving) {
             showLoading(true);
         }
         try {
-            const response = await fetch("/api/config");
+            // Use Config API from autossh container
+            if (!apiConfig.base_url) {
+                throw new Error('API server not configured');
+            }
+
+            const response = await apiCall('/config');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
 
-            // Fetch statuses from API server
-            const statuses = await fetchTunnelStatuses();
-
             // Clear existing rows before adding new ones
             tableBody.innerHTML = '';
             if (data.tunnels && Array.isArray(data.tunnels)) {
                 data.tunnels.forEach((tunnel) => {
-                    // Merge status from API
-                    if (Object.keys(statuses).length > 0) {
-                        tunnel.status = statuses[tunnel.hash] || 'STOPPED';
-                    } else {
-                        tunnel.status = 'N/A';
-                    }
+                    // Set initial status to LOADING or N/A
+                    tunnel.status = 'N/A';
                     addRow(tunnel);
                 });
+                
+                // Fetch statuses asynchronously after rendering
+                refreshStatuses();
             } else {
                 const warningMsg = window.i18n ? window.i18n.t('messages.no_tunnels') : 'No tunnels found in configuration';
                 console.warn(warningMsg);
@@ -237,9 +238,31 @@ document.addEventListener("DOMContentLoaded", () => {
         tableBody.appendChild(row);
 
         // Add delete row event with confirmation
-        row.querySelector(".deleteRow").addEventListener("click", () => {
+        row.querySelector(".deleteRow").addEventListener("click", async () => {
             const confirmMessage = window.i18n ? window.i18n.t('messages.delete_confirm') : 'Are you sure you want to delete this tunnel configuration?';
-            if (confirm(confirmMessage)) {
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            // If tunnel has a hash, delete via Config API
+            if (tunnelHash) {
+                try {
+                    const response = await apiCall(`/config/${tunnelHash}/delete`, { method: 'POST' });
+                    if (!response.ok) {
+                        const errorData = await response.text();
+                        throw new Error(`Delete failed: ${response.status} - ${errorData}`);
+                    }
+                    const successMsg = window.i18n ? window.i18n.t('messages.delete_success') : 'Tunnel deleted successfully';
+                    showMessage(successMsg, 'success');
+                    // Reload configuration to refresh the list
+                    setTimeout(() => loadConfiguration(), 500);
+                } catch (error) {
+                    console.error('Error deleting tunnel:', error);
+                    const errorMsg = window.i18n ? window.i18n.t('messages.delete_failed') : 'Failed to delete tunnel';
+                    showMessage(errorMsg, 'error');
+                }
+            } else {
+                // New unsaved row, just remove from DOM
                 row.style.animation = "fadeOut 0.3s ease-out";
                 setTimeout(() => row.remove(), 300);
             }
@@ -577,8 +600,8 @@ document.addEventListener("DOMContentLoaded", () => {
         addRow();
     });
 
-    // Save config button event
-    document.getElementById("saveConfig").addEventListener("click", () => {
+    // Save config button event - uses Config API to replace all configurations
+    document.getElementById("saveConfig").addEventListener("click", async () => {
         const rows = Array.from(tableBody.rows);
 
         // Validate all inputs before saving
@@ -595,6 +618,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (hasErrors) {
             const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fix validation errors before saving';
+            showMessage(errorMsg, "error");
+            return;
+        }
+
+        if (!apiConfig.base_url) {
+            const errorMsg = window.i18n ? window.i18n.t('messages.api_not_configured') : 'API server not configured';
             showMessage(errorMsg, "error");
             return;
         }
@@ -621,36 +650,35 @@ document.addEventListener("DOMContentLoaded", () => {
         isConfigSaving = true;
         showLoading(true);
         
-        fetch("/api/config", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tunnels: validTunnels }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(() => {
-                const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
-                showMessage(successMsg, "success");
-                // Reload configuration immediately to get updated hashes
-                // Keep loading state until reload completes
-                return loadConfiguration();
-            })
-            .then(() => {
-                // Configuration reloaded successfully, re-enable clicks
-                isConfigSaving = false;
-                showLoading(false);
-            })
-            .catch(error => {
-                console.error("Error saving configuration:", error);
-                const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
-                showMessage(errorMsg, "error");
-                isConfigSaving = false;
-                showLoading(false);
+        try {
+            // Use Config API from autossh container
+            const response = await apiCall('/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tunnels: validTunnels }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                throw new Error(`HTTP error! status: ${response.status} - ${errorData}`);
+            }
+
+            const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
+            showMessage(successMsg, "success");
+            
+            // Reload configuration immediately to get updated hashes
+            await loadConfiguration();
+            
+            // Configuration reloaded successfully, re-enable clicks
+            isConfigSaving = false;
+            showLoading(false);
+        } catch (error) {
+            console.error("Error saving configuration:", error);
+            const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
+            showMessage(errorMsg, "error");
+            isConfigSaving = false;
+            showLoading(false);
+        }
     });
 
 });

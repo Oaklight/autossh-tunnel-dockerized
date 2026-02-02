@@ -25,11 +25,8 @@ services:
     image: oaklight/autossh-tunnel-web-panel:latest
     ports:
       - "5000:5000"
-    volumes:
-      - ./config:/home/myuser/config:rw
+    # No config volume needed - web panel uses Config API from autossh container
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Asia/Shanghai
       # API_BASE_URL is used by the browser to connect to the API server
       # Use localhost since the browser runs on the host machine
