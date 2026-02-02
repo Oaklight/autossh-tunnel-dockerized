@@ -52,7 +52,7 @@
     "restart_tunnel": "터널 재시작",
     "stop_tunnel": "터널 중지",
     "refresh": "새로고침",
-    "auto_refresh": "자동 새로고침"
+    "auto_refresh": "자동 새로고침 (5초)"
   },
   "tooltips": {
     "add_tunnel": "터널 추가",

@@ -52,7 +52,7 @@
     "restart_tunnel": "重启隧道",
     "stop_tunnel": "停止隧道",
     "refresh": "刷新",
-    "auto_refresh": "自动刷新"
+    "auto_refresh": "自动刷新 (5秒)"
   },
   "tooltips": {
     "add_tunnel": "添加隧道",
