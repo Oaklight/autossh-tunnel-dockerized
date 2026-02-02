@@ -366,15 +366,71 @@ curl -X DELETE http://localhost:8080/delete/7b840f8344679dff5df893eefd245043
     2. 配置将从配置文件中移除
     3. 相关日志文件会保留直到清理
 
-### 获取隧道配置
+## 配置管理 API
 
-获取特定隧道的配置详情。
+配置管理 API 提供直接管理隧道配置的端点。所有配置更改都会在修改前自动备份。
+
+!!! info "自动备份"
+    在任何配置修改之前，系统会自动在 `/etc/autossh/config/backups/` 目录下创建带时间戳的备份。
+
+### 获取全部配置
+
+获取所有隧道配置。
+
+**请求：**
+
+```http
+GET /config
+```
+
+**示例：**
+
+```bash
+curl -X GET http://localhost:8080/config
+```
+
+**响应：**
+
+```json
+{
+  "tunnels": [
+    {
+      "name": "my-tunnel",
+      "remote_host": "user@server.example.com",
+      "remote_port": "8080",
+      "local_port": "18080",
+      "direction": "remote_to_local",
+      "interactive": false,
+      "hash": "7b840f8344679dff5df893eefd245043"
+    },
+    {
+      "name": "another-tunnel",
+      "remote_host": "user@other.example.com",
+      "remote_port": "3306",
+      "local_port": "13306",
+      "direction": "remote_to_local",
+      "interactive": false,
+      "hash": "abc123def456789012345678901234ab"
+    }
+  ]
+}
+```
+
+### 获取单个隧道配置
+
+通过哈希值（或 8+ 字符前缀）获取特定隧道的配置详情。
 
 **请求：**
 
 ```http
 GET /config/<隧道哈希>
 ```
+
+!!! tip "哈希前缀支持"
+    可以使用短哈希前缀（最少 8 个字符）代替完整的 32 字符哈希：
+    ```bash
+    curl -X GET http://localhost:8080/config/7b840f83
+    ```
 
 **示例：**
 
@@ -391,10 +447,242 @@ curl -X GET http://localhost:8080/config/7b840f8344679dff5df893eefd245043
   "remote_port": "8080",
   "local_port": "18080",
   "direction": "remote_to_local",
-  "hash": "7b840f8344679dff5df893eefd245043",
-  "interactive": false
+  "interactive": false,
+  "hash": "7b840f8344679dff5df893eefd245043"
 }
 ```
+
+### 全部替换配置
+
+用新的隧道配置替换整个配置文件。
+
+**请求：**
+
+```http
+POST /config
+Content-Type: application/json
+```
+
+或
+
+```http
+PUT /config
+Content-Type: application/json
+```
+
+**请求体：**
+
+```json
+{
+  "tunnels": [
+    {
+      "name": "tunnel-1",
+      "remote_host": "user@server1.example.com",
+      "remote_port": "8080",
+      "local_port": "18080",
+      "direction": "remote_to_local",
+      "interactive": false
+    },
+    {
+      "name": "tunnel-2",
+      "remote_host": "user@server2.example.com",
+      "remote_port": "3306",
+      "local_port": "13306"
+    }
+  ]
+}
+```
+
+**示例：**
+
+```bash
+curl -X POST http://localhost:8080/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tunnels": [
+      {
+        "name": "my-tunnel",
+        "remote_host": "user@server.example.com",
+        "remote_port": "8080",
+        "local_port": "18080"
+      }
+    ]
+  }'
+```
+
+**响应（200 OK）：**
+
+```json
+{
+  "status": "success",
+  "message": "Configuration saved"
+}
+```
+
+!!! warning "完全替换"
+    此端点会替换整个配置。请求中未包含的隧道将被删除。
+
+### 新增隧道
+
+添加新的隧道配置。
+
+**请求：**
+
+```http
+POST /config/new
+Content-Type: application/json
+```
+
+**请求体参数：**
+
+| 参数        | 类型    | 必需 | 描述                                           |
+| ----------- | ------- | ---- | ---------------------------------------------- |
+| name        | string  | 是   | 隧道名称                                       |
+| remote_host | string  | 是   | 远程主机（格式：user@host）                    |
+| remote_port | string  | 是   | 远程端口                                       |
+| local_port  | string  | 是   | 本地端口                                       |
+| direction   | string  | 否   | 隧道方向（默认：remote_to_local）              |
+| interactive | boolean | 否   | 是否需要交互式认证（默认：false）              |
+
+**示例：**
+
+```bash
+curl -X POST http://localhost:8080/config/new \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-new-tunnel",
+    "remote_host": "user@server.example.com",
+    "remote_port": "8080",
+    "local_port": "18080",
+    "direction": "remote_to_local",
+    "interactive": false
+  }'
+```
+
+**响应（201 Created）：**
+
+```json
+{
+  "name": "my-new-tunnel",
+  "remote_host": "user@server.example.com",
+  "remote_port": "8080",
+  "local_port": "18080",
+  "direction": "remote_to_local",
+  "interactive": false,
+  "hash": "abc123def456789012345678901234ab"
+}
+```
+
+### 更新单个隧道
+
+通过哈希值（或 8+ 字符前缀）更新现有隧道配置。
+
+**请求：**
+
+```http
+POST /config/<隧道哈希>
+Content-Type: application/json
+```
+
+或
+
+```http
+PUT /config/<隧道哈希>
+Content-Type: application/json
+```
+
+**请求体参数：**
+
+| 参数        | 类型    | 必需 | 描述                                           |
+| ----------- | ------- | ---- | ---------------------------------------------- |
+| name        | string  | 是   | 隧道名称                                       |
+| remote_host | string  | 是   | 远程主机（格式：user@host）                    |
+| remote_port | string  | 是   | 远程端口                                       |
+| local_port  | string  | 是   | 本地端口                                       |
+| direction   | string  | 否   | 隧道方向（默认：remote_to_local）              |
+| interactive | boolean | 否   | 是否需要交互式认证（默认：false）              |
+
+**示例：**
+
+```bash
+curl -X POST http://localhost:8080/config/7b840f83 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "updated-tunnel",
+    "remote_host": "user@new-server.example.com",
+    "remote_port": "9090",
+    "local_port": "19090"
+  }'
+```
+
+**响应（200 OK）：**
+
+```json
+{
+  "name": "updated-tunnel",
+  "remote_host": "user@new-server.example.com",
+  "remote_port": "9090",
+  "local_port": "19090",
+  "direction": "remote_to_local",
+  "interactive": false,
+  "hash": "def456abc789012345678901234567cd"
+}
+```
+
+!!! note "哈希值变更"
+    更新隧道配置时，哈希值会改变，因为它是根据隧道参数计算的。
+
+### 删除隧道（RESTful）
+
+使用 RESTful DELETE 方法删除隧道配置。
+
+**请求：**
+
+```http
+DELETE /config/<隧道哈希>
+```
+
+**示例：**
+
+```bash
+curl -X DELETE http://localhost:8080/config/7b840f8344679dff5df893eefd245043
+```
+
+**响应（200 OK）：**
+
+```json
+{
+  "status": "success",
+  "message": "Tunnel deleted"
+}
+```
+
+### 删除隧道（POST）
+
+使用 POST 方法删除隧道配置（适用于不支持 DELETE 的客户端）。
+
+**请求：**
+
+```http
+POST /config/<隧道哈希>/delete
+```
+
+**示例：**
+
+```bash
+curl -X POST http://localhost:8080/config/7b840f83/delete
+```
+
+**响应（200 OK）：**
+
+```json
+{
+  "status": "success",
+  "message": "Tunnel deleted"
+}
+```
+
+## 日志 API
 
 ### 获取隧道日志
 
