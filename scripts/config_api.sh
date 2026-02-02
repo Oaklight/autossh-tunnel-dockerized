@@ -4,7 +4,8 @@
 # This module provides functions for managing tunnel configurations via API
 
 # Configuration file paths
-# Use AUTOSSH_CONFIG_FILE for consistency with other scripts, fallback to CONFIG_FILE
+# Use AUTOSSH_CONFIG_FILE for consistency with other scripts
+# Default to /etc/autossh/config/ which is the standard mount point in compose.yaml
 CONFIG_FILE="${AUTOSSH_CONFIG_FILE:-${CONFIG_FILE:-/etc/autossh/config/config.yaml}}"
 CONFIG_BACKUP_DIR="${CONFIG_BACKUP_DIR:-/etc/autossh/config/backups}"
 
