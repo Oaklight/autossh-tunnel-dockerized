@@ -6,13 +6,14 @@ The web panel provides a visual interface for managing SSH tunnel configurations
 
 ## Features
 
-- **Visual Configuration Editing**: View and edit the `config.yaml` file through a user-friendly interface
-- **Automatic Backup**: Configuration changes are automatically backed up to `config/backups/`
+- **Visual Configuration Editing**: View and edit tunnel configurations through a user-friendly interface
+- **Automatic Backup**: Configuration changes are automatically backed up to `config/backups/` on the autossh container
 - **Real-time Updates**: Configuration changes automatically reload tunnels without container restart
 - **Multi-language Support**: Supports Chinese, English, and other languages
 - **Tunnel Status Monitoring**: Real-time view of each tunnel's running status
 - **Individual Tunnel Control**: Start and stop each tunnel independently
-- **Direct API Architecture**: Browser makes API calls directly to the tunnel control API for improved performance
+- **Direct API Architecture**: Browser makes API calls directly to the autossh Config API for all operations
+- **No Config Volume Required**: Web panel no longer needs access to config files - all operations go through the API
 
 ## Accessing the Web Panel
 
@@ -28,33 +29,49 @@ If you modified the web panel port, use the corresponding port number.
 
 ### Main Page
 
-The main page displays a list of all configured tunnels, including:
+The main page displays a list of all configured tunnels in an editable table format:
 
-- **Tunnel Name**: Custom tunnel identifier
-- **Remote Host**: Target host for SSH connection
-- **Port Mapping**: Mapping between local and remote ports
-- **Direction**: Tunnel direction (local to remote / remote to local)
-- **Status**: Running / Stopped
-- **Action Buttons**: Start, Stop, Edit, Delete
+| Column | Description |
+|--------|-------------|
+| **Controls** | Per-row action buttons: Save & Restart, Start, Restart, Stop |
+| **Name** | Editable tunnel name field |
+| **Status** | Status indicator icon (click to open tunnel detail page) |
+| **Remote Host** | Editable remote host field |
+| **Remote Port** | Editable remote port field |
+| **Local Port** | Editable local port field |
+| **Direction** | Dropdown to select tunnel direction |
+| **Actions** | Interactive Auth toggle and Delete button |
+
+**Status Indicators:**
+
+- 🟢 Green check: Running
+- 🔴 Red X: Dead/Error
+- 🟠 Orange hourglass: Starting/Loading
+- ⚪ Grey stop: Stopped
 
 ### Adding a Tunnel
 
-1. Click the "Add Tunnel" button
-2. Fill in the tunnel configuration:
-   - **Name**: Custom name for the tunnel (optional)
+1. Click the "Add" button at the bottom of the page
+2. A new empty row will appear in the table
+3. Fill in the tunnel configuration directly in the table:
+   - **Name**: Custom name for the tunnel
    - **Remote Host**: SSH host configuration name (e.g., `user@remote-host`)
-   - **Remote Port**: Port on the remote server
-   - **Local Port**: Port on the local machine
-   - **Direction**: Choose `local_to_remote` or `remote_to_local`
-   - **Interactive Mode**: Whether interactive SSH session is needed (usually select false)
-3. Click "Save"
+   - **Remote Port**: Port on the remote server (supports `port` or `hostname:port` format)
+   - **Local Port**: Port on the local machine (supports `port` or `ip:port` format)
+   - **Direction**: Choose `Remote to Local` or `Local to Remote`
+4. Click the row's "Save" button (💾) or the global "Save & Restart" button
 
 ### Editing Tunnels
 
+Tunnels can be edited directly in the table:
+
 1. Find the tunnel to edit in the tunnel list
-2. Click the "Edit" button
-3. Modify the configuration
-4. Click "Save"
+2. Modify the configuration fields directly in the table row
+3. Click the row's "Save" button (💾) to save and restart only that tunnel
+4. Or click the global "Save & Restart" button to save all changes and restart all tunnels
+
+!!! tip "Per-Row Save"
+    The per-row save button (💾) allows you to save and restart individual tunnels without affecting other tunnels. This is useful when you only need to modify one tunnel.
 
 ### Deleting Tunnels
 
@@ -64,10 +81,24 @@ The main page displays a list of all configured tunnels, including:
 
 ### Starting/Stopping Tunnels
 
-- **Start Single Tunnel**: Click the "Start" button next to the tunnel
-- **Stop Single Tunnel**: Click the "Stop" button next to the tunnel
-- **Start All Tunnels**: Click the "Start All" button at the top of the page
-- **Stop All Tunnels**: Click the "Stop All" button at the top of the page
+Each tunnel row has control buttons:
+
+- **Start** (▶️): Start the tunnel
+- **Restart** (🔄): Stop and restart the tunnel
+- **Stop** (⏹️): Stop the tunnel
+
+!!! note "Interactive Authentication"
+    Click the fingerprint icon (🫆) to toggle interactive authentication mode. When enabled (green), the tunnel will prompt for authentication if needed.
+
+### Tunnel Detail Page
+
+Click on the status indicator icon in any row to open the tunnel's detail page. The detail page provides:
+
+- **Full Configuration View**: See all tunnel settings
+- **Real-time Logs**: View tunnel logs with auto-refresh
+- **Control Buttons**: Start, Restart, Stop the tunnel
+- **Configuration Editing**: Modify tunnel settings directly
+- **Auto-refresh**: Status and logs update automatically every 5 seconds
 
 ## Configuration Backup
 
@@ -172,17 +203,33 @@ ls -t | tail -n +11 | xargs rm -f
 The web panel uses a **direct API architecture**:
 
 1. **Static File Server**: The Go web server (port 5000) serves HTML, CSS, and JavaScript files
-2. **Configuration Management**: The web server handles configuration file reading and writing
-3. **Direct API Calls**: The browser makes API calls directly to the autossh API server (port 8080)
+2. **Direct API Calls**: The browser makes API calls directly to the autossh API server (port 8080) for all operations:
+   - **Config API**: Get, create, update, and delete tunnel configurations
+   - **Control API**: Start, stop, and restart tunnels
+   - **Status API**: Get tunnel status and logs
 
 This architecture provides:
 
 - **Better Performance**: No proxy overhead for API calls
-- **Simplified Networking**: Web container doesn't require host network mode
-- **Clear Separation**: Configuration management vs tunnel control
+- **Simplified Networking**: Web container doesn't require host network mode or config volume
+- **Clear Separation**: Web panel is purely a static server, all logic is in the autossh container
+- **Single Source of Truth**: Configuration is managed only by the autossh container
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Browser       │────▶│   Web Container │     │ autossh Container│
+│   (Frontend)    │     │   (Static Only) │     │   (Config API)   │
+└────────┬────────┘     └─────────────────┘     └────────▲────────┘
+         │                                               │
+         │  /config, /status, /start, /stop, /logs       │
+         └───────────────────────────────────────────────┘
+```
 
 !!! info "Network Requirements"
     Since the browser makes direct API calls to port 8080, ensure the API server is accessible from the user's browser. When running locally, this is typically `http://localhost:8080`.
+
+!!! tip "No Config Volume Needed"
+    The web container no longer requires a config volume mount. All configuration operations are performed through the Config API on the autossh container.
 
 ## Security Recommendations
 
