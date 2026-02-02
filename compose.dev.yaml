@@ -20,10 +20,7 @@ services:
       dockerfile: Dockerfile.web
     ports:
       - "5000:5000"
-    volumes:
-      - ./config:/home/myuser/config:rw
+    # No config volume needed - web panel uses Config API from autossh container
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080

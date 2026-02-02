@@ -40,7 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeMDC();
 
     // Load API config first, then load tunnel details
-    loadAPIConfig().then(() => loadTunnelDetails());
+    loadAPIConfig().then(() => {
+        loadTunnelDetails();
+        // Start auto-refresh by default
+        startAutoRefresh();
+    });
 
     // Set up event listeners
     startBtn.addEventListener('click', () => handleControl('start'));
@@ -59,6 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (checkboxEl) {
             new mdc.checkbox.MDCCheckbox(checkboxEl);
         }
+
+        // Set checkbox to checked by default (auto-refresh is enabled by default)
+        autoRefreshCheckbox.checked = true;
 
         autoRefreshCheckbox.addEventListener('change', () => {
             if (autoRefreshCheckbox.checked) {
@@ -117,11 +124,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return fetch(url, { ...options, headers });
     }
 
-    async function loadTunnelDetails() {
+    async function loadTunnelDetails(retryCount = 0) {
         try {
             // First, get the config to get tunnel details (only needed once on initial load)
             if (!currentTunnel) {
-                const configResponse = await fetch('/api/config');
+                if (!apiConfig.base_url) {
+                    showError('API server not configured');
+                    return;
+                }
+
+                // Use Config API from autossh container
+                const configResponse = await apiCall('/config');
                 if (!configResponse.ok) throw new Error('Failed to load configuration');
 
                 const configData = await configResponse.json();
@@ -135,31 +148,45 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentTunnel = tunnel;
                 displayTunnelInfo(tunnel);
 
-                // Delay initial log loading to give API time to be ready
-                setTimeout(() => loadLogs(), 1000);
+                // Load logs immediately (no delay)
+                loadLogs();
             }
 
-            // Get current status directly from API
-            if (apiConfig.base_url) {
-                const statusResponse = await apiCall('/status');
-                if (statusResponse.ok) {
-                    const statusData = await statusResponse.json();
-                    const tunnelStatus = statusData.find(t => t.hash === currentTunnel.hash);
-                    if (tunnelStatus) {
-                        currentTunnel.status = tunnelStatus.status;
-                        updateStatusDisplay(tunnelStatus.status);
-                    } else {
-                        currentTunnel.status = 'STOPPED';
-                        updateStatusDisplay('STOPPED');
-                    }
+            // Refresh status immediately after loading details
+            await refreshTunnelStatus();
+
+        } catch (error) {
+            console.error('Error loading tunnel details:', error);
+            
+            // Retry on failure (API might not be ready yet)
+            if (!currentTunnel && retryCount < 3) {
+                const delay = (retryCount + 1) * 500; // 500ms, 1s, 1.5s
+                console.log(`Retrying tunnel details load in ${delay}ms (attempt ${retryCount + 1}/3)`);
+                setTimeout(() => loadTunnelDetails(retryCount + 1), delay);
+            } else if (!currentTunnel) {
+                showError('Failed to load tunnel details');
+            }
+        }
+    }
+
+    async function refreshTunnelStatus() {
+        if (!apiConfig.base_url || !currentTunnel) return;
+
+        try {
+            const statusResponse = await apiCall('/status');
+            if (statusResponse.ok) {
+                const statusData = await statusResponse.json();
+                const tunnelStatus = statusData.find(t => t.hash === currentTunnel.hash);
+                if (tunnelStatus) {
+                    currentTunnel.status = tunnelStatus.status;
+                    updateStatusDisplay(tunnelStatus.status);
+                } else {
+                    currentTunnel.status = 'STOPPED';
+                    updateStatusDisplay('STOPPED');
                 }
             }
         } catch (error) {
-            console.error('Error loading tunnel details:', error);
-            if (!currentTunnel) {
-                showError('Failed to load tunnel details');
-            }
-            // If it's just a status update failure, silently ignore
+            console.warn('Failed to refresh tunnel status:', error);
         }
     }
 
@@ -344,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function startAutoRefresh() {
         if (autoRefreshInterval) return;
         autoRefreshInterval = setInterval(() => {
-            loadTunnelDetails();
+            refreshTunnelStatus();
             loadLogs();
         }, AUTO_REFRESH_INTERVAL);
     }
