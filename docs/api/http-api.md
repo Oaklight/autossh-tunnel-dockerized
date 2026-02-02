@@ -369,15 +369,71 @@ curl -X DELETE http://localhost:8080/delete/7b840f8344679dff5df893eefd245043
     2. The configuration will be removed from the config file
     3. Associated log files will remain until cleanup
 
-### Get Tunnel Configuration
+## Configuration API
 
-Get the configuration details of a specific tunnel.
+The Configuration API provides endpoints for managing tunnel configurations directly. All configuration changes are automatically backed up before modification.
+
+!!! info "Automatic Backup"
+    Before any configuration modification, the system automatically creates a backup in `/etc/autossh/config/backups/` with a timestamp.
+
+### Get All Configurations
+
+Retrieve all tunnel configurations.
+
+**Request:**
+
+```http
+GET /config
+```
+
+**Example:**
+
+```bash
+curl -X GET http://localhost:8080/config
+```
+
+**Response:**
+
+```json
+{
+  "tunnels": [
+    {
+      "name": "my-tunnel",
+      "remote_host": "user@server.example.com",
+      "remote_port": "8080",
+      "local_port": "18080",
+      "direction": "remote_to_local",
+      "interactive": false,
+      "hash": "7b840f8344679dff5df893eefd245043"
+    },
+    {
+      "name": "another-tunnel",
+      "remote_host": "user@other.example.com",
+      "remote_port": "3306",
+      "local_port": "13306",
+      "direction": "remote_to_local",
+      "interactive": false,
+      "hash": "abc123def456789012345678901234ab"
+    }
+  ]
+}
+```
+
+### Get Single Tunnel Configuration
+
+Get the configuration details of a specific tunnel by hash (or 8+ character prefix).
 
 **Request:**
 
 ```http
 GET /config/<tunnel_hash>
 ```
+
+!!! tip "Hash Prefix Support"
+    You can use a short hash prefix (minimum 8 characters) instead of the full 32-character hash:
+    ```bash
+    curl -X GET http://localhost:8080/config/7b840f83
+    ```
 
 **Example:**
 
@@ -394,10 +450,242 @@ curl -X GET http://localhost:8080/config/7b840f8344679dff5df893eefd245043
   "remote_port": "8080",
   "local_port": "18080",
   "direction": "remote_to_local",
-  "hash": "7b840f8344679dff5df893eefd245043",
-  "interactive": false
+  "interactive": false,
+  "hash": "7b840f8344679dff5df893eefd245043"
 }
 ```
+
+### Replace All Configurations
+
+Replace the entire configuration file with new tunnel configurations.
+
+**Request:**
+
+```http
+POST /config
+Content-Type: application/json
+```
+
+or
+
+```http
+PUT /config
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+  "tunnels": [
+    {
+      "name": "tunnel-1",
+      "remote_host": "user@server1.example.com",
+      "remote_port": "8080",
+      "local_port": "18080",
+      "direction": "remote_to_local",
+      "interactive": false
+    },
+    {
+      "name": "tunnel-2",
+      "remote_host": "user@server2.example.com",
+      "remote_port": "3306",
+      "local_port": "13306"
+    }
+  ]
+}
+```
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:8080/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tunnels": [
+      {
+        "name": "my-tunnel",
+        "remote_host": "user@server.example.com",
+        "remote_port": "8080",
+        "local_port": "18080"
+      }
+    ]
+  }'
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "status": "success",
+  "message": "Configuration saved"
+}
+```
+
+!!! warning "Full Replacement"
+    This endpoint replaces the entire configuration. Any tunnels not included in the request will be removed.
+
+### Add New Tunnel
+
+Add a new tunnel configuration.
+
+**Request:**
+
+```http
+POST /config/new
+Content-Type: application/json
+```
+
+**Request Body:**
+
+| Parameter   | Type    | Required | Description                                      |
+| ----------- | ------- | -------- | ------------------------------------------------ |
+| name        | string  | Yes      | Tunnel name                                      |
+| remote_host | string  | Yes      | Remote host (format: user@host)                  |
+| remote_port | string  | Yes      | Remote port                                      |
+| local_port  | string  | Yes      | Local port                                       |
+| direction   | string  | No       | Tunnel direction (default: remote_to_local)      |
+| interactive | boolean | No       | Requires interactive authentication (default: false) |
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:8080/config/new \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-new-tunnel",
+    "remote_host": "user@server.example.com",
+    "remote_port": "8080",
+    "local_port": "18080",
+    "direction": "remote_to_local",
+    "interactive": false
+  }'
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "name": "my-new-tunnel",
+  "remote_host": "user@server.example.com",
+  "remote_port": "8080",
+  "local_port": "18080",
+  "direction": "remote_to_local",
+  "interactive": false,
+  "hash": "abc123def456789012345678901234ab"
+}
+```
+
+### Update Single Tunnel
+
+Update an existing tunnel configuration by hash (or 8+ character prefix).
+
+**Request:**
+
+```http
+POST /config/<tunnel_hash>
+Content-Type: application/json
+```
+
+or
+
+```http
+PUT /config/<tunnel_hash>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+| Parameter   | Type    | Required | Description                                      |
+| ----------- | ------- | -------- | ------------------------------------------------ |
+| name        | string  | Yes      | Tunnel name                                      |
+| remote_host | string  | Yes      | Remote host (format: user@host)                  |
+| remote_port | string  | Yes      | Remote port                                      |
+| local_port  | string  | Yes      | Local port                                       |
+| direction   | string  | No       | Tunnel direction (default: remote_to_local)      |
+| interactive | boolean | No       | Requires interactive authentication (default: false) |
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:8080/config/7b840f83 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "updated-tunnel",
+    "remote_host": "user@new-server.example.com",
+    "remote_port": "9090",
+    "local_port": "19090"
+  }'
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "name": "updated-tunnel",
+  "remote_host": "user@new-server.example.com",
+  "remote_port": "9090",
+  "local_port": "19090",
+  "direction": "remote_to_local",
+  "interactive": false,
+  "hash": "def456abc789012345678901234567cd"
+}
+```
+
+!!! note "Hash Changes"
+    When you update a tunnel's configuration, the hash will change because it's calculated from the tunnel parameters.
+
+### Delete Tunnel (RESTful)
+
+Delete a tunnel configuration using the RESTful DELETE method.
+
+**Request:**
+
+```http
+DELETE /config/<tunnel_hash>
+```
+
+**Example:**
+
+```bash
+curl -X DELETE http://localhost:8080/config/7b840f8344679dff5df893eefd245043
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "status": "success",
+  "message": "Tunnel deleted"
+}
+```
+
+### Delete Tunnel (POST)
+
+Delete a tunnel configuration using POST method (for clients that don't support DELETE).
+
+**Request:**
+
+```http
+POST /config/<tunnel_hash>/delete
+```
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:8080/config/7b840f83/delete
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "status": "success",
+  "message": "Tunnel deleted"
+}
+```
+
+## Logs API
 
 ### Get Tunnel Logs
 
