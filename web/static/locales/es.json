@@ -52,7 +52,7 @@
     "restart_tunnel": "Reiniciar túnel",
     "stop_tunnel": "Detener túnel",
     "refresh": "Actualizar",
-    "auto_refresh": "Actualización automática"
+    "auto_refresh": "Actualización automática (5s)"
   },
   "tooltips": {
     "add_tunnel": "Añadir túnel",

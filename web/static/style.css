@@ -542,6 +542,7 @@ body {
 .auto-refresh-toggle {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .auto-refresh-toggle .mdc-form-field {
@@ -555,6 +556,7 @@ body {
   color: rgba(0, 0, 0, 0.7);
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 }
 
 /* MDC Checkbox Styling */

@@ -52,7 +52,7 @@
     "restart_tunnel": "トンネルを再起動",
     "stop_tunnel": "トンネルを停止",
     "refresh": "更新",
-    "auto_refresh": "自動更新"
+    "auto_refresh": "自動更新 (5秒)"
   },
   "tooltips": {
     "add_tunnel": "トンネルを追加",

@@ -52,7 +52,7 @@
     "restart_tunnel": "إعادة تشغيل النفق",
     "stop_tunnel": "إيقاف النفق",
     "refresh": "تحديث",
-    "auto_refresh": "تحديث تلقائي"
+    "auto_refresh": "تحديث تلقائي (5 ثوانٍ)"
   },
   "tooltips": {
     "add_tunnel": "إضافة نفق",
