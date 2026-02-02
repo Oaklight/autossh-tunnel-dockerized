@@ -4,7 +4,7 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000

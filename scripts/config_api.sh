@@ -4,8 +4,9 @@
 # This module provides functions for managing tunnel configurations via API
 
 # Configuration file paths
-CONFIG_FILE="${CONFIG_FILE:-/home/myuser/config/config.yaml}"
-CONFIG_BACKUP_DIR="${CONFIG_BACKUP_DIR:-/home/myuser/config/backups}"
+# Use AUTOSSH_CONFIG_FILE for consistency with other scripts, fallback to CONFIG_FILE
+CONFIG_FILE="${AUTOSSH_CONFIG_FILE:-${CONFIG_FILE:-/etc/autossh/config/config.yaml}}"
+CONFIG_BACKUP_DIR="${CONFIG_BACKUP_DIR:-/etc/autossh/config/backups}"
 
 # Source required modules if not already loaded
 if ! command -v parse_config >/dev/null 2>&1; then
@@ -33,14 +34,13 @@ fi
 #######################################
 
 # Function to backup config file
-# Returns: Path to backup file
+# Returns: Path to backup file (to stderr for logging, not stdout)
 backup_config() {
 	mkdir -p "$CONFIG_BACKUP_DIR"
 	if [ -f "$CONFIG_FILE" ]; then
 		local backup_file="$CONFIG_BACKUP_DIR/config_$(date +%Y%m%d%H%M%S).yaml"
 		cp "$CONFIG_FILE" "$backup_file"
-		log_info "CONFIG_API" "Backed up config to $backup_file"
-		echo "$backup_file"
+		log_info "CONFIG_API" "Backed up config to $backup_file" >&2
 	fi
 }
 
@@ -127,7 +127,10 @@ get_tunnel_json_by_hash() {
 		return 1
 	fi
 
-	# Find the tunnel with this hash
+	# Find the tunnel with this hash using temp files to avoid subshell issues
+	local temp_json=$(mktemp)
+	local temp_flag=$(mktemp)
+
 	parse_config "$CONFIG_FILE" | while IFS='	' read -r remote_host remote_port local_port direction name hash interactive; do
 		if [ "$hash" = "$full_hash" ]; then
 			if [ "$interactive" = "true" ]; then
@@ -144,13 +147,22 @@ get_tunnel_json_by_hash() {
   "direction": "%s",
   "interactive": %s,
   "hash": "%s"
-}' "$name" "$remote_host" "$remote_port" "$local_port" "$direction" "$interactive_json" "$hash"
-			return 0
+}' "$name" "$remote_host" "$remote_port" "$local_port" "$direction" "$interactive_json" "$hash" >"$temp_json"
+			echo "1" >"$temp_flag"
+			break
 		fi
 	done
 
-	echo "Tunnel not found: $full_hash"
-	return 1
+	# Check if we found the tunnel
+	if [ -s "$temp_flag" ]; then
+		cat "$temp_json"
+		rm -f "$temp_json" "$temp_flag"
+		return 0
+	else
+		rm -f "$temp_json" "$temp_flag"
+		echo "Tunnel not found: $full_hash"
+		return 1
+	fi
 }
 
 #######################################
@@ -196,7 +208,7 @@ write_config_from_json() {
 	done
 
 	mv "$temp_file" "$CONFIG_FILE"
-	log_info "CONFIG_API" "Config file updated: $CONFIG_FILE"
+	log_info "CONFIG_API" "Config file updated: $CONFIG_FILE" >&2
 	return 0
 }
 
@@ -239,7 +251,7 @@ add_tunnel_from_json() {
 	# Calculate and return the new hash
 	local new_hash=$(calculate_tunnel_hash "$name" "$remote_host" "$remote_port" "$local_port" "$direction" "$interactive")
 
-	log_info "CONFIG_API" "Added new tunnel: $name ($new_hash)"
+	log_info "CONFIG_API" "Added new tunnel: $name ($new_hash)" >&2
 	echo "$new_hash"
 	return 0
 }
@@ -300,7 +312,7 @@ update_tunnel_by_hash() {
 	fi
 
 	mv "$temp_file" "$CONFIG_FILE"
-	log_info "CONFIG_API" "Updated tunnel: $full_hash"
+	log_info "CONFIG_API" "Updated tunnel: $full_hash" >&2
 
 	# Calculate and return the new hash
 	local new_hash=$(calculate_tunnel_hash "$new_name" "$new_remote_host" "$new_remote_port" "$new_local_port" "$new_direction" "$new_interactive")
@@ -341,6 +353,6 @@ delete_tunnel_by_hash() {
 	done
 
 	mv "$temp_file" "$CONFIG_FILE"
-	log_info "CONFIG_API" "Deleted tunnel: $full_hash"
+	log_info "CONFIG_API" "Deleted tunnel: $full_hash" >&2
 	return 0
 }
