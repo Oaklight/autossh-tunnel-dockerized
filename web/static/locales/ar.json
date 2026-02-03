@@ -45,6 +45,7 @@
   "buttons": {
     "add": "إضافة",
     "save_restart": "حفظ وإعادة تشغيل",
+    "save_restart_row": "حفظ وإعادة تشغيل هذا النفق",
     "delete": "حذف النفق",
     "interactive_auth_enabled": "المصادقة التفاعلية مفعلة",
     "interactive_auth_disabled": "المصادقة التفاعلية معطلة",

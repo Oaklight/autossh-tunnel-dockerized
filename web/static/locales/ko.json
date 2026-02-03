@@ -45,6 +45,7 @@
   "buttons": {
     "add": "추가",
     "save_restart": "저장 및 재시작",
+    "save_restart_row": "이 터널 저장 및 재시작",
     "delete": "터널 삭제",
     "interactive_auth_enabled": "대화형 인증 활성화됨",
     "interactive_auth_disabled": "대화형 인증 비활성화됨",

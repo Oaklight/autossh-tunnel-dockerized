@@ -389,8 +389,8 @@ body {
 /* Column width distribution (Controls, Name, Status, Remote Host, Remote Port, Local Port, Direction, Actions) */
 .mdc-data-table__header-cell:nth-child(1),
 .mdc-data-table__cell:nth-child(1) {
-  width: 12%;
-  min-width: 130px;
+  width: 14%;
+  min-width: 160px;
 }
 
 .mdc-data-table__header-cell:nth-child(2),
@@ -676,6 +676,20 @@ body {
 }
 
 .stop-button:active:not(:disabled) .material-icons {
+  transform: scale(0.9);
+}
+
+/* Save Row Button */
+.save-row-button {
+  color: #2196f3;
+}
+
+.save-row-button:hover:not(:disabled) {
+  background-color: rgba(33, 150, 243, 0.1);
+  transform: scale(1.1);
+}
+
+.save-row-button:active:not(:disabled) .material-icons {
   transform: scale(0.9);
 }
 

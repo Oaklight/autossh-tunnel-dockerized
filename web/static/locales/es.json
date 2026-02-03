@@ -45,6 +45,7 @@
   "buttons": {
     "add": "Añadir",
     "save_restart": "Guardar y reiniciar",
+    "save_restart_row": "Guardar y reiniciar este túnel",
     "delete": "Eliminar túnel",
     "interactive_auth_enabled": "Autenticación interactiva activada",
     "interactive_auth_disabled": "Autenticación interactiva desactivada",

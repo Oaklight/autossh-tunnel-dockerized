@@ -45,6 +45,7 @@
   "buttons": {
     "add": "Ajouter",
     "save_restart": "Enregistrer et redémarrer",
+    "save_restart_row": "Enregistrer et redémarrer ce tunnel",
     "delete": "Supprimer le tunnel",
     "interactive_auth_enabled": "Authentification interactive activée",
     "interactive_auth_disabled": "Authentification interactive désactivée",
