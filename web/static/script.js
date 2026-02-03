@@ -410,6 +410,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const responseData = await response.json();
             const newHash = responseData.hash || hash;
 
+            // Re-enable control buttons before updating hash (which replaces them)
+            controlButtons.forEach(btn => btn.disabled = false);
+
             // Update the row's hash references
             updateRowHash(row, newHash);
 
@@ -430,7 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (statusIndicator) {
                 updateStatusIndicator(statusIndicator, 'STOPPED');
             }
-        } finally {
+            // Re-enable control buttons on error
             controlButtons.forEach(btn => btn.disabled = false);
         }
     }
