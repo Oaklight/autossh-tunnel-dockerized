@@ -76,6 +76,7 @@ nav:
       - Contributing: development/contributing.md
       - Internationalization: development/i18n.md
   - Troubleshooting: troubleshooting.md
+  - Changelog: changelog.md
 
 # Hide navigation on specific pages
 hooks: []
