@@ -169,7 +169,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    async function refreshTunnelStatus() {
+    // retryCount is used for fast retry on initial load
+    async function refreshTunnelStatus(retryCount = 0) {
         if (!apiConfig.base_url || !currentTunnel) return;
 
         try {
@@ -184,9 +185,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentTunnel.status = 'STOPPED';
                     updateStatusDisplay('STOPPED');
                 }
+            } else if (retryCount < 5) {
+                // Retry on non-ok response
+                const delay = 500;
+                console.log(`Status fetch failed, retrying in ${delay}ms (attempt ${retryCount + 1}/5)`);
+                setTimeout(() => refreshTunnelStatus(retryCount + 1), delay);
             }
         } catch (error) {
             console.warn('Failed to refresh tunnel status:', error);
+            // Retry on error
+            if (retryCount < 5) {
+                const delay = 500;
+                console.log(`Status fetch error, retrying in ${delay}ms (attempt ${retryCount + 1}/5)`);
+                setTimeout(() => refreshTunnelStatus(retryCount + 1), delay);
+            }
         }
     }
 

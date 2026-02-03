@@ -527,9 +527,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Refresh only statuses (not full config reload)
-    async function refreshStatuses() {
+    // retryCount is used for fast retry on initial load
+    async function refreshStatuses(retryCount = 0) {
         const statuses = await fetchTunnelStatuses();
-        if (Object.keys(statuses).length === 0) return;
+        
+        // If empty and we haven't retried too many times, retry quickly
+        if (Object.keys(statuses).length === 0) {
+            if (retryCount < 5) {
+                const delay = 500; // 500ms fast retry
+                console.log(`Status fetch returned empty, retrying in ${delay}ms (attempt ${retryCount + 1}/5)`);
+                setTimeout(() => refreshStatuses(retryCount + 1), delay);
+            }
+            return;
+        }
 
         // Update status indicators in existing rows
         const rows = tableBody.querySelectorAll('tr');
