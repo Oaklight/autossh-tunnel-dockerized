@@ -45,6 +45,7 @@
   "buttons": {
     "add": "追加",
     "save_restart": "保存して再起動",
+    "save_restart_row": "このトンネルを保存して再起動",
     "delete": "トンネルを削除",
     "interactive_auth_enabled": "対話認証が有効",
     "interactive_auth_disabled": "対話認証が無効",

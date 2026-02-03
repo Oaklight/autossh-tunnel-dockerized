@@ -45,6 +45,7 @@
   "buttons": {
     "add": "新增",
     "save_restart": "儲存並重新啟動",
+    "save_restart_row": "儲存並重新啟動此隧道",
     "delete": "刪除隧道",
     "interactive_auth_enabled": "已啟用互動認證",
     "interactive_auth_disabled": "已停用互動認證",

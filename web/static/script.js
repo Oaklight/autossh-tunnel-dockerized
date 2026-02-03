@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     tunnel.status = 'N/A';
                     addRow(tunnel);
                 });
-                
+
                 // Fetch statuses asynchronously after rendering
                 refreshStatuses();
             } else {
@@ -184,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const interactiveDisabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
         const deleteTunnelText = window.i18n ? window.i18n.t('buttons.delete') : 'Delete tunnel';
 
+        const saveRestartText = window.i18n ? window.i18n.t('buttons.save_restart_row') : 'Save & Restart';
         const startTunnelText = window.i18n ? window.i18n.t('buttons.start_tunnel') : 'Start tunnel';
         const restartTunnelText = window.i18n ? window.i18n.t('buttons.restart_tunnel') : 'Restart tunnel';
         const stopTunnelText = window.i18n ? window.i18n.t('buttons.stop_tunnel') : 'Stop tunnel';
@@ -191,6 +192,9 @@ document.addEventListener("DOMContentLoaded", () => {
         row.innerHTML = `
             <td class="mdc-data-table__cell">
                 <div class="control-buttons-cell">
+                    <button class="control-button save-row-button" data-hash="${tunnelHash}" title="${saveRestartText}" data-i18n-title="buttons.save_restart_row">
+                        <i class="material-icons">save</i>
+                    </button>
                     <button class="control-button start-button" data-hash="${tunnelHash}" title="${startTunnelText}" data-i18n-title="buttons.start_tunnel">
                         <i class="material-icons">play_arrow</i>
                     </button>
@@ -285,10 +289,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Add control button events
+        const saveRowButton = row.querySelector(".save-row-button");
         const startButton = row.querySelector(".start-button");
         const restartButton = row.querySelector(".restart-button");
         const stopButton = row.querySelector(".stop-button");
 
+        saveRowButton.addEventListener("click", () => handleSaveRow(tunnelHash, row));
         startButton.addEventListener("click", () => handleTunnelControl('start', tunnelHash, row));
         restartButton.addEventListener("click", () => handleTunnelControl('restart', tunnelHash, row));
         stopButton.addEventListener("click", () => handleTunnelControl('stop', tunnelHash, row));
@@ -320,6 +326,91 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Remove animation class after animation completes
         setTimeout(() => row.classList.remove("new-row"), 300);
+    }
+
+    // Handle save single row (update tunnel config and restart)
+    async function handleSaveRow(hash, row) {
+        const cells = row.cells;
+        const interactiveToggle = cells[7].querySelector(".interactive-toggle-button");
+
+        const tunnelData = {
+            name: cells[1].querySelector("input").value.trim(),
+            remote_host: cells[3].querySelector("input").value.trim(),
+            remote_port: cells[4].querySelector("input").value.trim(),
+            local_port: cells[5].querySelector("input").value.trim(),
+            interactive: interactiveToggle.getAttribute('data-interactive') === 'true',
+            direction: cells[6].querySelector("select").value,
+        };
+
+        // Validate required fields
+        if (!tunnelData.name || !tunnelData.remote_host || !tunnelData.remote_port || !tunnelData.local_port) {
+            const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fill in all required fields';
+            showMessage(errorMsg, 'error');
+            return;
+        }
+
+        // Validate inputs
+        let hasErrors = false;
+        const inputs = row.querySelectorAll('input');
+        inputs.forEach(input => {
+            validateInput({ target: input });
+            if (input.classList.contains('error')) {
+                hasErrors = true;
+            }
+        });
+
+        if (hasErrors) {
+            const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fix validation errors before saving';
+            showMessage(errorMsg, 'error');
+            return;
+        }
+
+        if (!apiConfig.base_url) {
+            const errorMsg = window.i18n ? window.i18n.t('messages.api_not_configured') : 'API server not configured';
+            showMessage(errorMsg, 'error');
+            return;
+        }
+
+        // Disable all control buttons during operation
+        const controlButtons = row.querySelectorAll('.control-button');
+        controlButtons.forEach(btn => btn.disabled = true);
+
+        try {
+            let response;
+            if (hash) {
+                // Update existing tunnel via Config API
+                response = await apiCall(`/config/${hash}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(tunnelData),
+                });
+            } else {
+                // Create new tunnel via Config API
+                response = await apiCall('/config/new', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(tunnelData),
+                });
+            }
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                throw new Error(`Save failed: ${response.status} - ${errorData}`);
+            }
+
+            const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
+            showMessage(successMsg, 'success');
+
+            // Reload configuration to get updated hashes and trigger restart
+            setTimeout(() => loadConfiguration(), 500);
+
+        } catch (error) {
+            console.error('Error saving tunnel:', error);
+            const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
+            showMessage(errorMsg, 'error');
+        } finally {
+            controlButtons.forEach(btn => btn.disabled = false);
+        }
     }
 
     // Handle tunnel control actions
@@ -530,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // retryCount is used for fast retry on initial load
     async function refreshStatuses(retryCount = 0) {
         const statuses = await fetchTunnelStatuses();
-        
+
         // If empty and we haven't retried too many times, retry quickly
         if (Object.keys(statuses).length === 0) {
             if (retryCount < 5) {
@@ -659,7 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Set flag to prevent status indicator clicks during save/reload
         isConfigSaving = true;
         showLoading(true);
-        
+
         try {
             // Use Config API from autossh container
             const response = await apiCall('/config', {
@@ -675,10 +766,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
             showMessage(successMsg, "success");
-            
+
             // Reload configuration immediately to get updated hashes
             await loadConfiguration();
-            
+
             // Configuration reloaded successfully, re-enable clicks
             isConfigSaving = false;
             showLoading(false);
