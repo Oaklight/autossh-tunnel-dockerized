@@ -375,6 +375,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const controlButtons = row.querySelectorAll('.control-button');
         controlButtons.forEach(btn => btn.disabled = true);
 
+        // Show loading indicator on status
+        const statusIndicator = row.querySelector('.status-indicator');
+        if (statusIndicator) {
+            statusIndicator.textContent = 'hourglass_empty';
+            statusIndicator.style.color = '#FF9800';
+            statusIndicator.title = 'Saving...';
+        }
+
         try {
             let response;
             if (hash) {
@@ -398,19 +406,105 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(`Save failed: ${response.status} - ${errorData}`);
             }
 
+            // Get the new hash from response
+            const responseData = await response.json();
+            const newHash = responseData.hash || hash;
+
+            // Update the row's hash references
+            updateRowHash(row, newHash);
+
             const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
             showMessage(successMsg, 'success');
 
             // Wait for file monitor to detect changes and complete smart restart
-            // The file monitor triggers autossh-cli start which takes ~2-3 seconds
-            setTimeout(() => loadConfiguration(), 3000);
+            // Then refresh only this row's status
+            setTimeout(async () => {
+                await refreshRowStatus(row, newHash);
+            }, 3000);
 
         } catch (error) {
             console.error('Error saving tunnel:', error);
             const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
             showMessage(errorMsg, 'error');
+            // Reset status indicator on error
+            if (statusIndicator) {
+                updateStatusIndicator(statusIndicator, 'STOPPED');
+            }
         } finally {
             controlButtons.forEach(btn => btn.disabled = false);
+        }
+    }
+
+    // Update a row's hash references after save
+    function updateRowHash(row, newHash) {
+        // Update status indicator
+        const statusIndicator = row.querySelector('.status-indicator');
+        if (statusIndicator) {
+            statusIndicator.dataset.hash = newHash;
+        }
+
+        // Update control buttons
+        const controlButtons = row.querySelectorAll('.control-button');
+        controlButtons.forEach(btn => {
+            btn.dataset.hash = newHash;
+        });
+
+        // Update event listeners for control buttons
+        const saveRowButton = row.querySelector(".save-row-button");
+        const startButton = row.querySelector(".start-button");
+        const restartButton = row.querySelector(".restart-button");
+        const stopButton = row.querySelector(".stop-button");
+
+        // Clone and replace to remove old event listeners
+        const newSaveBtn = saveRowButton.cloneNode(true);
+        const newStartBtn = startButton.cloneNode(true);
+        const newRestartBtn = restartButton.cloneNode(true);
+        const newStopBtn = stopButton.cloneNode(true);
+
+        saveRowButton.parentNode.replaceChild(newSaveBtn, saveRowButton);
+        startButton.parentNode.replaceChild(newStartBtn, startButton);
+        restartButton.parentNode.replaceChild(newRestartBtn, restartButton);
+        stopButton.parentNode.replaceChild(newStopBtn, stopButton);
+
+        // Add new event listeners with updated hash
+        newSaveBtn.addEventListener("click", () => handleSaveRow(newHash, row));
+        newStartBtn.addEventListener("click", () => handleTunnelControl('start', newHash, row));
+        newRestartBtn.addEventListener("click", () => handleTunnelControl('restart', newHash, row));
+        newStopBtn.addEventListener("click", () => handleTunnelControl('stop', newHash, row));
+
+        // Update status indicator click handler
+        if (statusIndicator && newHash) {
+            const newStatusIndicator = statusIndicator.cloneNode(true);
+            newStatusIndicator.dataset.hash = newHash;
+            statusIndicator.parentNode.replaceChild(newStatusIndicator, statusIndicator);
+
+            newStatusIndicator.addEventListener("click", () => {
+                if (isConfigSaving) {
+                    const waitMsg = window.i18n ? window.i18n.t('messages.please_wait') : 'Please wait for configuration to reload...';
+                    showMessage(waitMsg, 'info');
+                    return;
+                }
+                window.location.href = `/tunnel-detail?hash=${newHash}`;
+            });
+
+            newStatusIndicator.style.transition = "transform 0.2s ease";
+            newStatusIndicator.addEventListener("mouseenter", () => {
+                newStatusIndicator.style.transform = "scale(1.2)";
+            });
+            newStatusIndicator.addEventListener("mouseleave", () => {
+                newStatusIndicator.style.transform = "scale(1)";
+            });
+        }
+    }
+
+    // Refresh status for a single row
+    async function refreshRowStatus(row, hash) {
+        const statuses = await fetchTunnelStatuses();
+        const statusIndicator = row.querySelector('.status-indicator');
+
+        if (statusIndicator) {
+            const status = (hash && statuses[hash]) ? statuses[hash] : 'STOPPED';
+            updateStatusIndicator(statusIndicator, status);
         }
     }
 
