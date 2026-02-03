@@ -39,7 +39,9 @@
       "dead": "중지됨",
       "starting": "시작 중",
       "stopped": "중지됨",
-      "na": "사용 불가"
+      "na": "사용 불가",
+      "loading": "로딩 중...",
+      "saving": "저장 중..."
     }
   },
   "buttons": {

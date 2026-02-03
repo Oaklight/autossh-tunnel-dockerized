@@ -141,6 +141,123 @@
     word-break: break-all;
 }
 
+/* Editable Config Inputs */
+.config-input {
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.87);
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    border-left: 4px solid var(--mdc-theme-primary);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.config-input:focus {
+    outline: none;
+    border-color: var(--mdc-theme-primary);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.config-input:hover {
+    border-color: #bdbdbd;
+}
+
+.config-input.error {
+    border-color: #f44336;
+    border-left-color: #f44336;
+}
+
+.config-input.error:focus {
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+/* Config Select Dropdown */
+.config-select {
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.87);
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    border-left: 4px solid var(--mdc-theme-primary);
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+}
+
+.config-select:focus {
+    outline: none;
+    border-color: var(--mdc-theme-primary);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.config-select:hover {
+    border-color: #bdbdbd;
+}
+
+/* Interactive Toggle in Detail Page */
+.interactive-toggle-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    border-left: 4px solid var(--mdc-theme-primary);
+    background: #f5f5f5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.6);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.interactive-toggle-button:hover {
+    background: #eeeeee;
+    border-color: #bdbdbd;
+    border-left-color: var(--mdc-theme-primary);
+}
+
+.interactive-toggle-button.active {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: #4CAF50;
+    border-left-color: #4CAF50;
+    color: #4CAF50;
+}
+
+.interactive-toggle-button .material-icons {
+    font-size: 20px;
+}
+
+.interactive-toggle-button .toggle-label {
+    font-weight: 500;
+}
+
+/* Save Config Button */
+.save-config-btn {
+    background-color: #2196F3 !important;
+    color: white !important;
+}
+
+.save-config-btn:hover {
+    background-color: #1976D2 !important;
+}
+
+.save-config-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Control Buttons */
 .control-buttons {
     display: flex;
