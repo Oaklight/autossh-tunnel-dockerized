@@ -74,12 +74,18 @@
                         <i class="material-icons">settings</i>
                         <span data-i18n="tunnel_detail.configuration">Configuration</span>
                     </h2>
+                    <button class="mdc-button mdc-button--raised save-config-btn" id="saveConfigBtn">
+                        <span class="mdc-button__ripple"></span>
+                        <i class="material-icons mdc-button__icon">save</i>
+                        <span class="mdc-button__label" data-i18n="buttons.save_restart">Save & Restart</span>
+                    </button>
                 </div>
                 <div class="card-content">
                     <div class="config-grid">
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.name">Name</label>
-                            <div class="config-value" id="tunnelName">-</div>
+                            <input type="text" class="config-input" id="tunnelName" placeholder="Tunnel name"
+                                data-i18n-placeholder="table.placeholders.tunnel_name">
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.hash">Hash</label>
@@ -87,29 +93,43 @@
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.remote_host">Remote Host</label>
-                            <div class="config-value" id="remoteHost">-</div>
+                            <input type="text" class="config-input" id="remoteHost" placeholder="Remote host"
+                                data-i18n-placeholder="table.placeholders.remote_host">
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.remote_port">Remote Port</label>
-                            <div class="config-value" id="remotePort">-</div>
+                            <input type="text" class="config-input" id="remotePort"
+                                placeholder="Remote port (e.g., 44497 or hostname:44497)"
+                                data-i18n-placeholder="table.placeholders.remote_port">
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.local_port">Local Port</label>
-                            <div class="config-value" id="localPort">-</div>
+                            <input type="text" class="config-input" id="localPort"
+                                placeholder="Local port (e.g., 55001 or 192.168.1.100:55001)"
+                                data-i18n-placeholder="table.placeholders.local_port">
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.direction">Direction</label>
-                            <div class="config-value" id="direction">-</div>
+                            <select class="config-select" id="direction">
+                                <option value="remote_to_local" data-i18n="table.direction.remote_to_local">Remote to
+                                    Local</option>
+                                <option value="local_to_remote" data-i18n="table.direction.local_to_remote">Local to
+                                    Remote</option>
+                            </select>
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.interactive">Interactive Auth</label>
-                            <div class="config-value" id="interactive">
-                                <i class="material-icons">help_outline</i>
-                            </div>
+                            <button class="interactive-toggle-button" id="interactiveToggle" data-interactive="false">
+                                <i class="material-icons">fingerprint</i>
+                                <span class="toggle-label" data-i18n="buttons.interactive_auth_disabled">Disabled</span>
+                            </button>
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.status">Status</label>
-                            <div class="config-value" id="statusValue">-</div>
+                            <div class="config-value" id="statusValue">
+                                <i class="material-icons" style="color: #FF9800;">hourglass_empty</i>
+                                <span style="color: #FF9800;" data-i18n="table.status.loading">Loading...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -194,14 +214,14 @@
     <!-- Material Design JavaScript (local) -->
     <script src="/static/vendor/material-components-web.min.js"></script>
     <!-- Internationalization -->
-    <script src="/static/i18n.js"></script>
+    <script src="/static/i18n.js?v=2"></script>
     <!-- Universal Tooltip System -->
-    <script src="/static/tooltip.js"></script>
+    <script src="/static/tooltip.js?v=2"></script>
     <!-- API Configuration -->
     <script>
         window.API_BASE_URL = '{{ .APIBaseURL }}';
     </script>
-    <script src="/static/tunnel-detail.js"></script>
+    <script src="/static/tunnel-detail.js?v=2"></script>
 
     <!-- Language Toggle Script -->
     <script>

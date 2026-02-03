@@ -39,7 +39,9 @@
       "dead": "已停止",
       "starting": "启动中",
       "stopped": "已停止",
-      "na": "不可用"
+      "na": "不可用",
+      "loading": "加载中...",
+      "saving": "保存中..."
     }
   },
   "buttons": {

@@ -39,7 +39,9 @@
       "dead": "DEAD",
       "starting": "STARTING",
       "stopped": "STOPPED",
-      "na": "N/A"
+      "na": "N/A",
+      "loading": "Loading...",
+      "saving": "Saving..."
     }
   },
   "buttons": {

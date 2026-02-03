@@ -39,7 +39,9 @@
       "dead": "Detenido",
       "starting": "Iniciando",
       "stopped": "Detenido",
-      "na": "No disponible"
+      "na": "No disponible",
+      "loading": "Cargando...",
+      "saving": "Guardando..."
     }
   },
   "buttons": {

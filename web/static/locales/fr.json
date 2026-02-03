@@ -39,7 +39,9 @@
       "dead": "Arrêté",
       "starting": "Démarrage",
       "stopped": "Arrêté",
-      "na": "Non disponible"
+      "na": "Non disponible",
+      "loading": "Chargement...",
+      "saving": "Enregistrement..."
     }
   },
   "buttons": {
