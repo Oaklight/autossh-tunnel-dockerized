@@ -1,0 +1,9 @@
+services:
+  ssh-server:
+    build: .
+    ports:
+      - "2222:22"
+    container_name: ssh-interactive-auth
+    stdin_open: true
+    tty: true
+    restart: unless-stopped

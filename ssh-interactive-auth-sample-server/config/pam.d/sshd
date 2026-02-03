@@ -1,0 +1,16 @@
+# PAM configuration for the Secure Shell service
+
+# Google Authenticator
+# nullok: allow login if user hasn't set up authenticator (optional, but good for initial setup if needed, though here we want to force it)
+# But since we are setting it up in the image, we can remove nullok to be strict.
+# Standard Un*x authentication (Password)
+@include common-auth
+
+# Google Authenticator (Verification code)
+auth required pam_google_authenticator.so
+
+# Account management
+@include common-account
+
+# Session management
+@include common-session

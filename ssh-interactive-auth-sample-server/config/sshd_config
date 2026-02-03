@@ -1,0 +1,8 @@
+Port 22
+PermitRootLogin yes
+PubkeyAuthentication no
+PasswordAuthentication no
+ChallengeResponseAuthentication yes
+AuthenticationMethods keyboard-interactive
+UsePAM yes
+Subsystem sftp internal-sftp
