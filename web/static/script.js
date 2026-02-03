@@ -173,8 +173,8 @@ document.addEventListener("DOMContentLoaded", () => {
             tableBody.innerHTML = '';
             if (data.tunnels && Array.isArray(data.tunnels)) {
                 data.tunnels.forEach((tunnel) => {
-                    // Set initial status to LOADING or N/A
-                    tunnel.status = 'N/A';
+                    // Set initial status to LOADING while fetching actual status
+                    tunnel.status = 'LOADING';
                     addRow(tunnel);
                 });
 
@@ -227,6 +227,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 statusIcon = "stop_circle";
                 statusColor = "#9E9E9E"; // Grey
                 statusTooltip = "Stopped";
+                break;
+            case "LOADING":
+                statusIcon = "hourglass_empty";
+                statusColor = "#FF9800"; // Orange
+                statusTooltip = "Loading...";
                 break;
             case "N/A":
             default:
