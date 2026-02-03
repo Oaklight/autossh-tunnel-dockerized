@@ -64,13 +64,28 @@ parse_config() {
 				interactive=""
 				in_tunnel=true
 
-				# Check if this line also contains a field (like "- name: value")
+				# Check if this line also contains a field (like "- name: value" or "- remote_host: value")
 				if [ "${line#- *:}" != "$line" ]; then
 					# Extract the field from the line
 					field_line=$(echo "$line" | sed 's/^- *//')
 					case "$field_line" in
 					name:*)
 						name=$(echo "$field_line" | sed 's/name:[[:space:]]*//' | sed 's/^"\(.*\)"$/\1/')
+						;;
+					remote_host:*)
+						remote_host=$(echo "$field_line" | sed 's/remote_host:[[:space:]]*//' | sed 's/^"\(.*\)"$/\1/')
+						;;
+					remote_port:*)
+						remote_port=$(echo "$field_line" | sed 's/remote_port:[[:space:]]*//' | sed 's/^"\(.*\)"$/\1/')
+						;;
+					local_port:*)
+						local_port=$(echo "$field_line" | sed 's/local_port:[[:space:]]*//' | sed 's/^"\(.*\)"$/\1/')
+						;;
+					direction:*)
+						direction=$(echo "$field_line" | sed 's/direction:[[:space:]]*//' | sed 's/^"\(.*\)"$/\1/')
+						;;
+					interactive:*)
+						interactive=$(echo "$field_line" | sed 's/interactive:[[:space:]]*//' | sed 's/^"\(.*\)"$/\1/')
 						;;
 					esac
 				fi

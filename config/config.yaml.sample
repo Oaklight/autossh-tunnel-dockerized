@@ -1,9 +1,30 @@
 tunnels:
+  # Basic tunnel example (name is optional)
   - remote_host: "user@remote-host1"
     remote_port: 8000
     local_port: 8001
+
+  # Tunnel with explicit direction
   - remote_host: "user@remote-host2"
     remote_port: 9000
     local_port: 9001
     direction: remote_to_local
+
+  # Interactive tunnel example (requires 2FA or password authentication)
+  # Use 'autossh-cli auth <hash>' to start this tunnel manually
+  # This tunnel will NOT be started automatically
+  - name: "jumphost-tunnel"
+    remote_host: "user@jumphost.example.com"
+    remote_port: 22
+    local_port: 2222
+    direction: remote_to_local
+    interactive: true
+
+  # Example with host:port format for remote_port and local_port
+  # - name: "custom-bind"
+  #   remote_host: "user@server"
+  #   remote_port: "0.0.0.0:8080"
+  #   local_port: "127.0.0.1:8080"
+  #   direction: local_to_remote
+
   # Add more tunnels as needed
