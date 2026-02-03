@@ -73,8 +73,9 @@ nav:
           - HTTP API: api/http-api.md
           - 隧道生命周期: api/tunnel-lifecycle.md
   - 开发指南:
-      - 贡献指南: development/contributing.md
-      - 国际化: development/i18n.md
+    - 贡献指南: development/contributing.md
+    - 国际化: development/i18n.md
+    - 交互式认证服务器: development/interactive-auth-server.md
   - 故障排除: troubleshooting.md
   - 更新日志: changelog.md
 
