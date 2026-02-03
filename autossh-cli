@@ -71,6 +71,7 @@ $(print_color "$CYAN" "TUNNEL MANAGEMENT:")
   start-tunnel <hash>      Start a specific tunnel by hash (or 8+ char prefix)
   stop-tunnel <hash>       Stop a specific tunnel by hash (or 8+ char prefix)
   show-tunnel <hash>       Show details of a specific tunnel (or 8+ char prefix)
+  auth <hash>              Start an interactive tunnel (supports 2FA/Password)
   
 $(print_color "$CYAN" "CONFIGURATION:")
   config                   Show current configuration paths
@@ -102,6 +103,9 @@ $(print_color "$CYAN" "EXAMPLES:")
   autossh-cli logs 7b840f83            # View logs using 8-char prefix
   autossh-cli start-tunnel 99acb12f    # Start tunnel using prefix
   autossh-cli stop-tunnel fc3cce10     # Stop tunnel using prefix
+  
+  # Interactive authentication (for 2FA/Password servers)
+  autossh-cli auth 7b840f83            # Start interactive tunnel
   
   # Using custom config
   autossh-cli -c ./config/config.yaml start
@@ -159,6 +163,11 @@ check_scripts() {
 		missing=1
 	fi
 
+	if [ ! -f "$SCRIPTS_DIR/interactive_auth.sh" ]; then
+		print_error "Missing: $SCRIPTS_DIR/interactive_auth.sh"
+		missing=1
+	fi
+
 	if [ $missing -eq 1 ]; then
 		print_error "Required script files are missing. Please ensure all scripts are in the scripts/ directory."
 		exit 1
@@ -169,6 +178,7 @@ check_scripts() {
 source_modules() {
 	. "$SCRIPTS_DIR/config_parser.sh"
 	. "$SCRIPTS_DIR/state_manager.sh"
+	. "$SCRIPTS_DIR/interactive_auth.sh"
 }
 
 # Parse command line arguments
@@ -209,10 +219,13 @@ parse_args() {
 			command="$1"
 			shift
 			;;
-		start-tunnel | stop-tunnel | show-tunnel)
+		start-tunnel | stop-tunnel | show-tunnel | auth)
 			command="$1"
-			tunnel_arg="$2"
-			shift 2
+			tunnel_arg="${2:-}"
+			shift
+			if [ -n "$1" ] && [ "${1#-}" = "$1" ]; then
+				shift
+			fi
 			;;
 		logs)
 			command="$1"
@@ -321,6 +334,21 @@ execute_command() {
 			exit 1
 		fi
 		;;
+	auth)
+		if [ -z "$tunnel_arg" ]; then
+			print_error "Tunnel hash required for auth command"
+			print_info "Usage: autossh-cli auth <hash>"
+			print_info "This command starts an interactive tunnel that requires manual authentication (2FA/Password)."
+			exit 1
+		fi
+		print_header "Interactive Authentication"
+		if start_interactive_tunnel "$tunnel_arg"; then
+			print_success "Interactive tunnel started successfully"
+		else
+			print_error "Failed to start interactive tunnel"
+			exit 1
+		fi
+		;;
 	stop-tunnel)
 		if [ -z "$tunnel_arg" ]; then
 			print_error "Tunnel hash required for stop-tunnel command"
@@ -362,7 +390,7 @@ execute_command() {
 				ls -la "$log_dir"/tunnel-*.log 2>/dev/null || echo "No log files found"
 				exit 1
 			fi
-			
+
 			# Show logs for specific tunnel
 			log_file="$log_dir/tunnel-${resolved_hash}.log"
 			if [ -f "$log_file" ]; then

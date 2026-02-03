@@ -156,6 +156,9 @@ start_all_tunnels() {
 		log_info "AUTOSSH" "Starting new tunnels..."
 		while IFS='	' read -r remote_host remote_port local_port direction name hash interactive; do
 			if [ "$interactive" = "true" ]; then
+				if echo "$to_start" | grep -q "^$hash$"; then
+					log_info "AUTOSSH" "Skipping interactive tunnel: ${name} (${hash})"
+				fi
 				continue
 			fi
 			if echo "$to_start" | grep -q "^$hash$"; then
