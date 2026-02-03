@@ -76,6 +76,7 @@ nav:
       - 贡献指南: development/contributing.md
       - 国际化: development/i18n.md
   - 故障排除: troubleshooting.md
+  - 更新日志: changelog.md
 
 # Hide navigation on specific pages
 hooks: []
