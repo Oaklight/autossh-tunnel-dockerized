@@ -401,8 +401,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
             showMessage(successMsg, 'success');
 
-            // Reload configuration to get updated hashes and trigger restart
-            setTimeout(() => loadConfiguration(), 500);
+            // Wait for file monitor to detect changes and complete smart restart
+            // The file monitor triggers autossh-cli start which takes ~2-3 seconds
+            setTimeout(() => loadConfiguration(), 3000);
 
         } catch (error) {
             console.error('Error saving tunnel:', error);
