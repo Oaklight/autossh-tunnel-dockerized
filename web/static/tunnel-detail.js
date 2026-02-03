@@ -67,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
         interactiveToggle.classList.toggle('active', newState);
         interactiveToggle.setAttribute('data-interactive', newState.toString());
 
-        const enabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Enabled';
-        const disabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Disabled';
+        const enabledText = getTranslation('buttons.interactive_auth_enabled', 'Enabled');
+        const disabledText = getTranslation('buttons.interactive_auth_disabled', 'Disabled');
         const toggleLabel = interactiveToggle.querySelector('.toggle-label');
         if (toggleLabel) {
             toggleLabel.textContent = newState ? enabledText : disabledText;
@@ -98,10 +98,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Helper function to get translation with fallback
+    function getTranslation(key, fallback) {
+        if (window.i18n && window.i18n.isReady) {
+            return window.i18n.t(key);
+        }
+        return fallback;
+    }
+
     // Listen for i18n ready event to update translations
     window.addEventListener('i18nReady', () => {
         if (currentTunnel) {
             updateInteractiveToggleLabel();
+            updateStatusDisplay(currentTunnel.status || 'STOPPED');
         }
     });
 
@@ -109,14 +118,15 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('languageChanged', () => {
         if (currentTunnel) {
             updateInteractiveToggleLabel();
+            updateStatusDisplay(currentTunnel.status || 'STOPPED');
         }
     });
 
     // Update interactive toggle label based on current state
     function updateInteractiveToggleLabel() {
         const isActive = interactiveToggle.classList.contains('active');
-        const enabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Enabled';
-        const disabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Disabled';
+        const enabledText = getTranslation('buttons.interactive_auth_enabled', 'Enabled');
+        const disabledText = getTranslation('buttons.interactive_auth_disabled', 'Disabled');
         const toggleLabel = interactiveToggle.querySelector('.toggle-label');
         if (toggleLabel) {
             toggleLabel.textContent = isActive ? enabledText : disabledText;
@@ -273,32 +283,32 @@ document.addEventListener("DOMContentLoaded", () => {
             case 'NORMAL':
                 statusIcon = "check_circle";
                 statusColor = "#4CAF50";
-                statusText = window.i18n ? window.i18n.t('table.status.running') : 'Running';
+                statusText = getTranslation('table.status.running', 'Running');
                 break;
             case 'STOPPED':
                 statusIcon = "stop_circle";
                 statusColor = "#9E9E9E";
-                statusText = window.i18n ? window.i18n.t('table.status.stopped') : 'Stopped';
+                statusText = getTranslation('table.status.stopped', 'Stopped');
                 break;
             case 'STARTING':
                 statusIcon = "hourglass_empty";
                 statusColor = "#FF9800";
-                statusText = window.i18n ? window.i18n.t('table.status.starting') : 'Starting';
+                statusText = getTranslation('table.status.starting', 'Starting');
                 break;
             case 'DEAD':
                 statusIcon = "cancel";
                 statusColor = "#F44336";
-                statusText = window.i18n ? window.i18n.t('table.status.dead') : 'Dead';
+                statusText = getTranslation('table.status.dead', 'Dead');
                 break;
             case 'LOADING':
                 statusIcon = "hourglass_empty";
                 statusColor = "#FF9800";
-                statusText = window.i18n ? window.i18n.t('table.status.loading') : 'Loading...';
+                statusText = getTranslation('table.status.loading', 'Loading...');
                 break;
             case 'SAVING':
                 statusIcon = "hourglass_empty";
                 statusColor = "#2196F3";
-                statusText = window.i18n ? window.i18n.t('table.status.saving') : 'Saving...';
+                statusText = getTranslation('table.status.saving', 'Saving...');
                 break;
         }
 

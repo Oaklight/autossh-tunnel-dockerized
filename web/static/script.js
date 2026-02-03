@@ -16,6 +16,74 @@ document.addEventListener("DOMContentLoaded", () => {
         startAutoRefresh();
     });
 
+    // Listen for i18n ready event to update translations
+    window.addEventListener('i18nReady', () => {
+        updateAllRowTranslations();
+    });
+
+    // Listen for language change event to update translations
+    window.addEventListener('languageChanged', () => {
+        updateAllRowTranslations();
+    });
+
+    // Helper function to get translation with fallback
+    function getTranslation(key, fallback) {
+        if (window.i18n && window.i18n.isReady) {
+            return window.i18n.t(key);
+        }
+        return fallback;
+    }
+
+    // Update translations for all existing rows
+    function updateAllRowTranslations() {
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            // Update control button titles
+            const saveRowBtn = row.querySelector('.save-row-button');
+            const startBtn = row.querySelector('.start-button');
+            const restartBtn = row.querySelector('.restart-button');
+            const stopBtn = row.querySelector('.stop-button');
+
+            if (saveRowBtn) saveRowBtn.title = getTranslation('buttons.save_restart_row', 'Save & Restart');
+            if (startBtn) startBtn.title = getTranslation('buttons.start_tunnel', 'Start tunnel');
+            if (restartBtn) restartBtn.title = getTranslation('buttons.restart_tunnel', 'Restart tunnel');
+            if (stopBtn) stopBtn.title = getTranslation('buttons.stop_tunnel', 'Stop tunnel');
+
+            // Update input placeholders
+            const inputs = row.querySelectorAll('input[data-i18n-placeholder]');
+            inputs.forEach(input => {
+                const key = input.getAttribute('data-i18n-placeholder');
+                if (key && window.i18n && window.i18n.isReady) {
+                    input.placeholder = window.i18n.t(key);
+                }
+            });
+
+            // Update select options
+            const options = row.querySelectorAll('option[data-i18n]');
+            options.forEach(option => {
+                const key = option.getAttribute('data-i18n');
+                if (key && window.i18n && window.i18n.isReady) {
+                    option.textContent = window.i18n.t(key);
+                }
+            });
+
+            // Update interactive toggle button title
+            const interactiveToggle = row.querySelector('.interactive-toggle-button');
+            if (interactiveToggle) {
+                const isActive = interactiveToggle.classList.contains('active');
+                const enabledText = getTranslation('buttons.interactive_auth_enabled', 'Interactive Auth Enabled');
+                const disabledText = getTranslation('buttons.interactive_auth_disabled', 'Interactive Auth Disabled');
+                interactiveToggle.title = isActive ? enabledText : disabledText;
+            }
+
+            // Update delete button title
+            const deleteBtn = row.querySelector('.delete-button');
+            if (deleteBtn) {
+                deleteBtn.title = getTranslation('buttons.delete', 'Delete tunnel');
+            }
+        });
+    }
+
     // Setup refresh button and auto-refresh checkbox
     setupRefreshControls();
 
@@ -171,23 +239,23 @@ document.addEventListener("DOMContentLoaded", () => {
         // Use server-provided hash or empty string for new tunnels
         const tunnelHash = tunnel.hash || '';
 
-        // Get translated placeholders
-        const tunnelNamePlaceholder = window.i18n ? window.i18n.t('table.placeholders.tunnel_name') : 'Tunnel name';
-        const remoteHostPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_host') : 'Remote host';
-        const remotePortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.remote_port') : 'Remote port (e.g., 44497 or hostname:44497)';
-        const localPortPlaceholder = window.i18n ? window.i18n.t('table.placeholders.local_port') : 'Local port (e.g., 55001 or 192.168.1.100:55001)';
+        // Get translated placeholders (use helper function that checks isReady)
+        const tunnelNamePlaceholder = getTranslation('table.placeholders.tunnel_name', 'Tunnel name');
+        const remoteHostPlaceholder = getTranslation('table.placeholders.remote_host', 'Remote host');
+        const remotePortPlaceholder = getTranslation('table.placeholders.remote_port', 'Remote port (e.g., 44497 or hostname:44497)');
+        const localPortPlaceholder = getTranslation('table.placeholders.local_port', 'Local port (e.g., 55001 or 192.168.1.100:55001)');
 
-        const remoteToLocalText = window.i18n ? window.i18n.t('table.direction.remote_to_local') : 'Remote to Local';
-        const localToRemoteText = window.i18n ? window.i18n.t('table.direction.local_to_remote') : 'Local to Remote';
+        const remoteToLocalText = getTranslation('table.direction.remote_to_local', 'Remote to Local');
+        const localToRemoteText = getTranslation('table.direction.local_to_remote', 'Local to Remote');
 
-        const interactiveEnabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
-        const interactiveDisabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
-        const deleteTunnelText = window.i18n ? window.i18n.t('buttons.delete') : 'Delete tunnel';
+        const interactiveEnabledText = getTranslation('buttons.interactive_auth_enabled', 'Interactive Auth Enabled');
+        const interactiveDisabledText = getTranslation('buttons.interactive_auth_disabled', 'Interactive Auth Disabled');
+        const deleteTunnelText = getTranslation('buttons.delete', 'Delete tunnel');
 
-        const saveRestartText = window.i18n ? window.i18n.t('buttons.save_restart_row') : 'Save & Restart';
-        const startTunnelText = window.i18n ? window.i18n.t('buttons.start_tunnel') : 'Start tunnel';
-        const restartTunnelText = window.i18n ? window.i18n.t('buttons.restart_tunnel') : 'Restart tunnel';
-        const stopTunnelText = window.i18n ? window.i18n.t('buttons.stop_tunnel') : 'Stop tunnel';
+        const saveRestartText = getTranslation('buttons.save_restart_row', 'Save & Restart');
+        const startTunnelText = getTranslation('buttons.start_tunnel', 'Start tunnel');
+        const restartTunnelText = getTranslation('buttons.restart_tunnel', 'Restart tunnel');
+        const stopTunnelText = getTranslation('buttons.stop_tunnel', 'Stop tunnel');
 
         row.innerHTML = `
             <td class="mdc-data-table__cell">
@@ -283,8 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
             interactiveToggle.setAttribute('data-interactive', newState.toString());
 
             // Update title (icon stays the same, only color changes via CSS)
-            const enabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_enabled') : 'Interactive Auth Enabled';
-            const disabledText = window.i18n ? window.i18n.t('buttons.interactive_auth_disabled') : 'Interactive Auth Disabled';
+            const enabledText = getTranslation('buttons.interactive_auth_enabled', 'Interactive Auth Enabled');
+            const disabledText = getTranslation('buttons.interactive_auth_disabled', 'Interactive Auth Disabled');
             interactiveToggle.title = newState ? enabledText : disabledText;
         });
 
