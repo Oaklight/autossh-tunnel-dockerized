@@ -73,8 +73,9 @@ nav:
           - HTTP API: api/http-api.md
           - Tunnel Lifecycle: api/tunnel-lifecycle.md
   - Development:
-      - Contributing: development/contributing.md
-      - Internationalization: development/i18n.md
+    - Contributing: development/contributing.md
+    - Internationalization: development/i18n.md
+    - Interactive Auth Server: development/interactive-auth-server.md
   - Troubleshooting: troubleshooting.md
   - Changelog: changelog.md
 
