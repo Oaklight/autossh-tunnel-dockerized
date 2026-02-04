@@ -89,7 +89,8 @@
     "interactive_start_hint": "このトンネルは対話認証が必要です。ターミナルから起動してください：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "interactive_restart_hint": "このトンネルは対話認証が必要です。まず停止してから、ターミナルから起動してください：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "hash_copied": "ハッシュをクリップボードにコピーしました",
-    "copy_failed": "クリップボードへのコピーに失敗しました"
+    "copy_failed": "クリップボードへのコピーに失敗しました",
+    "click_to_copy": "クリックしてコピー"
   },
   "validation": {
     "port_range": "ポートは1から65535の間である必要があります",

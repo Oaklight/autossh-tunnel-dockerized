@@ -652,25 +652,130 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Get or create toast container
+    function getToastContainer() {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+
+    // Show success/error messages as floating toast
     function showMessage(text, type = 'success') {
-        // Remove existing messages
-        const existingMessages = document.querySelectorAll('.message');
-        existingMessages.forEach(msg => msg.remove());
+        const container = getToastContainer();
 
         const message = document.createElement('div');
         message.className = `message ${type}`;
-        message.textContent = text;
 
-        const container = document.querySelector('.container');
-        container.insertBefore(message, container.firstChild);
+        // Create message content wrapper
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'message-content';
 
-        // Auto-remove after 3 seconds
+        // Create message text
+        const textSpan = document.createElement('span');
+        textSpan.textContent = text;
+        contentWrapper.appendChild(textSpan);
+
+        // Add click hint for copyable messages
+        const hintText = getTranslation('messages.click_to_copy', 'Click to copy');
+        const hint = document.createElement('div');
+        hint.className = 'message-hint';
+        hint.textContent = hintText;
+        contentWrapper.appendChild(hint);
+
+        // Create action buttons container
+        const actions = document.createElement('div');
+        actions.className = 'message-actions';
+
+        // Create copy button
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'message-copy';
+        copyBtn.innerHTML = '<i class="material-icons" style="font-size: 16px;">content_copy</i>';
+        copyBtn.setAttribute('aria-label', 'Copy');
+        copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyToClipboard(text, copyBtn);
+        });
+
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'message-close';
+        closeBtn.innerHTML = '×';
+        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dismissToast(message);
+        });
+
+        actions.appendChild(copyBtn);
+        actions.appendChild(closeBtn);
+
+        message.appendChild(contentWrapper);
+        message.appendChild(actions);
+
+        // Add click to copy on the whole message
+        message.addEventListener('click', () => {
+            copyToClipboard(text, copyBtn);
+        });
+
+        container.appendChild(message);
+
+        // Auto-remove after 5 seconds
+        const autoRemoveTimeout = setTimeout(() => {
+            dismissToast(message);
+        }, 5000);
+
+        // Store timeout reference for cleanup
+        message._autoRemoveTimeout = autoRemoveTimeout;
+    }
+
+    // Copy text to clipboard
+    async function copyToClipboard(text, button) {
+        try {
+            await navigator.clipboard.writeText(text);
+
+            // Visual feedback
+            if (button) {
+                button.classList.add('copied');
+                const icon = button.querySelector('.material-icons');
+                if (icon) {
+                    icon.textContent = 'check';
+                }
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    if (icon) {
+                        icon.textContent = 'content_copy';
+                    }
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('Failed to copy:', error);
+        }
+    }
+
+    // Dismiss toast with animation
+    function dismissToast(message) {
+        if (!message || !message.parentNode) return;
+
+        // Clear auto-remove timeout if exists
+        if (message._autoRemoveTimeout) {
+            clearTimeout(message._autoRemoveTimeout);
+        }
+
+        // Add hiding class for animation
+        message.classList.add('hiding');
+
+        // Remove after animation completes
         setTimeout(() => {
             if (message.parentNode) {
-                message.style.animation = 'fadeOut 0.3s ease-out';
-                setTimeout(() => message.remove(), 300);
+                message.remove();
             }
-        }, 3000);
+        }, 300);
     }
 
     function showError(text) {

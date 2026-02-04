@@ -89,7 +89,8 @@
     "interactive_start_hint": "يتطلب هذا النفق مصادقة تفاعلية. يرجى بدء التشغيل عبر الطرفية:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "interactive_restart_hint": "يتطلب هذا النفق مصادقة تفاعلية. يرجى إيقافه أولاً، ثم البدء عبر الطرفية:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "hash_copied": "تم نسخ التجزئة إلى الحافظة",
-    "copy_failed": "فشل النسخ إلى الحافظة"
+    "copy_failed": "فشل النسخ إلى الحافظة",
+    "click_to_copy": "انقر للنسخ"
   },
   "validation": {
     "port_range": "يجب أن يكون المنفذ بين 1 و 65535",
