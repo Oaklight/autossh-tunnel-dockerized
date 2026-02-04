@@ -177,6 +177,79 @@
    docker compose exec autossh cat /etc/autossh/config/config.yaml
    ```
 
+## 交互式认证问题
+
+### 交互式隧道无法启动
+
+**症状**：运行 `autossh-cli auth <hash>` 失败或显示错误
+
+**解决方案**：
+
+1. **确保使用正确的用户上下文**：
+   
+   `auth` 命令必须以 `myuser` 用户身份运行：
+   ```bash
+   docker exec -it -u myuser <容器名称> autossh-cli auth <hash>
+   ```
+   
+   如果不使用 `-u myuser`，可能会看到访问 SSH 配置文件的权限错误。
+
+2. **验证隧道是否标记为交互式**：
+   
+   检查隧道配置中是否有 `interactive: true`：
+   ```bash
+   docker exec -it autossh-1 autossh-cli show-tunnel <hash>
+   ```
+
+3. **检查 SSH 主机配置**：
+   
+   确保远程主机在 `~/.ssh/config` 中正确配置：
+   ```bash
+   docker exec -it autossh-1 cat /home/myuser/.ssh/config
+   ```
+
+### 认证失败
+
+**症状**：2FA 验证码或密码被拒绝
+
+**解决方案**：
+
+1. **验证凭据**：
+   - 确保输入正确的 2FA 验证码或密码
+   - 检查 2FA 令牌是否已过期（TOTP 验证码有时间限制）
+
+2. **检查 SSH 服务器配置**：
+   - 验证远程服务器是否支持键盘交互式认证
+   - 检查您的账户在远程服务器上是否被锁定或禁用
+
+3. **测试手动 SSH 连接**：
+   ```bash
+   docker exec -it -u myuser autossh-1 ssh <远程主机>
+   ```
+
+### 交互式隧道认证后显示 STOPPED
+
+**症状**：隧道认证成功但立即显示为 STOPPED
+
+**解决方案**：
+
+1. **检查隧道日志**：
+   ```bash
+   docker exec -it autossh-1 autossh-cli logs <hash>
+   ```
+
+2. **验证端口可用性**：
+   
+   确保本地/远程端口未被占用：
+   ```bash
+   netstat -tuln | grep <端口号>
+   ```
+
+3. **检查 SSH 控制套接字**：
+   ```bash
+   docker exec -it autossh-1 ls -la /tmp/ssh_control_*
+   ```
+
 ## 隧道运行问题
 
 ### 隧道频繁断开重连

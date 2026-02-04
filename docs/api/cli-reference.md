@@ -94,6 +94,58 @@ autossh-cli logs 7b840f8344679dff5df893eefd245043
 
 ## 隧道控制命令
 
+### 交互式认证
+
+启动需要手动认证（2FA/密码）的交互式隧道：
+
+```bash
+autossh-cli auth <哈希值>
+```
+
+!!! important "需要用户上下文"
+    `auth` 命令必须以 `myuser` 用户身份运行，以正确访问 SSH 配置文件。使用 `docker exec` 时需要添加 `-u myuser` 参数：
+    
+    ```bash
+    docker exec -it -u myuser <容器名称> autossh-cli auth <哈希值>
+    ```
+
+**示例：**
+
+```bash
+# 启动隧道的交互式认证
+$ docker exec -it -u myuser autotunnel-autossh-1 autossh-cli auth c5ed76f1
+
+Interactive Authentication
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Initializing interactive tunnel: test-2fa-tunnel (c5ed76f1dfccb8959815fbfdc69d582d)
+
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Starting SSH session for: test-2fa-tunnel
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] You may be prompted for password or 2FA.
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] The session will go to background upon successful authentication.
+
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Direction: remote_to_local (Local Forwarding)
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Forwarding: localhost:18888 <- test-2fa-server:localhost:8888
+(testuser@localhost) Verification code: ******
+
+[2026-02-03 16:44:29] [INFO] [INTERACTIVE] Authentication successful. Tunnel running in background.
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Tunnel PID: 55085
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Tunnel registered in state file.
+
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Tunnel 'test-2fa-tunnel' is now running.
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Use 'autossh-cli status' to check tunnel status.
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Use 'autossh-cli stop-tunnel c5ed76f1dfccb8959815fbfdc69d582d' to stop.
+SUCCESS: Interactive tunnel started successfully
+```
+
+**主要特性：**
+
+- 使用普通 SSH 而非 autossh，避免自动重连尝试
+- 支持键盘交互式认证（2FA、密码提示）
+- 认证成功后隧道在后台运行
+- 使用 SSH 控制套接字进行 PID 跟踪和管理
+
+!!! note "交互式隧道"
+    交互式隧道在配置文件中标记为 `interactive: true`。它们在容器启动时**不会**自动启动。您必须使用 `auth` 命令手动进行认证。
+
 ### 启动单个隧道
 
 通过哈希值（或 8+ 字符前缀）启动特定隧道：
