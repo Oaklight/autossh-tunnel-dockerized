@@ -301,6 +301,13 @@
     cursor: not-allowed;
 }
 
+/* Disabled interactive buttons - special styling */
+.control-btn.disabled-interactive {
+    opacity: 0.4;
+    cursor: help;
+    filter: grayscale(100%);
+}
+
 /* Log Controls */
 .log-controls {
     display: flex;
@@ -463,4 +470,57 @@
 
 .loading {
     animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Message Styles */
+.message {
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.message.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.message.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.message.info {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #90caf9;
+    white-space: pre-line;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
 }

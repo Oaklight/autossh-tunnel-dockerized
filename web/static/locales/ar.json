@@ -54,6 +54,8 @@
     "start_tunnel": "بدء النفق",
     "restart_tunnel": "إعادة تشغيل النفق",
     "stop_tunnel": "إيقاف النفق",
+    "interactive_start_disabled": "مطلوب مصادقة تفاعلية - استخدم سطر الأوامر",
+    "interactive_restart_disabled": "مطلوب مصادقة تفاعلية - استخدم سطر الأوامر",
     "refresh": "تحديث",
     "auto_refresh": "تحديث تلقائي (5 ثوانٍ)"
   },
@@ -62,7 +64,8 @@
     "save_config": "حفظ التكوين وإعادة التشغيل",
     "direction": "الاتجاه",
     "actions": "العمليات",
-    "controls": "التحكم"
+    "controls": "التحكم",
+    "refresh_status": "تحديث الحالة"
   },
   "messages": {
     "delete_confirm": "هل أنت متأكد من أنك تريد حذف تكوين النفق هذا؟",
@@ -80,7 +83,9 @@
     "start_failed": "فشل في بدء النفق",
     "restart_failed": "فشل في إعادة تشغيل النفق",
     "stop_failed": "فشل في إيقاف النفق",
-    "save_first": "يرجى حفظ التكوين أولاً"
+    "save_first": "يرجى حفظ التكوين أولاً",
+    "interactive_start_hint": "يتطلب هذا النفق مصادقة تفاعلية. يرجى بدء التشغيل عبر الطرفية:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "interactive_restart_hint": "يتطلب هذا النفق مصادقة تفاعلية. يرجى إيقافه أولاً، ثم البدء عبر الطرفية:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
   },
   "validation": {
     "port_range": "يجب أن يكون المنفذ بين 1 و 65535",

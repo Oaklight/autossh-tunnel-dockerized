@@ -152,32 +152,43 @@ start_interactive_tunnel() {
 	local log_file="$log_dir/tunnel-${target_hash}.log"
 
 	echo ""
-	log_info "INTERACTIVE" "Starting SSH session for: $name"
-	log_info "INTERACTIVE" "You may be prompted for password or 2FA."
-	log_info "INTERACTIVE" "The session will go to background upon successful authentication."
+	log_info "INTERACTIVE" "Starting SSH session for: $name" | tee -a "$log_file"
+	log_info "INTERACTIVE" "You may be prompted for password or 2FA." | tee -a "$log_file"
+	log_info "INTERACTIVE" "The session will go to background upon successful authentication." | tee -a "$log_file"
 	echo ""
 
 	# Execute SSH command based on direction
 	# Note: ssh -f will fork to background after successful authentication
 	# The exit code reflects whether authentication succeeded
+	# We use a temporary file to capture the exit code since we're in /bin/sh (not bash)
 	local ssh_result
+	local ssh_exit_file=$(mktemp)
 	if [ "$direction" = "local_to_remote" ]; then
 		# Remote Forwarding (-R): expose local service to remote
-		log_info "INTERACTIVE" "Direction: local_to_remote (Remote Forwarding)"
-		log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num -> $remote_host:$target_host:$target_port"
-		ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $remote_host 2>&1
-		ssh_result=$?
+		log_info "INTERACTIVE" "Direction: local_to_remote (Remote Forwarding)" | tee -a "$log_file"
+		log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num -> $remote_host:$target_host:$target_port" | tee -a "$log_file"
+		# Run ssh and capture exit code, while still showing output to terminal and log
+		(
+			ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $remote_host 2>&1
+			echo $? >"$ssh_exit_file"
+		) | tee -a "$log_file"
+		ssh_result=$(cat "$ssh_exit_file")
 	else
 		# Local Forwarding (-L): bring remote service to local (default)
-		log_info "INTERACTIVE" "Direction: remote_to_local (Local Forwarding)"
-		log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num <- $remote_host:$target_host:$target_port"
-		ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $remote_host 2>&1
-		ssh_result=$?
+		log_info "INTERACTIVE" "Direction: remote_to_local (Local Forwarding)" | tee -a "$log_file"
+		log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num <- $remote_host:$target_host:$target_port" | tee -a "$log_file"
+		# Run ssh and capture exit code, while still showing output to terminal and log
+		(
+			ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $remote_host 2>&1
+			echo $? >"$ssh_exit_file"
+		) | tee -a "$log_file"
+		ssh_result=$(cat "$ssh_exit_file")
 	fi
+	rm -f "$ssh_exit_file"
 
 	if [ $ssh_result -eq 0 ]; then
-		echo ""
-		log_info "INTERACTIVE" "Authentication successful. Tunnel running in background."
+		echo "" | tee -a "$log_file"
+		log_info "INTERACTIVE" "Authentication successful. Tunnel running in background." | tee -a "$log_file"
 
 		# Wait a moment for the control socket to be created
 		sleep 1
@@ -188,23 +199,23 @@ start_interactive_tunnel() {
 		local ssh_pid=$(echo "$check_output" | sed -n 's/.*pid=\([0-9]*\).*/\1/p')
 
 		if [ -n "$ssh_pid" ]; then
-			log_info "INTERACTIVE" "Tunnel PID: $ssh_pid"
+			log_info "INTERACTIVE" "Tunnel PID: $ssh_pid" | tee -a "$log_file"
 			save_tunnel_state "$remote_host" "$remote_port" "$local_port" "$direction" "$name" "$target_hash" "$ssh_pid"
-			log_info "INTERACTIVE" "Tunnel registered in state file."
-			echo ""
-			log_info "INTERACTIVE" "Tunnel '$name' is now running."
-			log_info "INTERACTIVE" "Use 'autossh-cli status' to check tunnel status."
-			log_info "INTERACTIVE" "Use 'autossh-cli stop-tunnel $target_hash' to stop."
+			log_info "INTERACTIVE" "Tunnel registered in state file." | tee -a "$log_file"
+			echo "" | tee -a "$log_file"
+			log_info "INTERACTIVE" "Tunnel '$name' is now running." | tee -a "$log_file"
+			log_info "INTERACTIVE" "Use 'autossh-cli status' to check tunnel status." | tee -a "$log_file"
+			log_info "INTERACTIVE" "Use 'autossh-cli stop-tunnel $target_hash' to stop." | tee -a "$log_file"
 		else
-			log_error "INTERACTIVE" "Could not retrieve tunnel PID from control socket."
-			log_error "INTERACTIVE" "Debug output: $check_output"
-			log_info "INTERACTIVE" "The tunnel may still be running. Check with 'ps aux | grep ssh'"
+			log_error "INTERACTIVE" "Could not retrieve tunnel PID from control socket." | tee -a "$log_file"
+			log_error "INTERACTIVE" "Debug output: $check_output" | tee -a "$log_file"
+			log_info "INTERACTIVE" "The tunnel may still be running. Check with 'ps aux | grep ssh'" | tee -a "$log_file"
 			return 1
 		fi
 	else
-		echo ""
-		log_error "INTERACTIVE" "SSH exited with error code $ssh_result"
-		log_error "INTERACTIVE" "Authentication may have failed or connection was refused."
+		echo "" | tee -a "$log_file"
+		log_error "INTERACTIVE" "SSH exited with error code $ssh_result" | tee -a "$log_file"
+		log_error "INTERACTIVE" "Authentication may have failed or connection was refused." | tee -a "$log_file"
 		return $ssh_result
 	fi
 }

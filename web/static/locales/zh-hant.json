@@ -54,6 +54,8 @@
     "start_tunnel": "啟動隧道",
     "restart_tunnel": "重新啟動隧道",
     "stop_tunnel": "停止隧道",
+    "interactive_start_disabled": "需要互動認證 - 請使用命令列",
+    "interactive_restart_disabled": "需要互動認證 - 請使用命令列",
     "refresh": "重新整理",
     "auto_refresh": "自動重新整理 (5秒)"
   },
@@ -62,7 +64,8 @@
     "save_config": "儲存設定並重新啟動",
     "direction": "方向",
     "actions": "操作",
-    "controls": "控制"
+    "controls": "控制",
+    "refresh_status": "重新整理狀態"
   },
   "messages": {
     "delete_confirm": "確定要刪除此隧道設定嗎？",
@@ -80,7 +83,9 @@
     "start_failed": "隧道啟動失敗",
     "restart_failed": "隧道重新啟動失敗",
     "stop_failed": "隧道停止失敗",
-    "save_first": "請先儲存設定"
+    "save_first": "請先儲存設定",
+    "interactive_start_hint": "此隧道需要互動式認證。請透過終端機啟動：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "interactive_restart_hint": "此隧道需要互動式認證。請先停止隧道，然後透過終端機啟動：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
   },
   "validation": {
     "port_range": "連接埠必須在 1 到 65535 之間",
