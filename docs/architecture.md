@@ -41,8 +41,8 @@ graph TB
     end
     
     SSH -->|只读挂载| ENTRY
-    CONFIG -->|只读挂载| ENTRY
-    CONFIG -->|读写挂载| WEBSERVER
+    CONFIG -->|读写挂载| ENTRY
+    BROWSER -->|静态文件| WEBSERVER
     
     ENTRY --> MONITOR
     MONITOR --> CLI
@@ -50,7 +50,6 @@ graph TB
     CLI --> AUTOSSH
     API --> CLI
     
-    BROWSER -->|静态文件| WEBSERVER
     BROWSER -->|直接 API 调用| API
     
     AUTOSSH -->|SSH 隧道| REMOTE1
@@ -81,7 +80,7 @@ graph TB
 | 宿主机路径 | 容器路径 | 模式 | 描述 |
 |-----------|---------|------|------|
 | `~/.ssh` | `/home/myuser/.ssh` | `ro` | SSH 密钥和配置（只读） |
-| `./config` | `/etc/autossh/config` | `ro` | 隧道配置（只读） |
+| `./config` | `/etc/autossh/config` | `rw` | 隧道配置（读写，用于配置 API） |
 
 ### 环境变量
 
@@ -108,6 +107,12 @@ graph TB
 | POST | `/stop/{hash}` | 停止特定隧道 |
 | GET | `/logs` | 列出可用的日志文件 |
 | GET | `/logs/{hash}` | 获取特定隧道的日志 |
+| GET | `/config` | 获取所有隧道配置 |
+| GET | `/config/{hash}` | 获取单个隧道配置 |
+| POST | `/config` | 替换所有配置 |
+| POST | `/config/new` | 添加新隧道 |
+| POST | `/config/{hash}` | 更新单个隧道 |
+| DELETE | `/config/{hash}` | 删除隧道 |
 
 ### 最小 Docker Compose 示例
 
@@ -118,7 +123,7 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
@@ -135,7 +140,7 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
@@ -160,26 +165,23 @@ services:
 
 | 组件 | 描述 |
 |------|------|
-| `Go Web Server` | 提供静态文件并管理配置 |
+| `Go Web Server` | 仅提供静态文件 |
 | `Web UI` | 支持国际化的 HTML/CSS/JavaScript 前端（在浏览器中运行） |
 
 ### 卷挂载
 
-| 宿主机路径 | 容器路径 | 模式 | 描述 |
-|-----------|---------|------|------|
-| `./config` | `/home/myuser/config` | `rw` | 隧道配置（用于编辑） |
+!!! note "无需配置卷挂载"
+    从 v2.1.0 开始，Web 面板不再需要配置卷挂载。所有配置操作都通过 autossh 容器的配置 API 完成。
 
 ### 环境变量
 
 | 变量 | 描述 | 默认值 | 必需 |
 |------|------|--------|------|
-| `PUID` | 文件权限的用户 ID | `1000` | 否 |
-| `PGID` | 文件权限的组 ID | `1000` | 否 |
 | `TZ` | 日志时间戳的时区 | `UTC` | 否 |
 | `API_BASE_URL` | autossh API 服务器的 URL（传递给浏览器） | `http://localhost:8080` | **是** |
 
 !!! info "直接 API 架构"
-    `API_BASE_URL` 会传递给基于浏览器的前端，前端直接向 autossh 容器发起 API 调用。Go Web 服务器不代理 API 请求 - 它只提供静态文件和配置管理。
+    `API_BASE_URL` 会传递给基于浏览器的前端，前端直接向 autossh 容器发起 API 调用。Go Web 服务器不代理 API 请求 - 它只提供静态文件。所有配置管理都通过配置 API 完成。
 
 ### Docker Compose 示例
 
@@ -190,11 +192,8 @@ services:
     image: oaklight/autossh-tunnel-web-panel:latest
     ports:
       - "5000:5000"
-    volumes:
-      - ./config:/home/myuser/config
+    # 无需配置卷挂载 - Web 面板使用 autossh 容器的配置 API
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080
     restart: always
@@ -216,7 +215,7 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
@@ -230,18 +229,15 @@ services:
     image: oaklight/autossh-tunnel-web-panel:latest
     ports:
       - "5000:5000"
-    volumes:
-      - ./config:/home/myuser/config:rw
+    # 无需配置卷挂载 - Web 面板使用 autossh 容器的配置 API
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080
     restart: always
 ```
 
-!!! note "配置编辑"
-    Web 面板将配置目录挂载为读写模式（`rw`）以允许通过 UI 编辑配置。autossh 容器只需要读取权限（`ro`），因为它只读取配置。
+!!! note "配置管理"
+    autossh 容器将配置目录挂载为读写模式（`rw`）以支持配置 API。Web 面板不再需要直接访问配置文件 - 所有配置操作都通过配置 API 完成。
 
 !!! info "网络架构"
     - **autossh 容器** 使用 host 网络模式以允许隧道绑定到特定 IP 地址
