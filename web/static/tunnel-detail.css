@@ -140,10 +140,51 @@
 .config-value.hash-value {
     font-family: 'Courier New', monospace;
     font-size: 0.75rem;
-    word-break: break-all;
-    white-space: nowrap;
+    justify-content: space-between;
+    padding-right: 8px;
+}
+
+.config-value.hash-value .hash-text {
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.hash-copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.hash-copy-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--mdc-theme-primary);
+}
+
+.hash-copy-btn:active {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.hash-copy-btn .material-icons {
+    font-size: 18px;
+}
+
+.hash-copy-btn.copied {
+    color: #4CAF50;
+}
+
+.hash-copy-btn.copied .material-icons::after {
+    content: 'check';
 }
 
 /* Editable Config Inputs */
@@ -522,6 +563,7 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -533,6 +575,7 @@
         opacity: 1;
         transform: translateY(0);
     }
+
     to {
         opacity: 0;
         transform: translateY(-10px);

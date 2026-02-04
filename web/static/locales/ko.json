@@ -58,7 +58,8 @@
     "interactive_start_disabled": "대화형 인증 필요 - CLI 사용",
     "interactive_restart_disabled": "대화형 인증 필요 - CLI 사용",
     "refresh": "새로고침",
-    "auto_refresh": "자동 새로고침 (5초)"
+    "auto_refresh": "자동 새로고침 (5초)",
+    "copy_hash": "해시 복사"
   },
   "tooltips": {
     "add_tunnel": "터널 추가",
@@ -86,7 +87,9 @@
     "stop_failed": "터널 중지 실패",
     "save_first": "먼저 구성을 저장하세요",
     "interactive_start_hint": "이 터널은 대화형 인증이 필요합니다. 터미널에서 시작하세요:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
-    "interactive_restart_hint": "이 터널은 대화형 인증이 필요합니다. 먼저 중지한 후 터미널에서 시작하세요:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
+    "interactive_restart_hint": "이 터널은 대화형 인증이 필요합니다. 먼저 중지한 후 터미널에서 시작하세요:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "hash_copied": "해시가 클립보드에 복사되었습니다",
+    "copy_failed": "클립보드에 복사하지 못했습니다"
   },
   "validation": {
     "port_range": "포트는 1에서 65535 사이여야 합니다",

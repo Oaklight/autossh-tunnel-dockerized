@@ -89,7 +89,13 @@
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.hash">Hash</label>
-                            <div class="config-value hash-value" id="tunnelHash">-</div>
+                            <div class="config-value hash-value" id="tunnelHash">
+                                <span class="hash-text">-</span>
+                                <button class="hash-copy-btn" id="copyHashBtn" title="Copy hash"
+                                    data-i18n-title="buttons.copy_hash">
+                                    <i class="material-icons">content_copy</i>
+                                </button>
+                            </div>
                         </div>
                         <div class="config-item">
                             <label data-i18n="tunnel_detail.remote_host">Remote Host</label>
