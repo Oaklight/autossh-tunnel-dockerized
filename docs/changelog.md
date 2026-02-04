@@ -5,6 +5,29 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [v2.2.0] - 2026-02-04
+
+### 新增
+
+- **交互式认证（CLI）**：新增 `autossh-cli auth` 命令，支持需要 2FA 或密码认证的隧道
+    - 使用 SSH control socket 管理连接
+    - 支持哈希前缀匹配（8+ 字符）
+    - 自动 PID 跟踪和状态管理
+- **交互式认证测试服务器**：用于测试 2FA 认证的 Docker 化 SSH 服务器（`ssh-interactive-auth-sample-server/`）
+    - 预配置 Google Authenticator
+    - 包含 Makefile 便于快速启动
+- **API 并发连接**：添加 socat 支持以处理并发 API 请求
+- **Web 面板增强**：
+    - 浮动 toast 通知，支持复制到剪贴板
+    - 隧道详情页添加复制哈希按钮
+    - 帮助页面添加交互式认证 CLI 文档
+    - 改进配置网格布局和元素一致性
+
+### 变更
+
+- **交互式隧道 UI**：增强交互式认证隧道的 UI，使用指纹图标切换
+- **i18n 改进**：语言按钮提示使用静态翻译键
+
 ## [v2.1.0] - 2026-02-03
 
 ### 新增
