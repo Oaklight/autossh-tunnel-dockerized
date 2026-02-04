@@ -10,7 +10,8 @@
     "github": "GitHub",
     "back": "返回",
     "language_toggle": "Language / 語言",
-    "language_toggle_prefix": "可用語言"
+    "language_toggle_prefix": "可用語言",
+    "switch_language": "切換語言"
   },
   "table": {
     "headers": {

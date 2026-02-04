@@ -10,7 +10,8 @@
     "github": "GitHub",
     "back": "戻る",
     "language_toggle": "Language / 言語",
-    "language_toggle_prefix": "利用可能な言語"
+    "language_toggle_prefix": "利用可能な言語",
+    "switch_language": "言語を切り替え"
   },
   "table": {
     "headers": {
