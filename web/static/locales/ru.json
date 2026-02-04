@@ -58,7 +58,8 @@
     "interactive_start_disabled": "Требуется интерактивная аутентификация - Используйте CLI",
     "interactive_restart_disabled": "Требуется интерактивная аутентификация - Используйте CLI",
     "refresh": "Обновить",
-    "auto_refresh": "Автообновление (5 сек)"
+    "auto_refresh": "Автообновление (5 сек)",
+    "copy_hash": "Копировать хеш"
   },
   "tooltips": {
     "add_tunnel": "Добавить туннель",
@@ -86,7 +87,9 @@
     "stop_failed": "Ошибка остановки туннеля",
     "save_first": "Пожалуйста, сначала сохраните настройки",
     "interactive_start_hint": "Этот туннель требует интерактивной аутентификации. Пожалуйста, запустите его через терминал:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
-    "interactive_restart_hint": "Этот туннель требует интерактивной аутентификации. Сначала остановите его, затем запустите через терминал:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
+    "interactive_restart_hint": "Этот туннель требует интерактивной аутентификации. Сначала остановите его, затем запустите через терминал:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "hash_copied": "Хеш скопирован в буфер обмена",
+    "copy_failed": "Не удалось скопировать в буфер обмена"
   },
   "validation": {
     "port_range": "Порт должен быть между 1 и 65535",

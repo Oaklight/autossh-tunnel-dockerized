@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const refreshLogsBtn = document.getElementById('refreshLogsBtn');
     const clearLogsBtn = document.getElementById('clearLogsBtn');
     const autoRefreshCheckbox = document.getElementById('autoRefresh');
+    const copyHashBtn = document.getElementById('copyHashBtn');
 
     let currentTunnel = null;
     let currentHash = tunnelHash; // Track current hash (may change after save)
@@ -77,6 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Input validation
     addInputValidation();
+
+    // Copy hash button event
+    if (copyHashBtn) {
+        copyHashBtn.addEventListener('click', handleCopyHash);
+    }
 
     // Setup auto-refresh checkbox
     if (autoRefreshCheckbox) {
@@ -268,7 +274,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function displayTunnelInfo(tunnel) {
         // Set input values
         tunnelNameInput.value = tunnel.name || '';
-        tunnelHashEl.textContent = tunnel.hash || '-';
+        // Update hash text (inside the span)
+        const hashTextEl = tunnelHashEl.querySelector('.hash-text');
+        if (hashTextEl) {
+            hashTextEl.textContent = tunnel.hash || '-';
+        }
         remoteHostInput.value = tunnel.remote_host || '';
         remotePortInput.value = tunnel.remote_port || '';
         localPortInput.value = tunnel.local_port || '';
@@ -416,7 +426,10 @@ document.addEventListener("DOMContentLoaded", () => {
             // Update current hash and URL if changed
             if (newHash !== currentHash) {
                 currentHash = newHash;
-                tunnelHashEl.textContent = newHash;
+                const hashTextEl = tunnelHashEl.querySelector('.hash-text');
+                if (hashTextEl) {
+                    hashTextEl.textContent = newHash;
+                }
                 // Update URL without reload
                 const newUrl = new URL(window.location);
                 newUrl.searchParams.set('hash', newHash);
@@ -680,5 +693,39 @@ document.addEventListener("DOMContentLoaded", () => {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Handle copy hash to clipboard
+    async function handleCopyHash() {
+        const hashTextEl = tunnelHashEl.querySelector('.hash-text');
+        const hashValue = hashTextEl ? hashTextEl.textContent : currentHash;
+
+        if (!hashValue || hashValue === '-') {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(hashValue);
+
+            // Visual feedback
+            copyHashBtn.classList.add('copied');
+            const icon = copyHashBtn.querySelector('.material-icons');
+            const originalIcon = icon.textContent;
+            icon.textContent = 'check';
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                copyHashBtn.classList.remove('copied');
+                icon.textContent = originalIcon;
+            }, 2000);
+
+            // Show success message
+            const successMsg = getTranslation('messages.hash_copied', 'Hash copied to clipboard');
+            showMessage(successMsg, 'success');
+        } catch (error) {
+            console.error('Failed to copy hash:', error);
+            const errorMsg = getTranslation('messages.copy_failed', 'Failed to copy to clipboard');
+            showMessage(errorMsg, 'error');
+        }
     }
 });

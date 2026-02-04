@@ -58,7 +58,8 @@
     "interactive_start_disabled": "需要互動認證 - 請使用命令列",
     "interactive_restart_disabled": "需要互動認證 - 請使用命令列",
     "refresh": "重新整理",
-    "auto_refresh": "自動重新整理 (5秒)"
+    "auto_refresh": "自動重新整理 (5秒)",
+    "copy_hash": "複製雜湊值"
   },
   "tooltips": {
     "add_tunnel": "新增隧道",
@@ -86,7 +87,9 @@
     "stop_failed": "隧道停止失敗",
     "save_first": "請先儲存設定",
     "interactive_start_hint": "此隧道需要互動式認證。請透過終端機啟動：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
-    "interactive_restart_hint": "此隧道需要互動式認證。請先停止隧道，然後透過終端機啟動：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
+    "interactive_restart_hint": "此隧道需要互動式認證。請先停止隧道，然後透過終端機啟動：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "hash_copied": "雜湊值已複製到剪貼簿",
+    "copy_failed": "複製到剪貼簿失敗"
   },
   "validation": {
     "port_range": "連接埠必須在 1 到 65535 之間",
