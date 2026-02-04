@@ -5,8 +5,10 @@ FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0 AS base
 # install dependencies
 RUN apk add --no-cache \
     autossh \
+    flock \
     inotify-tools \
     netcat-openbsd \
+    socat \
     su-exec
 
 # create user and group
