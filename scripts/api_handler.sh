@@ -1,14 +1,13 @@
 #!/bin/sh
 
-# api_server.sh - Simple API Server with concurrent connection support
-# Exposes autossh-cli functionality via HTTP
+# api_handler.sh - HTTP Request Handler for API Server
+# This script is executed by socat for each incoming connection
+# It handles a single HTTP request and returns the response
 #
-# This is the main entry point that handles HTTP routing.
-# Business logic is delegated to specialized modules.
-#
-# Supports two modes:
-# - socat mode (default): Uses socat for concurrent connections (recommended)
-# - netcat mode (fallback): Uses netcat for single connection at a time
+# Concurrency Safety:
+# - Uses file locking (flock) for write operations to prevent race conditions
+# - Read operations are lock-free for better performance
+# - Write operations acquire exclusive locks on config and state files
 
 # Source all required modules
 SCRIPT_DIR="$(dirname "$0")"
@@ -19,13 +18,85 @@ SCRIPT_DIR="$(dirname "$0")"
 . "$SCRIPT_DIR/http_utils.sh"
 . "$SCRIPT_DIR/config_api.sh"
 
-# Server configuration
-PORT="${API_PORT:-8080}"
-PIPE="/tmp/autossh_api_pipe"
-# Maximum concurrent connections for socat mode
-MAX_CHILDREN="${API_MAX_CHILDREN:-10}"
-# Use socat if available, otherwise fall back to netcat
-USE_SOCAT="${API_USE_SOCAT:-auto}"
+#######################################
+# File Locking for Concurrency Safety
+#######################################
+
+# Lock file paths
+CONFIG_LOCK="/tmp/autossh_config.lock"
+STATE_LOCK="/tmp/autossh_state.lock"
+
+# Acquire exclusive lock for config operations
+# Usage: acquire_config_lock
+# Returns: 0 on success, 1 on failure (timeout)
+acquire_config_lock() {
+	local lock_fd=200
+	local timeout=10
+
+	# Create lock file if it doesn't exist
+	touch "$CONFIG_LOCK"
+
+	# Try to acquire lock with timeout
+	exec 200>"$CONFIG_LOCK"
+	if command -v flock >/dev/null 2>&1; then
+		flock -w "$timeout" 200
+		return $?
+	else
+		# Fallback: simple lock file mechanism
+		local count=0
+		while [ -f "${CONFIG_LOCK}.held" ] && [ $count -lt $((timeout * 10)) ]; do
+			sleep 0.1
+			count=$((count + 1))
+		done
+		if [ $count -ge $((timeout * 10)) ]; then
+			return 1
+		fi
+		touch "${CONFIG_LOCK}.held"
+		return 0
+	fi
+}
+
+# Release config lock
+release_config_lock() {
+	if command -v flock >/dev/null 2>&1; then
+		exec 200>&-
+	else
+		rm -f "${CONFIG_LOCK}.held"
+	fi
+}
+
+# Acquire exclusive lock for state operations
+acquire_state_lock() {
+	local lock_fd=201
+	local timeout=5
+
+	touch "$STATE_LOCK"
+	exec 201>"$STATE_LOCK"
+	if command -v flock >/dev/null 2>&1; then
+		flock -w "$timeout" 201
+		return $?
+	else
+		local count=0
+		while [ -f "${STATE_LOCK}.held" ] && [ $count -lt $((timeout * 10)) ]; do
+			sleep 0.1
+			count=$((count + 1))
+		done
+		if [ $count -ge $((timeout * 10)) ]; then
+			return 1
+		fi
+		touch "${STATE_LOCK}.held"
+		return 0
+	fi
+}
+
+# Release state lock
+release_state_lock() {
+	if command -v flock >/dev/null 2>&1; then
+		exec 201>&-
+	else
+		rm -f "${STATE_LOCK}.held"
+	fi
+}
 
 #######################################
 # Status API Helper Functions
@@ -135,8 +206,15 @@ handle_config_routes() {
 			;;
 		"POST" | "PUT")
 			if [ -n "$request_body" ]; then
+				# Acquire lock for write operation
+				if ! acquire_config_lock; then
+					json_error "Server busy, please retry" | response "503 Service Unavailable"
+					return 0
+				fi
 				write_config_from_json "$request_body"
-				if [ $? -eq 0 ]; then
+				local result=$?
+				release_config_lock
+				if [ $result -eq 0 ]; then
 					json_success "Configuration saved" | response "200 OK"
 				else
 					json_error "Failed to save configuration" | response "500 Internal Server Error"
@@ -155,8 +233,15 @@ handle_config_routes() {
 	"/config/new")
 		if [ "$method" = "POST" ]; then
 			if [ -n "$request_body" ]; then
+				# Acquire lock for write operation
+				if ! acquire_config_lock; then
+					json_error "Server busy, please retry" | response "503 Service Unavailable"
+					return 0
+				fi
 				result=$(add_tunnel_from_json "$request_body")
-				if [ $? -eq 0 ]; then
+				local add_result=$?
+				release_config_lock
+				if [ $add_result -eq 0 ]; then
 					tunnel_json=$(get_tunnel_json_by_hash "$result")
 					if [ $? -eq 0 ]; then
 						echo "$tunnel_json" | response "201 Created"
@@ -179,8 +264,15 @@ handle_config_routes() {
 		if [ "$method" = "POST" ]; then
 			tunnel_hash=$(echo "$path" | sed 's|^/config/||' | sed 's|/delete$||')
 			if [ -n "$tunnel_hash" ]; then
+				# Acquire lock for write operation
+				if ! acquire_config_lock; then
+					json_error "Server busy, please retry" | response "503 Service Unavailable"
+					return 0
+				fi
 				result=$(delete_tunnel_by_hash "$tunnel_hash")
-				if [ $? -eq 0 ]; then
+				local delete_result=$?
+				release_config_lock
+				if [ $delete_result -eq 0 ]; then
 					json_success "Tunnel deleted" | response "200 OK"
 				else
 					json_error "$result" | response "404 Not Found"
@@ -208,8 +300,15 @@ handle_config_routes() {
 			;;
 		"POST" | "PUT")
 			if [ -n "$request_body" ]; then
+				# Acquire lock for write operation
+				if ! acquire_config_lock; then
+					json_error "Server busy, please retry" | response "503 Service Unavailable"
+					return 0
+				fi
 				result=$(update_tunnel_by_hash "$tunnel_hash" "$request_body")
-				if [ $? -eq 0 ]; then
+				local update_result=$?
+				release_config_lock
+				if [ $update_result -eq 0 ]; then
 					tunnel_json=$(get_tunnel_json_by_hash "$result")
 					if [ $? -eq 0 ]; then
 						echo "$tunnel_json" | response "200 OK"
@@ -224,8 +323,15 @@ handle_config_routes() {
 			fi
 			;;
 		"DELETE")
+			# Acquire lock for write operation
+			if ! acquire_config_lock; then
+				json_error "Server busy, please retry" | response "503 Service Unavailable"
+				return 0
+			fi
 			result=$(delete_tunnel_by_hash "$tunnel_hash")
-			if [ $? -eq 0 ]; then
+			local delete_result=$?
+			release_config_lock
+			if [ $delete_result -eq 0 ]; then
 				json_success "Tunnel deleted" | response "200 OK"
 			else
 				json_error "$result" | response "404 Not Found"
@@ -382,166 +488,58 @@ handle_log_routes() {
 # Main Request Handler
 #######################################
 
-handle_request() {
-	# Read the request line
-	read -r line
-	line=$(echo "$line" | tr -d '\r')
-	method=$(echo "$line" | cut -d ' ' -f 1)
-	path=$(echo "$line" | cut -d ' ' -f 2)
+# Read the request line
+read -r line
+line=$(echo "$line" | tr -d '\r')
+method=$(echo "$line" | cut -d ' ' -f 1)
+path=$(echo "$line" | cut -d ' ' -f 2)
 
-	# Variables to store headers
-	local auth_header=""
-	local content_length=0
+# Variables to store headers
+auth_header=""
+content_length=0
 
-	# Consume headers and extract Authorization and Content-Length
-	while read -r header; do
-		header=$(echo "$header" | tr -d '\r')
-		[ -z "$header" ] && break
+# Consume headers and extract Authorization and Content-Length
+while read -r header; do
+	header=$(echo "$header" | tr -d '\r')
+	[ -z "$header" ] && break
 
-		case "$header" in
-		Authorization:* | authorization:*)
-			auth_header=$(echo "$header" | sed 's/^[Aa]uthorization:[[:space:]]*//')
-			;;
-		Content-Length:* | content-length:*)
-			content_length=$(echo "$header" | sed 's/^[Cc]ontent-[Ll]ength:[[:space:]]*//')
-			;;
-		esac
-	done
+	case "$header" in
+	Authorization:* | authorization:*)
+		auth_header=$(echo "$header" | sed 's/^[Aa]uthorization:[[:space:]]*//')
+		;;
+	Content-Length:* | content-length:*)
+		content_length=$(echo "$header" | sed 's/^[Cc]ontent-[Ll]ength:[[:space:]]*//')
+		;;
+	esac
+done
 
-	# Read request body if Content-Length > 0
-	local request_body=""
-	if [ "$content_length" -gt 0 ] 2>/dev/null; then
-		request_body=$(dd bs=1 count="$content_length" 2>/dev/null)
-	fi
+# Read request body if Content-Length > 0
+request_body=""
+if [ "$content_length" -gt 0 ] 2>/dev/null; then
+	request_body=$(dd bs=1 count="$content_length" 2>/dev/null)
+fi
 
-	# Log request
-	log_info "API" "$method $path" >&2
+# Log request
+log_info "API" "$method $path" >&2
 
-	# Handle OPTIONS requests for CORS preflight (no auth required)
-	if [ "$method" = "OPTIONS" ]; then
-		echo "" | response "204 No Content"
-		return
-	fi
+# Handle OPTIONS requests for CORS preflight (no auth required)
+if [ "$method" = "OPTIONS" ]; then
+	echo "" | response "204 No Content"
+	exit 0
+fi
 
-	# Verify authentication for all other requests
-	if ! verify_auth "$auth_header"; then
-		log_info "API" "Unauthorized request to $path" >&2
-		response_unauthorized
-		return
-	fi
+# Verify authentication for all other requests
+if ! verify_auth "$auth_header"; then
+	log_info "API" "Unauthorized request to $path" >&2
+	response_unauthorized
+	exit 0
+fi
 
-	# Route to appropriate handler
-	handle_config_routes "$method" "$path" "$request_body" && return
-	handle_tunnel_control_routes "$method" "$path" && return
-	handle_status_routes "$method" "$path" && return
-	handle_log_routes "$method" "$path" && return
+# Route to appropriate handler
+handle_config_routes "$method" "$path" "$request_body" && exit 0
+handle_tunnel_control_routes "$method" "$path" && exit 0
+handle_status_routes "$method" "$path" && exit 0
+handle_log_routes "$method" "$path" && exit 0
 
-	# No route matched
-	json_error "Not Found" | response "404 Not Found"
-}
-
-#######################################
-# Request Handler Wrapper for socat
-#######################################
-
-# This function is called by socat for each connection
-# It reads from stdin and writes to stdout
-handle_request_wrapper() {
-	# Source modules again since we're in a forked process
-	SCRIPT_DIR="$(dirname "$0")"
-	. "$SCRIPT_DIR/logger.sh"
-	. "$SCRIPT_DIR/state_manager.sh"
-	. "$SCRIPT_DIR/config_parser.sh"
-	. "$SCRIPT_DIR/json_utils.sh"
-	. "$SCRIPT_DIR/http_utils.sh"
-	. "$SCRIPT_DIR/config_api.sh"
-
-	handle_request
-}
-
-#######################################
-# Server Mode Detection
-#######################################
-
-detect_server_mode() {
-	if [ "$USE_SOCAT" = "socat" ]; then
-		if command -v socat >/dev/null 2>&1; then
-			echo "socat"
-		else
-			log_info "API" "socat requested but not available, falling back to netcat" >&2
-			echo "netcat"
-		fi
-	elif [ "$USE_SOCAT" = "netcat" ]; then
-		echo "netcat"
-	else
-		# Auto-detect: prefer socat if available
-		if command -v socat >/dev/null 2>&1; then
-			echo "socat"
-		else
-			echo "netcat"
-		fi
-	fi
-}
-
-#######################################
-# Socat Server Mode
-#######################################
-
-start_socat_server() {
-	log_info "API" "Starting API server on port $PORT (socat mode, max $MAX_CHILDREN concurrent connections)..."
-
-	# Use the api_handler.sh script for handling requests
-	HANDLER_SCRIPT="$SCRIPT_DIR/api_handler.sh"
-
-	if [ ! -f "$HANDLER_SCRIPT" ]; then
-		log_error "API" "Handler script not found: $HANDLER_SCRIPT"
-		exit 1
-	fi
-
-	# Start socat server
-	# -T 30: timeout after 30 seconds of inactivity
-	# fork: fork a new process for each connection
-	# max-children: limit concurrent connections
-	exec socat -T 30 TCP-LISTEN:$PORT,reuseaddr,fork,max-children=$MAX_CHILDREN EXEC:"$HANDLER_SCRIPT"
-}
-
-#######################################
-# Netcat Server Mode (Legacy)
-#######################################
-
-start_netcat_server() {
-	log_info "API" "Starting API server on port $PORT (netcat mode - single connection)..."
-	log_info "API" "Note: netcat mode handles one request at a time. Install socat for concurrent connections." >&2
-
-	# Main loop
-	while true; do
-		rm -f "$PIPE"
-		mkfifo "$PIPE"
-
-		# Use netcat to listen on the port
-		cat "$PIPE" | nc -l -p "$PORT" | handle_request >"$PIPE"
-
-		rm -f "$PIPE"
-		# Prevent tight loop in case of errors
-		sleep 0.1
-	done
-}
-
-#######################################
-# Main Entry Point
-#######################################
-
-SERVER_MODE=$(detect_server_mode)
-
-case "$SERVER_MODE" in
-socat)
-	start_socat_server
-	;;
-netcat)
-	start_netcat_server
-	;;
-*)
-	log_error "API" "Unknown server mode: $SERVER_MODE"
-	exit 1
-	;;
-esac
+# No route matched
+json_error "Not Found" | response "404 Not Found"
