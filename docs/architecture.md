@@ -41,8 +41,8 @@ graph TB
     end
     
     SSH -->|read-only mount| ENTRY
-    CONFIG -->|read-only mount| ENTRY
-    CONFIG -->|read-write mount| WEBSERVER
+    CONFIG -->|read-write mount| ENTRY
+    BROWSER -->|Static files| WEBSERVER
     
     ENTRY --> MONITOR
     MONITOR --> CLI
@@ -50,7 +50,6 @@ graph TB
     CLI --> AUTOSSH
     API --> CLI
     
-    BROWSER -->|Static files| WEBSERVER
     BROWSER -->|Direct API calls| API
     
     AUTOSSH -->|SSH Tunnel| REMOTE1
@@ -81,7 +80,7 @@ The core container that manages SSH tunnels using autossh.
 | Host Path | Container Path | Mode | Description |
 |-----------|----------------|------|-------------|
 | `~/.ssh` | `/home/myuser/.ssh` | `ro` | SSH keys and config (read-only) |
-| `./config` | `/etc/autossh/config` | `ro` | Tunnel configuration (read-only) |
+| `./config` | `/etc/autossh/config` | `rw` | Tunnel configuration (read-write for Config API) |
 
 ### Environment Variables
 
@@ -108,6 +107,12 @@ The core container that manages SSH tunnels using autossh.
 | POST | `/stop/{hash}` | Stop specific tunnel |
 | GET | `/logs` | List available log files |
 | GET | `/logs/{hash}` | Get logs for specific tunnel |
+| GET | `/config` | Get all tunnel configurations |
+| GET | `/config/{hash}` | Get single tunnel configuration |
+| POST | `/config` | Replace all configurations |
+| POST | `/config/new` | Add new tunnel |
+| POST | `/config/{hash}` | Update single tunnel |
+| DELETE | `/config/{hash}` | Delete tunnel |
 
 ### Minimal Docker Compose Example
 
@@ -118,7 +123,7 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
@@ -135,7 +140,7 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
@@ -160,26 +165,23 @@ An optional web-based management interface that communicates with the autossh co
 
 | Component | Description |
 |-----------|-------------|
-| `Go Web Server` | Serves static files and manages configuration |
+| `Go Web Server` | Serves static files only |
 | `Web UI` | HTML/CSS/JavaScript frontend with i18n support (runs in browser) |
 
 ### Volume Mounts
 
-| Host Path | Container Path | Mode | Description |
-|-----------|----------------|------|-------------|
-| `./config` | `/home/myuser/config` | `rw` | Tunnel configuration (for editing) |
+!!! note "No Config Volume Required"
+    Since v2.1.0, the web panel no longer requires a config volume mount. All configuration operations are performed through the Config API on the autossh container.
 
 ### Environment Variables
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `PUID` | User ID for file permissions | `1000` | No |
-| `PGID` | Group ID for file permissions | `1000` | No |
 | `TZ` | Timezone for log timestamps | `UTC` | No |
 | `API_BASE_URL` | URL of the autossh API server (passed to browser) | `http://localhost:8080` | **Yes** |
 
 !!! info "Direct API Architecture"
-    The `API_BASE_URL` is passed to the browser-based frontend, which makes API calls directly to the autossh container. The Go web server does not proxy API requests - it only serves static files and manages configuration.
+    The `API_BASE_URL` is passed to the browser-based frontend, which makes API calls directly to the autossh container. The Go web server does not proxy API requests - it only serves static files. All configuration management is done through the Config API.
 
 ### Docker Compose Example
 
@@ -190,11 +192,8 @@ services:
     image: oaklight/autossh-tunnel-web-panel:latest
     ports:
       - "5000:5000"
-    volumes:
-      - ./config:/home/myuser/config
+    # No config volume needed - web panel uses Config API from autossh container
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080
     restart: always
@@ -216,7 +215,7 @@ services:
     image: oaklight/autossh-tunnel:latest
     volumes:
       - ~/.ssh:/home/myuser/.ssh:ro
-      - ./config:/etc/autossh/config:ro
+      - ./config:/etc/autossh/config:rw
     environment:
       - PUID=1000
       - PGID=1000
@@ -230,18 +229,15 @@ services:
     image: oaklight/autossh-tunnel-web-panel:latest
     ports:
       - "5000:5000"
-    volumes:
-      - ./config:/home/myuser/config:rw
+    # No config volume needed - web panel uses Config API from autossh container
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080
     restart: always
 ```
 
-!!! note "Configuration Editing"
-    The web panel mounts the config directory as read-write (`rw`) to allow editing the configuration through the UI. The autossh container only needs read access (`ro`) since it only reads the configuration.
+!!! note "Configuration Management"
+    The autossh container mounts the config directory as read-write (`rw`) to support the Config API. The web panel no longer needs direct access to config files - all configuration operations go through the Config API.
 
 !!! info "Network Architecture"
     - The **autossh container** uses host network mode to allow tunnels to bind to specific IP addresses
