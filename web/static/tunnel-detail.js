@@ -110,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('i18nReady', () => {
         if (currentTunnel) {
             updateInteractiveToggleLabel();
+            updateControlButtonTitles();
             updateStatusDisplay(currentTunnel.status || 'STOPPED');
         }
     });
@@ -118,9 +119,23 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('languageChanged', () => {
         if (currentTunnel) {
             updateInteractiveToggleLabel();
+            updateControlButtonTitles();
             updateStatusDisplay(currentTunnel.status || 'STOPPED');
         }
     });
+
+    // Update control button titles based on interactive state
+    function updateControlButtonTitles() {
+        const isInteractive = currentTunnel?.interactive || false;
+        if (isInteractive) {
+            startBtn.title = getTranslation('buttons.interactive_start_disabled', 'Interactive Auth Required - Use CLI');
+            restartBtn.title = getTranslation('buttons.interactive_restart_disabled', 'Interactive Auth Required - Use CLI');
+        } else {
+            startBtn.title = getTranslation('buttons.start_tunnel', 'Start tunnel');
+            restartBtn.title = getTranslation('buttons.restart_tunnel', 'Restart tunnel');
+        }
+        stopBtn.title = getTranslation('buttons.stop_tunnel', 'Stop tunnel');
+    }
 
     // Update interactive toggle label based on current state
     function updateInteractiveToggleLabel() {
@@ -266,6 +281,23 @@ document.addEventListener("DOMContentLoaded", () => {
         interactiveToggle.classList.toggle('active', isInteractive);
         interactiveToggle.setAttribute('data-interactive', isInteractive.toString());
         updateInteractiveToggleLabel();
+
+        // Disable start/restart buttons for interactive tunnels
+        if (isInteractive) {
+            startBtn.disabled = true;
+            restartBtn.disabled = true;
+            startBtn.classList.add('disabled-interactive');
+            restartBtn.classList.add('disabled-interactive');
+            startBtn.title = getTranslation('buttons.interactive_start_disabled', 'Interactive Auth Required - Use CLI');
+            restartBtn.title = getTranslation('buttons.interactive_restart_disabled', 'Interactive Auth Required - Use CLI');
+        } else {
+            startBtn.disabled = false;
+            restartBtn.disabled = false;
+            startBtn.classList.remove('disabled-interactive');
+            restartBtn.classList.remove('disabled-interactive');
+            startBtn.title = getTranslation('buttons.start_tunnel', 'Start tunnel');
+            restartBtn.title = getTranslation('buttons.restart_tunnel', 'Restart tunnel');
+        }
 
         updateStatusDisplay(tunnel.status || 'LOADING');
     }
@@ -458,6 +490,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function handleControl(action) {
+        // Check if this is an interactive tunnel
+        const isInteractive = currentTunnel?.interactive || false;
+
+        // For interactive tunnels, show hint for start/restart actions
+        if (isInteractive && (action === 'start' || action === 'restart')) {
+            const hintKey = action === 'start' ? 'messages.interactive_start_hint' : 'messages.interactive_restart_hint';
+            const defaultHint = action === 'start'
+                ? 'This tunnel requires interactive authentication. Please start it via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + currentHash
+                : 'This tunnel requires interactive authentication. Please stop it first, then start via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + currentHash;
+            let hintMsg = window.i18n ? window.i18n.t(hintKey) : defaultHint;
+            // Replace {hash} placeholder with actual hash (first 8 chars)
+            hintMsg = hintMsg.replace('{hash}', currentHash.substring(0, 8));
+            showMessage(hintMsg, 'info');
+            return;
+        }
+
         const confirmMessages = {
             restart: window.i18n ? window.i18n.t('messages.confirm_restart') : 'Are you sure you want to restart this tunnel?',
             stop: window.i18n ? window.i18n.t('messages.confirm_stop') : 'Are you sure you want to stop this tunnel?'

@@ -54,6 +54,8 @@
     "start_tunnel": "Iniciar túnel",
     "restart_tunnel": "Reiniciar túnel",
     "stop_tunnel": "Detener túnel",
+    "interactive_start_disabled": "Requiere autenticación interactiva - Use CLI",
+    "interactive_restart_disabled": "Requiere autenticación interactiva - Use CLI",
     "refresh": "Actualizar",
     "auto_refresh": "Actualización automática (5s)"
   },
@@ -62,7 +64,8 @@
     "save_config": "Guardar configuración y reiniciar",
     "direction": "Dirección",
     "actions": "Acciones",
-    "controls": "Controles"
+    "controls": "Controles",
+    "refresh_status": "Actualizar estado"
   },
   "messages": {
     "delete_confirm": "¿Está seguro de que desea eliminar esta configuración de túnel?",
@@ -80,7 +83,9 @@
     "start_failed": "Error al iniciar el túnel",
     "restart_failed": "Error al reiniciar el túnel",
     "stop_failed": "Error al detener el túnel",
-    "save_first": "Por favor, guarde la configuración primero"
+    "save_first": "Por favor, guarde la configuración primero",
+    "interactive_start_hint": "Este túnel requiere autenticación interactiva. Por favor, inícielo a través del terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "interactive_restart_hint": "Este túnel requiere autenticación interactiva. Por favor, deténgalo primero, luego inícielo a través del terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
   },
   "validation": {
     "port_range": "El puerto debe estar entre 1 y 65535",

@@ -54,6 +54,8 @@
     "start_tunnel": "Start tunnel",
     "restart_tunnel": "Restart tunnel",
     "stop_tunnel": "Stop tunnel",
+    "interactive_start_disabled": "Interactive Auth Required - Use CLI",
+    "interactive_restart_disabled": "Interactive Auth Required - Use CLI",
     "refresh": "Refresh",
     "auto_refresh": "Auto Refresh (5s)"
   },
@@ -62,7 +64,8 @@
     "save_config": "Save Configuration and Restart",
     "direction": "Direction",
     "actions": "Actions",
-    "controls": "Controls"
+    "controls": "Controls",
+    "refresh_status": "Refresh Status"
   },
   "messages": {
     "delete_confirm": "Are you sure you want to delete this tunnel configuration?",
@@ -80,7 +83,9 @@
     "start_failed": "Failed to start tunnel",
     "restart_failed": "Failed to restart tunnel",
     "stop_failed": "Failed to stop tunnel",
-    "save_first": "Please save the configuration first"
+    "save_first": "Please save the configuration first",
+    "interactive_start_hint": "This tunnel requires interactive authentication. Please start it via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "interactive_restart_hint": "This tunnel requires interactive authentication. Please stop it first, then start via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
   },
   "validation": {
     "port_range": "Port must be between 1 and 65535",
