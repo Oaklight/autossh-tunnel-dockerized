@@ -54,6 +54,8 @@
     "start_tunnel": "Запустить туннель",
     "restart_tunnel": "Перезапустить туннель",
     "stop_tunnel": "Остановить туннель",
+    "interactive_start_disabled": "Требуется интерактивная аутентификация - Используйте CLI",
+    "interactive_restart_disabled": "Требуется интерактивная аутентификация - Используйте CLI",
     "refresh": "Обновить",
     "auto_refresh": "Автообновление (5 сек)"
   },
@@ -62,7 +64,8 @@
     "save_config": "Сохранить настройки и перезапустить",
     "direction": "Направление",
     "actions": "Действия",
-    "controls": "Управление"
+    "controls": "Управление",
+    "refresh_status": "Обновить статус"
   },
   "messages": {
     "delete_confirm": "Вы уверены, что хотите удалить эти настройки туннеля?",
@@ -80,7 +83,9 @@
     "start_failed": "Ошибка запуска туннеля",
     "restart_failed": "Ошибка перезапуска туннеля",
     "stop_failed": "Ошибка остановки туннеля",
-    "save_first": "Пожалуйста, сначала сохраните настройки"
+    "save_first": "Пожалуйста, сначала сохраните настройки",
+    "interactive_start_hint": "Этот туннель требует интерактивной аутентификации. Пожалуйста, запустите его через терминал:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "interactive_restart_hint": "Этот туннель требует интерактивной аутентификации. Сначала остановите его, затем запустите через терминал:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
   },
   "validation": {
     "port_range": "Порт должен быть между 1 и 65535",

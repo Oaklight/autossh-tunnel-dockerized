@@ -54,6 +54,8 @@
     "start_tunnel": "トンネルを開始",
     "restart_tunnel": "トンネルを再起動",
     "stop_tunnel": "トンネルを停止",
+    "interactive_start_disabled": "対話認証が必要 - CLIを使用",
+    "interactive_restart_disabled": "対話認証が必要 - CLIを使用",
     "refresh": "更新",
     "auto_refresh": "自動更新 (5秒)"
   },
@@ -62,7 +64,8 @@
     "save_config": "設定を保存して再起動",
     "direction": "方向",
     "actions": "操作",
-    "controls": "コントロール"
+    "controls": "コントロール",
+    "refresh_status": "ステータスを更新"
   },
   "messages": {
     "delete_confirm": "このトンネル設定を削除しますか？",
@@ -80,7 +83,9 @@
     "start_failed": "トンネルの開始に失敗しました",
     "restart_failed": "トンネルの再起動に失敗しました",
     "stop_failed": "トンネルの停止に失敗しました",
-    "save_first": "まず設定を保存してください"
+    "save_first": "まず設定を保存してください",
+    "interactive_start_hint": "このトンネルは対話認証が必要です。ターミナルから起動してください：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
+    "interactive_restart_hint": "このトンネルは対話認証が必要です。まず停止してから、ターミナルから起動してください：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}"
   },
   "validation": {
     "port_range": "ポートは1から65535の間である必要があります",

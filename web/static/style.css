@@ -632,6 +632,13 @@ body {
   cursor: not-allowed;
 }
 
+/* Disabled interactive buttons - special styling */
+.control-button.disabled-interactive {
+  opacity: 0.4;
+  cursor: help;
+  filter: grayscale(100%);
+}
+
 .control-button .material-icons {
   font-size: 18px;
   transition: all 0.2s ease;
@@ -958,6 +965,13 @@ body {
   background-color: #ffebee;
   color: #c62828;
   border: 1px solid #ef9a9a;
+}
+
+.message.info {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  white-space: pre-line;
 }
 
 /* Animation for new rows */

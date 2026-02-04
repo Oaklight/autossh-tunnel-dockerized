@@ -45,8 +45,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const stopBtn = row.querySelector('.stop-button');
 
             if (saveRowBtn) saveRowBtn.title = getTranslation('buttons.save_restart_row', 'Save & Restart');
-            if (startBtn) startBtn.title = getTranslation('buttons.start_tunnel', 'Start tunnel');
-            if (restartBtn) restartBtn.title = getTranslation('buttons.restart_tunnel', 'Restart tunnel');
+            // Check if buttons are disabled for interactive tunnels
+            if (startBtn) {
+                if (startBtn.classList.contains('disabled-interactive')) {
+                    startBtn.title = getTranslation('buttons.interactive_start_disabled', 'Interactive Auth Required - Use CLI');
+                } else {
+                    startBtn.title = getTranslation('buttons.start_tunnel', 'Start tunnel');
+                }
+            }
+            if (restartBtn) {
+                if (restartBtn.classList.contains('disabled-interactive')) {
+                    restartBtn.title = getTranslation('buttons.interactive_restart_disabled', 'Interactive Auth Required - Use CLI');
+                } else {
+                    restartBtn.title = getTranslation('buttons.restart_tunnel', 'Restart tunnel');
+                }
+            }
             if (stopBtn) stopBtn.title = getTranslation('buttons.stop_tunnel', 'Stop tunnel');
 
             // Update input placeholders
@@ -367,10 +380,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const restartButton = row.querySelector(".restart-button");
         const stopButton = row.querySelector(".stop-button");
 
+        // Check if this is an interactive tunnel
+        const isInteractive = tunnel.interactive || false;
+
+        if (isInteractive) {
+            // Disable start and restart buttons for interactive tunnels
+            startButton.disabled = true;
+            restartButton.disabled = true;
+            startButton.classList.add('disabled-interactive');
+            restartButton.classList.add('disabled-interactive');
+            startButton.title = getTranslation('buttons.interactive_start_disabled', 'Interactive Auth Required - Use CLI');
+            restartButton.title = getTranslation('buttons.interactive_restart_disabled', 'Interactive Auth Required - Use CLI');
+        }
+
         saveRowButton.addEventListener("click", () => handleSaveRow(tunnelHash, row));
-        startButton.addEventListener("click", () => handleTunnelControl('start', tunnelHash, row));
-        restartButton.addEventListener("click", () => handleTunnelControl('restart', tunnelHash, row));
-        stopButton.addEventListener("click", () => handleTunnelControl('stop', tunnelHash, row));
+        startButton.addEventListener("click", () => handleTunnelControl('start', tunnelHash, row, isInteractive));
+        restartButton.addEventListener("click", () => handleTunnelControl('restart', tunnelHash, row, isInteractive));
+        stopButton.addEventListener("click", () => handleTunnelControl('stop', tunnelHash, row, isInteractive));
 
         // Add click event to status indicator
         const statusIndicator = row.querySelector(".status-indicator");
@@ -585,11 +611,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Handle tunnel control actions
-    async function handleTunnelControl(action, hash, row) {
+    async function handleTunnelControl(action, hash, row, isInteractive = false) {
         // Check if hash is available
         if (!hash) {
             const errorMsg = window.i18n ? window.i18n.t('messages.save_first') : 'Please save the configuration first';
             showMessage(errorMsg, 'error');
+            return;
+        }
+
+        // For interactive tunnels, show hint for start/restart actions
+        if (isInteractive && (action === 'start' || action === 'restart')) {
+            const hintKey = action === 'start' ? 'messages.interactive_start_hint' : 'messages.interactive_restart_hint';
+            const defaultHint = action === 'start'
+                ? 'This tunnel requires interactive authentication. Please start it via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + hash
+                : 'This tunnel requires interactive authentication. Please stop it first, then start via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + hash;
+            let hintMsg = window.i18n ? window.i18n.t(hintKey) : defaultHint;
+            // Replace {hash} placeholder with actual hash
+            hintMsg = hintMsg.replace('{hash}', hash.substring(0, 8));
+            showMessage(hintMsg, 'info');
             return;
         }
 
