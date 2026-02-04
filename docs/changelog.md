@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.2.0] - 2026-02-04
+
+### Added
+
+- **Interactive Authentication (CLI)**: New `autossh-cli auth` command for tunnels requiring 2FA or password authentication
+    - Uses SSH control sockets for connection management
+    - Supports hash prefix matching (8+ characters)
+    - Automatic PID tracking and state management
+- **Interactive Auth Test Server**: Dockerized SSH server for testing 2FA authentication (`ssh-interactive-auth-sample-server/`)
+    - Pre-configured with Google Authenticator
+    - Includes Makefile for easy setup
+- **API Concurrent Connections**: Added socat support for handling concurrent API requests
+- **Web Panel Enhancements**:
+    - Floating toast notifications with copy-to-clipboard support
+    - Copy hash button on tunnel detail page
+    - Interactive auth CLI documentation in help page
+    - Improved config grid layout and element consistency
+
+### Changed
+
+- **Interactive Tunnel UI**: Enhanced UI for interactive auth tunnels with fingerprint icon toggle
+- **i18n Improvements**: Static translation keys for language button hints
+
 ## [v2.1.0] - 2026-02-03
 
 ### Added
