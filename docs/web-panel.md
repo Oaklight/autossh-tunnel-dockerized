@@ -88,7 +88,15 @@ Each tunnel row has control buttons:
 - **Stop** (⏹️): Stop the tunnel
 
 !!! note "Interactive Authentication"
-    Click the fingerprint icon (🫆) to toggle interactive authentication mode. When enabled (green), the tunnel will prompt for authentication if needed.
+    Click the fingerprint icon (🫆) to toggle interactive authentication mode. When enabled (green), the tunnel requires manual authentication via command line.
+    
+    **Important**: Tunnels with interactive authentication enabled **cannot be started from the web interface**. You must use the CLI command:
+    
+    ```bash
+    docker compose exec -it -u myuser autossh autossh-cli auth <hash>
+    ```
+    
+    See [CLI Reference - Interactive Authentication](api/cli-reference.md#interactive-authentication) for details.
 
 ### Tunnel Detail Page
 

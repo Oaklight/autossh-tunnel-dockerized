@@ -177,6 +177,79 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
    docker compose exec autossh cat /etc/autossh/config/config.yaml
    ```
 
+## Interactive Authentication Issues
+
+### Interactive Tunnel Won't Start
+
+**Symptom:** Running `autossh-cli auth <hash>` fails or shows errors.
+
+**Solutions:**
+
+1. **Ensure using correct user context:**
+   
+   The `auth` command must be run as `myuser` user:
+   ```bash
+   docker exec -it -u myuser <container_name> autossh-cli auth <hash>
+   ```
+   
+   Without `-u myuser`, you may see permission errors accessing SSH config files.
+
+2. **Verify tunnel is marked as interactive:**
+   
+   Check if the tunnel has `interactive: true` in config:
+   ```bash
+   docker exec -it autossh-1 autossh-cli show-tunnel <hash>
+   ```
+
+3. **Check SSH host configuration:**
+   
+   Ensure the remote host is properly configured in `~/.ssh/config`:
+   ```bash
+   docker exec -it autossh-1 cat /home/myuser/.ssh/config
+   ```
+
+### Authentication Fails
+
+**Symptom:** 2FA code or password is rejected.
+
+**Solutions:**
+
+1. **Verify credentials:**
+   - Ensure you're entering the correct 2FA code or password
+   - Check if the 2FA token has expired (TOTP codes are time-sensitive)
+
+2. **Check SSH server configuration:**
+   - Verify the remote server supports keyboard-interactive authentication
+   - Check if your account is locked or disabled on the remote server
+
+3. **Test manual SSH connection:**
+   ```bash
+   docker exec -it -u myuser autossh-1 ssh <remote_host>
+   ```
+
+### Interactive Tunnel Shows STOPPED After Authentication
+
+**Symptom:** Tunnel authenticates successfully but immediately shows as STOPPED.
+
+**Solutions:**
+
+1. **Check tunnel logs:**
+   ```bash
+   docker exec -it autossh-1 autossh-cli logs <hash>
+   ```
+
+2. **Verify port availability:**
+   
+   Ensure the local/remote port is not already in use:
+   ```bash
+   netstat -tuln | grep <port_number>
+   ```
+
+3. **Check SSH control socket:**
+   ```bash
+   docker exec -it autossh-1 ls -la /tmp/ssh_control_*
+   ```
+
 ## Tunnel Runtime Issues
 
 ### Tunnel Frequently Disconnects and Reconnects

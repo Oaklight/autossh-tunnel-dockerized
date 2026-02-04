@@ -94,6 +94,58 @@ autossh-cli logs 7b840f8344679dff5df893eefd245043
 
 ## Tunnel Control Commands
 
+### Interactive Authentication
+
+Start an interactive tunnel that requires manual authentication (2FA/Password):
+
+```bash
+autossh-cli auth <hash>
+```
+
+!!! important "User Context Required"
+    The `auth` command must be run as the `myuser` user to properly access SSH configuration files. Use the `-u myuser` flag with `docker exec`:
+    
+    ```bash
+    docker exec -it -u myuser <container_name> autossh-cli auth <hash>
+    ```
+
+**Example:**
+
+```bash
+# Start interactive authentication for a tunnel
+$ docker exec -it -u myuser autotunnel-autossh-1 autossh-cli auth c5ed76f1
+
+Interactive Authentication
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Initializing interactive tunnel: test-2fa-tunnel (c5ed76f1dfccb8959815fbfdc69d582d)
+
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Starting SSH session for: test-2fa-tunnel
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] You may be prompted for password or 2FA.
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] The session will go to background upon successful authentication.
+
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Direction: remote_to_local (Local Forwarding)
+[2026-02-03 16:44:21] [INFO] [INTERACTIVE] Forwarding: localhost:18888 <- test-2fa-server:localhost:8888
+(testuser@localhost) Verification code: ******
+
+[2026-02-03 16:44:29] [INFO] [INTERACTIVE] Authentication successful. Tunnel running in background.
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Tunnel PID: 55085
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Tunnel registered in state file.
+
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Tunnel 'test-2fa-tunnel' is now running.
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Use 'autossh-cli status' to check tunnel status.
+[2026-02-03 16:44:30] [INFO] [INTERACTIVE] Use 'autossh-cli stop-tunnel c5ed76f1dfccb8959815fbfdc69d582d' to stop.
+SUCCESS: Interactive tunnel started successfully
+```
+
+**Key Features:**
+
+- Uses plain SSH instead of autossh to avoid automatic reconnection attempts
+- Supports keyboard-interactive authentication (2FA, password prompts)
+- Tunnel runs in background after successful authentication
+- Uses SSH control sockets for PID tracking and management
+
+!!! note "Interactive Tunnels"
+    Interactive tunnels are marked with `interactive: true` in the configuration file. They are **not** started automatically when the container starts. You must manually authenticate using the `auth` command.
+
 ### Start a Single Tunnel
 
 Start a specific tunnel by its hash (or 8+ character prefix):
