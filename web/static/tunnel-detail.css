@@ -105,7 +105,7 @@
 /* Configuration Grid */
 .config-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
 }
 
@@ -133,12 +133,17 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    height: 48px;
+    box-sizing: border-box;
 }
 
 .config-value.hash-value {
     font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Editable Config Inputs */
@@ -151,6 +156,7 @@
     border-radius: 8px;
     border-left: 4px solid var(--mdc-theme-primary);
     width: 100%;
+    height: 48px;
     box-sizing: border-box;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -184,6 +190,7 @@
     border-radius: 8px;
     border-left: 4px solid var(--mdc-theme-primary);
     width: 100%;
+    height: 48px;
     box-sizing: border-box;
     cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -219,6 +226,7 @@
     font-size: 1rem;
     color: rgba(0, 0, 0, 0.6);
     width: 100%;
+    height: 48px;
     box-sizing: border-box;
 }
 
@@ -430,6 +438,12 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    .config-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .config-grid {
         grid-template-columns: 1fr;
