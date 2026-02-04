@@ -120,6 +120,7 @@
       "web_config": "Web Configuration",
       "yaml_config": "YAML Configuration",
       "ssh_config": "SSH Configuration",
+      "interactive_auth_cli": "Interactive Auth CLI",
       "advanced": "Advanced Configuration",
       "troubleshooting": "Troubleshooting"
     },
@@ -195,6 +196,47 @@
       "important_desc": "This project heavily relies on the ~/.ssh/config file for SSH connection configuration.",
       "example": "SSH Configuration File Example (~/.ssh/config):",
       "permissions": "SSH Key Permissions:"
+    },
+    "interactive_auth_cli": {
+      "title": "Interactive Auth CLI",
+      "description": "For SSH servers that require two-factor authentication (2FA) or password authentication, you need to use the autossh-cli command-line tool for interactive authentication.",
+      "when_to_use": {
+        "title": "When to Use:",
+        "2fa": "Server has two-factor authentication (2FA/MFA) enabled",
+        "password": "Server requires password authentication instead of key authentication",
+        "keyboard": "Server uses keyboard-interactive authentication"
+      },
+      "usage": {
+        "title": "Usage:",
+        "intro": "Follow these steps to start an interactive tunnel:",
+        "step1": "Enable interactive authentication option for the tunnel in the web interface",
+        "step2": "After saving the configuration, get the tunnel's hash value",
+        "step3": "Use the following command to start the interactive tunnel"
+      },
+      "commands": {
+        "title": "Command Examples:",
+        "docker_compose_desc": "Using docker compose (recommended):",
+        "docker_exec_desc": "Using docker exec (requires container name):",
+        "example_prefix": "Example (using 8-character hash prefix):"
+      },
+      "hash_prefix": {
+        "title": "Hash Prefix Support:",
+        "description": "Similar to Git's short hash, you can use 8 or more characters of the hash prefix to identify tunnels."
+      },
+      "other_commands": {
+        "title": "Other Common Commands:",
+        "list": "List all configured tunnels:",
+        "status": "View tunnel status:",
+        "logs": "View logs for a specific tunnel:",
+        "stop": "Stop a specific tunnel:"
+      },
+      "notes": {
+        "title": "Notes:",
+        "tty": "Must use -it parameter to enable interactive terminal",
+        "user": "Use -u myuser to specify the correct user identity",
+        "foreground": "Interactive tunnels run in the foreground and automatically move to background after successful authentication",
+        "web_disabled": "Tunnels with interactive authentication enabled cannot currently be started from the web interface; you must use the command line"
+      }
     },
     "advanced": {
       "title": "Advanced Configuration",

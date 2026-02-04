@@ -120,6 +120,7 @@
       "web_config": "Web設定",
       "yaml_config": "YAML設定",
       "ssh_config": "SSH設定",
+      "interactive_auth_cli": "対話認証CLI",
       "advanced": "高度な設定",
       "troubleshooting": "トラブルシューティング"
     },
@@ -195,6 +196,47 @@
       "important_desc": "このプロジェクトは SSH 接続設定のために ~/.ssh/config ファイルに大きく依存しています。",
       "example": "SSH設定ファイルの例 (~/.ssh/config)：",
       "permissions": "SSH キーの権限："
+    },
+    "interactive_auth_cli": {
+      "title": "対話認証CLI",
+      "description": "二要素認証（2FA）またはパスワード認証が必要な SSH サーバーの場合、autossh-cli コマンドラインツールを使用して対話認証を行う必要があります。",
+      "when_to_use": {
+        "title": "使用するタイミング：",
+        "2fa": "サーバーで二要素認証（2FA/MFA）が有効になっている",
+        "password": "サーバーがキー認証ではなくパスワード認証を必要とする",
+        "keyboard": "サーバーがキーボード対話認証を使用している"
+      },
+      "usage": {
+        "title": "使用方法：",
+        "intro": "以下の手順で対話トンネルを開始します：",
+        "step1": "Web インターフェースでトンネルの対話認証オプションを有効にする",
+        "step2": "設定を保存した後、トンネルのハッシュ値を取得する",
+        "step3": "以下のコマンドを使用して対話トンネルを開始する"
+      },
+      "commands": {
+        "title": "コマンド例：",
+        "docker_compose_desc": "docker compose を使用（推奨）：",
+        "docker_exec_desc": "docker exec を使用（コンテナ名が必要）：",
+        "example_prefix": "例（8文字のハッシュプレフィックスを使用）："
+      },
+      "hash_prefix": {
+        "title": "ハッシュプレフィックスのサポート：",
+        "description": "Git のショートハッシュと同様に、8文字以上のハッシュプレフィックスを使用してトンネルを識別できます。"
+      },
+      "other_commands": {
+        "title": "その他の一般的なコマンド：",
+        "list": "設定されたすべてのトンネルを一覧表示：",
+        "status": "トンネルのステータスを表示：",
+        "logs": "特定のトンネルのログを表示：",
+        "stop": "特定のトンネルを停止："
+      },
+      "notes": {
+        "title": "注意事項：",
+        "tty": "対話ターミナルを有効にするには -it パラメータを使用する必要があります",
+        "user": "-u myuser を使用して正しいユーザー ID を指定します",
+        "foreground": "対話トンネルはフォアグラウンドで実行され、認証成功後に自動的にバックグラウンドに移行します",
+        "web_disabled": "対話認証が有効なトンネルは現在 Web インターフェースから開始できません。コマンドラインを使用する必要があります"
+      }
     },
     "advanced": {
       "title": "高度な設定",

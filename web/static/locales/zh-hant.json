@@ -120,6 +120,7 @@
       "web_config": "網頁設定",
       "yaml_config": "YAML設定",
       "ssh_config": "SSH設定",
+      "interactive_auth_cli": "互動認證命令列",
       "advanced": "進階設定",
       "troubleshooting": "故障排除"
     },
@@ -195,6 +196,47 @@
       "important_desc": "本專案嚴重依賴 ~/.ssh/config 檔案進行 SSH 連線設定。",
       "example": "SSH設定檔範例 (~/.ssh/config)：",
       "permissions": "SSH金鑰權限："
+    },
+    "interactive_auth_cli": {
+      "title": "互動認證命令列",
+      "description": "對於需要雙因素認證（2FA）或密碼認證的 SSH 伺服器，您需要使用 autossh-cli 命令列工具進行互動式認證。",
+      "when_to_use": {
+        "title": "何時使用：",
+        "2fa": "伺服器啟用了雙因素認證（2FA/MFA）",
+        "password": "伺服器需要密碼認證而非金鑰認證",
+        "keyboard": "伺服器使用鍵盤互動式認證"
+      },
+      "usage": {
+        "title": "使用方法：",
+        "intro": "按照以下步驟啟動互動式隧道：",
+        "step1": "在網頁介面啟用隧道的互動認證選項",
+        "step2": "儲存設定後，取得隧道的雜湊值",
+        "step3": "使用以下命令啟動互動式隧道"
+      },
+      "commands": {
+        "title": "命令範例：",
+        "docker_compose_desc": "使用 docker compose（建議）：",
+        "docker_exec_desc": "使用 docker exec（需要容器名稱）：",
+        "example_prefix": "範例（使用 8 位雜湊前綴）："
+      },
+      "hash_prefix": {
+        "title": "雜湊前綴支援：",
+        "description": "類似於 Git 的短雜湊，您可以使用 8 個或更多字元的雜湊前綴來識別隧道。"
+      },
+      "other_commands": {
+        "title": "其他常用命令：",
+        "list": "列出所有設定的隧道：",
+        "status": "檢視隧道狀態：",
+        "logs": "檢視特定隧道的記錄：",
+        "stop": "停止特定隧道："
+      },
+      "notes": {
+        "title": "注意事項：",
+        "tty": "必須使用 -it 參數以啟用互動式終端機",
+        "user": "使用 -u myuser 指定正確的使用者身分",
+        "foreground": "互動式隧道會在前景執行，認證成功後會自動轉入背景",
+        "web_disabled": "啟用互動認證的隧道暫時無法透過網頁介面啟動，必須使用命令列"
+      }
     },
     "advanced": {
       "title": "進階設定",

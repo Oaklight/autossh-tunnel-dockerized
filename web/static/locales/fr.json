@@ -120,6 +120,7 @@
       "web_config": "Configuration web",
       "yaml_config": "Configuration YAML",
       "ssh_config": "Configuration SSH",
+      "interactive_auth_cli": "CLI d'authentification interactive",
       "advanced": "Configuration avancée",
       "troubleshooting": "Résolution des problèmes"
     },
@@ -195,6 +196,47 @@
       "important_desc": "Ce projet dépend fortement du fichier ~/.ssh/config pour la configuration de connexion SSH.",
       "example": "Exemple de fichier de configuration SSH (~/.ssh/config) :",
       "permissions": "Permissions de clé SSH :"
+    },
+    "interactive_auth_cli": {
+      "title": "CLI d'authentification interactive",
+      "description": "Pour les serveurs SSH nécessitant une authentification à deux facteurs (2FA) ou une authentification par mot de passe, vous devez utiliser l'outil en ligne de commande autossh-cli pour l'authentification interactive.",
+      "when_to_use": {
+        "title": "Quand l'utiliser :",
+        "2fa": "Le serveur a l'authentification à deux facteurs (2FA/MFA) activée",
+        "password": "Le serveur nécessite une authentification par mot de passe au lieu d'une authentification par clé",
+        "keyboard": "Le serveur utilise l'authentification interactive au clavier"
+      },
+      "usage": {
+        "title": "Utilisation :",
+        "intro": "Suivez ces étapes pour démarrer un tunnel interactif :",
+        "step1": "Activer l'option d'authentification interactive pour le tunnel dans l'interface web",
+        "step2": "Après avoir enregistré la configuration, obtenir la valeur de hachage du tunnel",
+        "step3": "Utiliser la commande suivante pour démarrer le tunnel interactif"
+      },
+      "commands": {
+        "title": "Exemples de commandes :",
+        "docker_compose_desc": "Utilisation de docker compose (recommandé) :",
+        "docker_exec_desc": "Utilisation de docker exec (nécessite le nom du conteneur) :",
+        "example_prefix": "Exemple (utilisation d'un préfixe de hachage de 8 caractères) :"
+      },
+      "hash_prefix": {
+        "title": "Support du préfixe de hachage :",
+        "description": "Similaire au hachage court de Git, vous pouvez utiliser 8 caractères ou plus du préfixe de hachage pour identifier les tunnels."
+      },
+      "other_commands": {
+        "title": "Autres commandes courantes :",
+        "list": "Lister tous les tunnels configurés :",
+        "status": "Afficher l'état du tunnel :",
+        "logs": "Afficher les journaux d'un tunnel spécifique :",
+        "stop": "Arrêter un tunnel spécifique :"
+      },
+      "notes": {
+        "title": "Notes :",
+        "tty": "Vous devez utiliser le paramètre -it pour activer le terminal interactif",
+        "user": "Utilisez -u myuser pour spécifier l'identité utilisateur correcte",
+        "foreground": "Les tunnels interactifs s'exécutent au premier plan et passent automatiquement en arrière-plan après une authentification réussie",
+        "web_disabled": "Les tunnels avec authentification interactive activée ne peuvent actuellement pas être démarrés depuis l'interface web ; vous devez utiliser la ligne de commande"
+      }
     },
     "advanced": {
       "title": "Configuration avancée",

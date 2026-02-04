@@ -76,6 +76,7 @@
                     <li><a href="#web-config" data-i18n="help.sections.web_config">网页配置</a></li>
                     <li><a href="#yaml-config" data-i18n="help.sections.yaml_config">YAML配置</a></li>
                     <li><a href="#ssh-config" data-i18n="help.sections.ssh_config">SSH配置</a></li>
+                    <li><a href="#interactive-auth-cli" data-i18n="help.sections.interactive_auth_cli">交互认证命令行</a></li>
                     <li><a href="#advanced" data-i18n="help.sections.advanced">高级配置</a></li>
                     <li><a href="#troubleshooting" data-i18n="help.sections.troubleshooting">故障排除</a></li>
                 </ul>
@@ -263,6 +264,120 @@ Host production
 chmod 600 ~/.ssh/*
 chmod 644 ~/.ssh/*.pub</code></pre>
                         </div>
+                    </div>
+                </section>
+
+                <!-- Interactive Auth CLI Section -->
+                <section id="interactive-auth-cli" class="help-section">
+                    <h2><i class="material-icons">terminal</i> <span
+                            data-i18n="help.interactive_auth_cli.title">交互认证命令行</span></h2>
+                    <div class="help-card">
+                        <p data-i18n="help.interactive_auth_cli.description">对于需要双因素认证（2FA）或密码认证的 SSH 服务器，您需要使用
+                            autossh-cli 命令行工具进行交互式认证。</p>
+
+                        <h4 data-i18n="help.interactive_auth_cli.when_to_use.title">何时使用：</h4>
+                        <ul>
+                            <li data-i18n="help.interactive_auth_cli.when_to_use.2fa">服务器启用了双因素认证（2FA/MFA）</li>
+                            <li data-i18n="help.interactive_auth_cli.when_to_use.password">服务器需要密码认证而非密钥认证</li>
+                            <li data-i18n="help.interactive_auth_cli.when_to_use.keyboard">服务器使用键盘交互式认证</li>
+                        </ul>
+
+                        <h4 data-i18n="help.interactive_auth_cli.usage.title">使用方法：</h4>
+                        <p data-i18n="help.interactive_auth_cli.usage.intro">按照以下步骤启动交互式隧道：</p>
+                        <ol>
+                            <li data-i18n="help.interactive_auth_cli.usage.step1">在网页界面启用隧道的交互认证选项</li>
+                            <li data-i18n="help.interactive_auth_cli.usage.step2">保存配置后，获取隧道的哈希值</li>
+                            <li data-i18n="help.interactive_auth_cli.usage.step3">使用以下命令启动交互式隧道</li>
+                        </ol>
+
+                        <h4 data-i18n="help.interactive_auth_cli.commands.title">命令示例：</h4>
+
+                        <p data-i18n="help.interactive_auth_cli.commands.docker_compose_desc">使用 docker compose（推荐）：</p>
+                        <div class="code-block copyable"
+                            data-copy-text="docker compose exec -it -u myuser autossh autossh-cli auth <hash>">
+                            <button class="copy-button" title="Copy to clipboard"
+                                data-i18n-title="messages.click_to_copy">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                            <pre><code>docker compose exec -it -u myuser autossh autossh-cli auth &lt;hash&gt;</code></pre>
+                        </div>
+
+                        <p data-i18n="help.interactive_auth_cli.commands.docker_exec_desc">使用 docker exec（需要容器名称）：</p>
+                        <div class="code-block copyable"
+                            data-copy-text="docker exec -it -u myuser autossh-tunnel-autossh-1 autossh-cli auth <hash>">
+                            <button class="copy-button" title="Copy to clipboard"
+                                data-i18n-title="messages.click_to_copy">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                            <pre><code>docker exec -it -u myuser autossh-tunnel-autossh-1 autossh-cli auth &lt;hash&gt;</code></pre>
+                        </div>
+
+                        <p><span data-i18n="help.interactive_auth_cli.commands.example_prefix">示例（使用 8 位哈希前缀）：</span>
+                        </p>
+                        <div class="code-block copyable"
+                            data-copy-text="docker compose exec -it -u myuser autossh autossh-cli auth 7b840f83">
+                            <button class="copy-button" title="Copy to clipboard"
+                                data-i18n-title="messages.click_to_copy">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                            <pre><code>docker compose exec -it -u myuser autossh autossh-cli auth 7b840f83</code></pre>
+                        </div>
+
+                        <h4 data-i18n="help.interactive_auth_cli.hash_prefix.title">哈希前缀支持：</h4>
+                        <p data-i18n="help.interactive_auth_cli.hash_prefix.description">类似于 Git 的短哈希，您可以使用 8
+                            个或更多字符的哈希前缀来标识隧道。</p>
+
+                        <h4 data-i18n="help.interactive_auth_cli.other_commands.title">其他常用命令：</h4>
+
+                        <p data-i18n="help.interactive_auth_cli.other_commands.list">列出所有配置的隧道：</p>
+                        <div class="code-block copyable"
+                            data-copy-text="docker compose exec -u myuser autossh autossh-cli list">
+                            <button class="copy-button" title="Copy to clipboard"
+                                data-i18n-title="messages.click_to_copy">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                            <pre><code>docker compose exec -u myuser autossh autossh-cli list</code></pre>
+                        </div>
+
+                        <p data-i18n="help.interactive_auth_cli.other_commands.status">查看隧道状态：</p>
+                        <div class="code-block copyable"
+                            data-copy-text="docker compose exec -u myuser autossh autossh-cli status">
+                            <button class="copy-button" title="Copy to clipboard"
+                                data-i18n-title="messages.click_to_copy">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                            <pre><code>docker compose exec -u myuser autossh autossh-cli status</code></pre>
+                        </div>
+
+                        <p data-i18n="help.interactive_auth_cli.other_commands.logs">查看特定隧道的日志：</p>
+                        <div class="code-block copyable"
+                            data-copy-text="docker compose exec -u myuser autossh autossh-cli logs <hash>">
+                            <button class="copy-button" title="Copy to clipboard"
+                                data-i18n-title="messages.click_to_copy">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                            <pre><code>docker compose exec -u myuser autossh autossh-cli logs &lt;hash&gt;</code></pre>
+                        </div>
+
+                        <p data-i18n="help.interactive_auth_cli.other_commands.stop">停止特定隧道：</p>
+                        <div class="code-block copyable"
+                            data-copy-text="docker compose exec -u myuser autossh autossh-cli stop-tunnel <hash>">
+                            <button class="copy-button" title="Copy to clipboard"
+                                data-i18n-title="messages.click_to_copy">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                            <pre><code>docker compose exec -u myuser autossh autossh-cli stop-tunnel &lt;hash&gt;</code></pre>
+                        </div>
+
+                        <h4 data-i18n="help.interactive_auth_cli.notes.title">注意事项：</h4>
+                        <ul>
+                            <li data-i18n="help.interactive_auth_cli.notes.tty">必须使用 <code>-it</code> 参数以启用交互式终端</li>
+                            <li data-i18n="help.interactive_auth_cli.notes.user">使用 <code>-u myuser</code> 指定正确的用户身份
+                            </li>
+                            <li data-i18n="help.interactive_auth_cli.notes.foreground">交互式隧道会在前台运行，认证成功后会自动转入后台</li>
+                            <li data-i18n="help.interactive_auth_cli.notes.web_disabled">启用交互认证的隧道暂时无法通过网页界面启动，必须使用命令行
+                            </li>
+                        </ul>
                     </div>
                 </section>
 
@@ -500,6 +615,61 @@ docker compose restart autossh</code></pre>
 
             window.addEventListener('scroll', highlightCurrentSection);
             highlightCurrentSection(); // Initial call
+
+            // Copy to clipboard functionality for code blocks
+            document.querySelectorAll('.code-block.copyable .copy-button').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const codeBlock = this.closest('.code-block');
+                    const textToCopy = codeBlock.dataset.copyText || codeBlock.querySelector('code').textContent;
+
+                    try {
+                        await navigator.clipboard.writeText(textToCopy);
+
+                        // Show success feedback
+                        const icon = this.querySelector('i');
+                        const originalIcon = icon.textContent;
+                        icon.textContent = 'check';
+                        this.classList.add('copied');
+
+                        // Show toast message
+                        const message = window.i18n ? window.i18n.t('messages.hash_copied') : 'Copied to clipboard';
+                        showCopyToast(message);
+
+                        // Reset after 2 seconds
+                        setTimeout(() => {
+                            icon.textContent = originalIcon;
+                            this.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy:', err);
+                        const message = window.i18n ? window.i18n.t('messages.copy_failed') : 'Failed to copy';
+                        showCopyToast(message);
+                    }
+                });
+            });
+
+            // Toast notification for copy feedback
+            function showCopyToast(message) {
+                // Remove existing toast if any
+                const existingToast = document.querySelector('.copy-toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                const toast = document.createElement('div');
+                toast.className = 'copy-toast';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                // Trigger animation
+                setTimeout(() => toast.classList.add('show'), 10);
+
+                // Remove after 2 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 2000);
+            }
         });
     </script>
 </body>

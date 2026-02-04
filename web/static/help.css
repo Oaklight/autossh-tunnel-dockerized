@@ -312,3 +312,104 @@ html {
 .code-block pre::-webkit-scrollbar-thumb:hover {
     background: #999;
 }
+
+/* Copyable Code Blocks */
+.code-block.copyable {
+    position: relative;
+}
+
+.code-block .copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0;
+    z-index: 10;
+}
+
+.code-block.copyable:hover .copy-button {
+    opacity: 1;
+}
+
+.code-block .copy-button:hover {
+    background: #fff;
+    border-color: var(--mdc-theme-primary);
+    color: var(--mdc-theme-primary);
+    transform: scale(1.05);
+}
+
+.code-block .copy-button:active {
+    transform: scale(0.95);
+}
+
+.code-block .copy-button .material-icons {
+    font-size: 18px;
+    color: #666;
+}
+
+.code-block .copy-button:hover .material-icons {
+    color: var(--mdc-theme-primary);
+}
+
+.code-block .copy-button.copied {
+    background: #4caf50;
+    border-color: #4caf50;
+}
+
+.code-block .copy-button.copied .material-icons {
+    color: #fff;
+}
+
+/* Copy Toast Notification */
+.copy-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #323232;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.copy-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* Ordered list styling for steps */
+.help-card ol {
+    color: rgba(0, 0, 0, 0.7);
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    padding-left: 24px;
+}
+
+.help-card ol li {
+    margin-bottom: 8px;
+}
+
+/* Mobile adjustments for copy button */
+@media (max-width: 768px) {
+    .code-block .copy-button {
+        opacity: 1;
+        padding: 4px;
+    }
+
+    .code-block .copy-button .material-icons {
+        font-size: 16px;
+    }
+}

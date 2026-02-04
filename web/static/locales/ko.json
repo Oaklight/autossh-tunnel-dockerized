@@ -120,6 +120,7 @@
       "web_config": "웹 구성",
       "yaml_config": "YAML 구성",
       "ssh_config": "SSH 구성",
+      "interactive_auth_cli": "대화형 인증 CLI",
       "advanced": "고급 구성",
       "troubleshooting": "문제 해결"
     },
@@ -195,6 +196,47 @@
       "important_desc": "이 프로젝트는 SSH 연결 구성을 위해 ~/.ssh/config 파일에 크게 의존합니다.",
       "example": "SSH 구성 파일 예제 (~/.ssh/config):",
       "permissions": "SSH 키 권한:"
+    },
+    "interactive_auth_cli": {
+      "title": "대화형 인증 CLI",
+      "description": "이중 인증(2FA) 또는 비밀번호 인증이 필요한 SSH 서버의 경우 autossh-cli 명령줄 도구를 사용하여 대화형 인증을 수행해야 합니다.",
+      "when_to_use": {
+        "title": "사용 시기:",
+        "2fa": "서버에서 이중 인증(2FA/MFA)이 활성화된 경우",
+        "password": "서버가 키 인증 대신 비밀번호 인증을 요구하는 경우",
+        "keyboard": "서버가 키보드 대화형 인증을 사용하는 경우"
+      },
+      "usage": {
+        "title": "사용 방법:",
+        "intro": "다음 단계에 따라 대화형 터널을 시작합니다:",
+        "step1": "웹 인터페이스에서 터널의 대화형 인증 옵션 활성화",
+        "step2": "구성 저장 후 터널의 해시 값 가져오기",
+        "step3": "다음 명령을 사용하여 대화형 터널 시작"
+      },
+      "commands": {
+        "title": "명령 예시:",
+        "docker_compose_desc": "docker compose 사용 (권장):",
+        "docker_exec_desc": "docker exec 사용 (컨테이너 이름 필요):",
+        "example_prefix": "예시 (8자리 해시 접두사 사용):"
+      },
+      "hash_prefix": {
+        "title": "해시 접두사 지원:",
+        "description": "Git의 짧은 해시와 유사하게 8자 이상의 해시 접두사를 사용하여 터널을 식별할 수 있습니다."
+      },
+      "other_commands": {
+        "title": "기타 일반 명령:",
+        "list": "구성된 모든 터널 나열:",
+        "status": "터널 상태 보기:",
+        "logs": "특정 터널의 로그 보기:",
+        "stop": "특정 터널 중지:"
+      },
+      "notes": {
+        "title": "참고 사항:",
+        "tty": "대화형 터미널을 활성화하려면 -it 매개변수를 사용해야 합니다",
+        "user": "-u myuser를 사용하여 올바른 사용자 ID 지정",
+        "foreground": "대화형 터널은 포그라운드에서 실행되며 인증 성공 후 자동으로 백그라운드로 이동합니다",
+        "web_disabled": "대화형 인증이 활성화된 터널은 현재 웹 인터페이스에서 시작할 수 없습니다. 명령줄을 사용해야 합니다"
+      }
     },
     "advanced": {
       "title": "고급 구성",

@@ -120,6 +120,7 @@
       "web_config": "网页配置",
       "yaml_config": "YAML配置",
       "ssh_config": "SSH配置",
+      "interactive_auth_cli": "交互认证命令行",
       "advanced": "高级配置",
       "troubleshooting": "故障排除"
     },
@@ -195,6 +196,47 @@
       "important_desc": "本项目严重依赖 ~/.ssh/config 文件进行 SSH 连接配置。",
       "example": "SSH配置文件示例 (~/.ssh/config)：",
       "permissions": "SSH密钥权限："
+    },
+    "interactive_auth_cli": {
+      "title": "交互认证命令行",
+      "description": "对于需要双因素认证（2FA）或密码认证的 SSH 服务器，您需要使用 autossh-cli 命令行工具进行交互式认证。",
+      "when_to_use": {
+        "title": "何时使用：",
+        "2fa": "服务器启用了双因素认证（2FA/MFA）",
+        "password": "服务器需要密码认证而非密钥认证",
+        "keyboard": "服务器使用键盘交互式认证"
+      },
+      "usage": {
+        "title": "使用方法：",
+        "intro": "按照以下步骤启动交互式隧道：",
+        "step1": "在网页界面启用隧道的交互认证选项",
+        "step2": "保存配置后，获取隧道的哈希值",
+        "step3": "使用以下命令启动交互式隧道"
+      },
+      "commands": {
+        "title": "命令示例：",
+        "docker_compose_desc": "使用 docker compose（推荐）：",
+        "docker_exec_desc": "使用 docker exec（需要容器名称）：",
+        "example_prefix": "示例（使用 8 位哈希前缀）："
+      },
+      "hash_prefix": {
+        "title": "哈希前缀支持：",
+        "description": "类似于 Git 的短哈希，您可以使用 8 个或更多字符的哈希前缀来标识隧道。"
+      },
+      "other_commands": {
+        "title": "其他常用命令：",
+        "list": "列出所有配置的隧道：",
+        "status": "查看隧道状态：",
+        "logs": "查看特定隧道的日志：",
+        "stop": "停止特定隧道："
+      },
+      "notes": {
+        "title": "注意事项：",
+        "tty": "必须使用 -it 参数以启用交互式终端",
+        "user": "使用 -u myuser 指定正确的用户身份",
+        "foreground": "交互式隧道会在前台运行，认证成功后会自动转入后台",
+        "web_disabled": "启用交互认证的隧道暂时无法通过网页界面启动，必须使用命令行"
+      }
     },
     "advanced": {
       "title": "高级配置",

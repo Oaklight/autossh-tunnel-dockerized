@@ -120,6 +120,7 @@
       "web_config": "Configuración web",
       "yaml_config": "Configuración YAML",
       "ssh_config": "Configuración SSH",
+      "interactive_auth_cli": "CLI de autenticación interactiva",
       "advanced": "Configuración avanzada",
       "troubleshooting": "Resolución de problemas"
     },
@@ -195,6 +196,47 @@
       "important_desc": "Este proyecto depende en gran medida del archivo ~/.ssh/config para la configuración de conexión SSH.",
       "example": "Ejemplo de archivo de configuración SSH (~/.ssh/config):",
       "permissions": "Permisos de clave SSH:"
+    },
+    "interactive_auth_cli": {
+      "title": "CLI de autenticación interactiva",
+      "description": "Para servidores SSH que requieren autenticación de dos factores (2FA) o autenticación por contraseña, debe usar la herramienta de línea de comandos autossh-cli para la autenticación interactiva.",
+      "when_to_use": {
+        "title": "Cuándo usar:",
+        "2fa": "El servidor tiene habilitada la autenticación de dos factores (2FA/MFA)",
+        "password": "El servidor requiere autenticación por contraseña en lugar de autenticación por clave",
+        "keyboard": "El servidor usa autenticación interactiva por teclado"
+      },
+      "usage": {
+        "title": "Uso:",
+        "intro": "Siga estos pasos para iniciar un túnel interactivo:",
+        "step1": "Habilitar la opción de autenticación interactiva para el túnel en la interfaz web",
+        "step2": "Después de guardar la configuración, obtener el valor hash del túnel",
+        "step3": "Usar el siguiente comando para iniciar el túnel interactivo"
+      },
+      "commands": {
+        "title": "Ejemplos de comandos:",
+        "docker_compose_desc": "Usando docker compose (recomendado):",
+        "docker_exec_desc": "Usando docker exec (requiere nombre del contenedor):",
+        "example_prefix": "Ejemplo (usando prefijo hash de 8 caracteres):"
+      },
+      "hash_prefix": {
+        "title": "Soporte de prefijo hash:",
+        "description": "Similar al hash corto de Git, puede usar 8 o más caracteres del prefijo hash para identificar túneles."
+      },
+      "other_commands": {
+        "title": "Otros comandos comunes:",
+        "list": "Listar todos los túneles configurados:",
+        "status": "Ver estado del túnel:",
+        "logs": "Ver registros de un túnel específico:",
+        "stop": "Detener un túnel específico:"
+      },
+      "notes": {
+        "title": "Notas:",
+        "tty": "Debe usar el parámetro -it para habilitar el terminal interactivo",
+        "user": "Use -u myuser para especificar la identidad de usuario correcta",
+        "foreground": "Los túneles interactivos se ejecutan en primer plano y pasan automáticamente a segundo plano después de una autenticación exitosa",
+        "web_disabled": "Los túneles con autenticación interactiva habilitada actualmente no se pueden iniciar desde la interfaz web; debe usar la línea de comandos"
+      }
     },
     "advanced": {
       "title": "Configuración avanzada",
