@@ -10,7 +10,8 @@
     "github": "GitHub",
     "back": "Volver",
     "language_toggle": "Language / Idioma",
-    "language_toggle_prefix": "Idiomas disponibles"
+    "language_toggle_prefix": "Idiomas disponibles",
+    "switch_language": "Cambiar idioma"
   },
   "table": {
     "headers": {
