@@ -527,57 +527,173 @@
     animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Message Styles */
+/* Toast Notification Container */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+    max-width: 420px;
+}
+
+/* Toast Notification Messages */
 .message {
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-radius: 8px;
-    margin: 16px 0;
     font-weight: 500;
     display: flex;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    animation: fadeIn 0.3s ease-out;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+    max-width: 100%;
+    word-wrap: break-word;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+.message:active {
+    transform: scale(0.98);
 }
 
 .message.success {
-    background-color: #e8f5e9;
+    background-color: rgba(232, 245, 233, 0.95);
     color: #2e7d32;
     border: 1px solid #a5d6a7;
 }
 
 .message.error {
-    background-color: #ffebee;
+    background-color: rgba(255, 235, 238, 0.95);
     color: #c62828;
     border: 1px solid #ef9a9a;
 }
 
 .message.info {
-    background-color: #e3f2fd;
+    background-color: rgba(227, 242, 253, 0.95);
     color: #1565c0;
     border: 1px solid #90caf9;
     white-space: pre-line;
 }
 
-@keyframes fadeIn {
+.message-content {
+    flex: 1;
+    line-height: 1.5;
+    user-select: text;
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.message-copy {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: inherit;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    line-height: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message-copy:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.message-copy.copied {
+    color: #4CAF50;
+    opacity: 1;
+}
+
+.message-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: inherit;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    font-size: 18px;
+    line-height: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message-close:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.message-hint {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+/* Toast slide in animation */
+@keyframes toastSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateX(100%);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 }
 
-@keyframes fadeOut {
+/* Toast slide out animation */
+@keyframes toastSlideOut {
     from {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 
     to {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateX(100%);
+    }
+}
+
+.message.hiding {
+    animation: toastSlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Responsive toast positioning */
+@media (max-width: 480px) {
+    .toast-container {
+        top: 70px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+    }
+
+    .message {
+        padding: 12px 16px;
+        font-size: 14px;
     }
 }

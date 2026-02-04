@@ -89,7 +89,8 @@
     "interactive_start_hint": "Este túnel requiere autenticación interactiva. Por favor, inícielo a través del terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "interactive_restart_hint": "Este túnel requiere autenticación interactiva. Por favor, deténgalo primero, luego inícielo a través del terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "hash_copied": "Hash copiado al portapapeles",
-    "copy_failed": "Error al copiar al portapapeles"
+    "copy_failed": "Error al copiar al portapapeles",
+    "click_to_copy": "Clic para copiar"
   },
   "validation": {
     "port_range": "El puerto debe estar entre 1 y 65535",

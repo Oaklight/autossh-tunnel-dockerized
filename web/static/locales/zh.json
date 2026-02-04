@@ -89,7 +89,8 @@
     "interactive_start_hint": "此隧道需要交互式认证。请通过终端启动：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "interactive_restart_hint": "此隧道需要交互式认证。请先停止隧道，然后通过终端启动：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "hash_copied": "哈希值已复制到剪贴板",
-    "copy_failed": "复制到剪贴板失败"
+    "copy_failed": "复制到剪贴板失败",
+    "click_to_copy": "点击复制"
   },
   "validation": {
     "port_range": "端口必须在 1 到 65535 之间",

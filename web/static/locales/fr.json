@@ -89,7 +89,8 @@
     "interactive_start_hint": "Ce tunnel nécessite une authentification interactive. Veuillez le démarrer via le terminal :\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "interactive_restart_hint": "Ce tunnel nécessite une authentification interactive. Veuillez d'abord l'arrêter, puis le démarrer via le terminal :\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "hash_copied": "Hash copié dans le presse-papiers",
-    "copy_failed": "Échec de la copie dans le presse-papiers"
+    "copy_failed": "Échec de la copie dans le presse-papiers",
+    "click_to_copy": "Cliquer pour copier"
   },
   "validation": {
     "port_range": "Le port doit être compris entre 1 et 65535",

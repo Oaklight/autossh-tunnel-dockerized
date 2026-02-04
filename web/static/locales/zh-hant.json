@@ -89,7 +89,8 @@
     "interactive_start_hint": "此隧道需要互動式認證。請透過終端機啟動：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "interactive_restart_hint": "此隧道需要互動式認證。請先停止隧道，然後透過終端機啟動：\ndocker compose exec -it -u myuser autossh autossh-cli auth {hash}",
     "hash_copied": "雜湊值已複製到剪貼簿",
-    "copy_failed": "複製到剪貼簿失敗"
+    "copy_failed": "複製到剪貼簿失敗",
+    "click_to_copy": "點擊複製"
   },
   "validation": {
     "port_range": "連接埠必須在 1 到 65535 之間",
