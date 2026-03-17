@@ -11,7 +11,13 @@
     "back": "뒤로",
     "language_toggle": "Language / 언어",
     "language_toggle_prefix": "사용 가능한 언어",
-    "switch_language": "언어 전환"
+    "switch_language": "언어 전환",
+    "theme": "테마 전환",
+    "color_scheme": "색상 구성",
+    "scheme_gold": "골드",
+    "scheme_teal": "틸",
+    "scheme_blue": "블루",
+    "scheme_slate": "슬레이트"
   },
   "table": {
     "headers": {

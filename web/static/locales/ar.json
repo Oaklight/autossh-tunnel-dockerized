@@ -11,7 +11,13 @@
     "back": "العودة",
     "language_toggle": "Language / اللغة",
     "language_toggle_prefix": "اللغات المتاحة",
-    "switch_language": "تغيير اللغة"
+    "switch_language": "تغيير اللغة",
+    "theme": "تبديل السمة",
+    "color_scheme": "نظام الألوان",
+    "scheme_gold": "ذهبي",
+    "scheme_teal": "أزرق مخضر",
+    "scheme_blue": "أزرق",
+    "scheme_slate": "رمادي"
   },
   "table": {
     "headers": {

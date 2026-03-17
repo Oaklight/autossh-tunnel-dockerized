@@ -11,7 +11,13 @@
     "back": "Retour",
     "language_toggle": "Language / Langue",
     "language_toggle_prefix": "Langues disponibles",
-    "switch_language": "Changer de langue"
+    "switch_language": "Changer de langue",
+    "theme": "Changer le thème",
+    "color_scheme": "Palette de couleurs",
+    "scheme_gold": "Or",
+    "scheme_teal": "Sarcelle",
+    "scheme_blue": "Bleu",
+    "scheme_slate": "Ardoise"
   },
   "table": {
     "headers": {

@@ -11,7 +11,13 @@
     "back": "Назад",
     "language_toggle": "Language / Язык",
     "language_toggle_prefix": "Доступные языки",
-    "switch_language": "Сменить язык"
+    "switch_language": "Сменить язык",
+    "theme": "Переключить тему",
+    "color_scheme": "Цветовая схема",
+    "scheme_gold": "Золотой",
+    "scheme_teal": "Бирюзовый",
+    "scheme_blue": "Синий",
+    "scheme_slate": "Серый"
   },
   "table": {
     "headers": {

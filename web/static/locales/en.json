@@ -11,7 +11,13 @@
     "back": "Back",
     "language_toggle": "Language / 语言",
     "language_toggle_prefix": "Available Languages",
-    "switch_language": "Switch Language"
+    "switch_language": "Switch Language",
+    "theme": "Toggle Theme",
+    "color_scheme": "Color Scheme",
+    "scheme_gold": "Gold",
+    "scheme_teal": "Teal",
+    "scheme_blue": "Blue",
+    "scheme_slate": "Slate"
   },
   "table": {
     "headers": {

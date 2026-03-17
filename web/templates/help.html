@@ -5,80 +5,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="app.help_title">SSH Tunnel Manager - Help</title>
-    <!-- Material Design CSS (local) -->
     <link href="/static/vendor/fonts/material-icons.css" rel="stylesheet">
     <link href="/static/vendor/fonts/roboto.css" rel="stylesheet">
-    <link href="/static/vendor/material-components-web.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/themes.css">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/help.css">
     <link rel="stylesheet" href="/static/tooltip.css">
 
-    <!-- Configurable Links -->
     <script>
-        // Configure your project links here
         window.PROJECT_CONFIG = {
             dockerHubUrl: 'https://hub.docker.com/r/oaklight/autossh-tunnel',
             githubUrl: 'https://github.com/Oaklight/autossh-tunnel-dockerized',
             projectName: 'SSH Tunnel Manager'
         };
     </script>
+
+    <script src="/static/theme-switcher.js"></script>
 </head>
 
-<body class="mdc-typography" data-page-title="app.help_title">
-    <!-- App Bar -->
-    <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
-        <div class="mdc-top-app-bar__row">
-            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-                <a href="/" class="mdc-top-app-bar__navigation-icon">
-                    <i class="material-icons">arrow_back</i>
-                </a>
-                <span class="mdc-top-app-bar__title" data-i18n="navigation.help">Help & Documentation</span>
-            </section>
-            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
-                <div class="corner-icons">
-                    <!-- Language Toggle -->
-                    <div class="corner-icon-wrapper">
-                        <button class="corner-icon language-toggle" id="languageToggle" data-tooltip="dynamic">
-                            <i class="material-icons">language</i>
-                        </button>
-                        <div class="language-dropdown" id="languageDropdown">
-                            <!-- Language options will be dynamically populated -->
-                        </div>
-                    </div>
-                    <a href="#" id="dockerhub-link" target="_blank" class="corner-icon"
-                        data-i18n-tooltip="navigation.docker_hub">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.888c0 .102.084.185.186.185m0 2.716h2.118a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.93 0h2.12a.186.186 0 00.185-.186V6.29a.186.186 0 00-.185-.185H8.1a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.964 0h2.119a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.93 0h2.12a.186.186 0 00.185-.185V9.006a.186.186 0 00-.185-.186H8.1a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.964 0h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186H5.136a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338 0-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983 0 1.97-.084 2.943-.25 1.225-.208 2.42-.598 3.554-1.146 1.147-.563 2.215-1.291 3.168-2.168.814-.75 1.518-1.607 2.05-2.553.404-.719.71-1.482.918-2.273a4.4 4.4 0 001.372.22c1.109 0 2.179-.536 2.717-1.36.189-.292.33-.609.415-.943l.034-.14-.079-.106z" />
-                        </svg>
-                    </a>
-                    <a href="#" id="github-link" target="_blank" class="corner-icon"
-                        data-i18n-tooltip="navigation.github">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                        </svg>
-                    </a>
-                </div>
-            </section>
+<body data-page-title="app.help_title">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-left">
+            <a href="/" class="header-back">
+                <i class="material-icons">arrow_back</i>
+            </a>
+            <span class="header-title" data-i18n="navigation.help">Help & Documentation</span>
+        </div>
+        <div class="header-right">
+            <button class="header-icon theme-toggle" id="themeToggle" data-i18n-tooltip="navigation.theme">
+                <i class="material-icons">light_mode</i>
+            </button>
+            <div class="scheme-wrapper">
+                <button class="header-icon scheme-toggle" id="schemeToggle"
+                        data-i18n-tooltip="navigation.color_scheme">
+                    <i class="material-icons">palette</i>
+                </button>
+                <div class="scheme-dropdown" id="schemeDropdown"></div>
+            </div>
+            <div class="lang-wrapper">
+                <button class="header-icon language-toggle" id="languageToggle" data-tooltip="dynamic">
+                    <i class="material-icons">language</i>
+                </button>
+                <div class="language-dropdown" id="languageDropdown"></div>
+            </div>
+            <a href="#" id="dockerhub-link" target="_blank" class="header-icon"
+                data-i18n-tooltip="navigation.docker_hub">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.888c0 .102.084.185.186.185m0 2.716h2.118a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.93 0h2.12a.186.186 0 00.185-.186V6.29a.186.186 0 00-.185-.185H8.1a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m-2.964 0h2.119a.186.186 0 00.186-.186V6.29a.186.186 0 00-.186-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.186.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.93 0h2.12a.186.186 0 00.185-.185V9.006a.186.186 0 00-.185-.186H8.1a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.964 0h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186H5.136a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338 0-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983 0 1.97-.084 2.943-.25 1.225-.208 2.42-.598 3.554-1.146 1.147-.563 2.215-1.291 3.168-2.168.814-.75 1.518-1.607 2.05-2.553.404-.719.71-1.482.918-2.273a4.4 4.4 0 001.372.22c1.109 0 2.179-.536 2.717-1.36.189-.292.33-.609.415-.943l.034-.14-.079-.106z" />
+                </svg>
+            </a>
+            <a href="#" id="github-link" target="_blank" class="header-icon"
+                data-i18n-tooltip="navigation.github">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+            </a>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="mdc-top-app-bar--fixed-adjust">
+    <main>
         <div class="help-container">
             <!-- Table of Contents -->
             <div class="help-toc">
-                <h3 data-i18n="help.toc">目录</h3>
+                <h3 data-i18n="help.toc">Contents</h3>
                 <ul>
-                    <li><a href="#overview" data-i18n="help.sections.overview">概述</a></li>
-                    <li><a href="#setup" data-i18n="help.sections.setup">快速设置</a></li>
-                    <li><a href="#web-config" data-i18n="help.sections.web_config">网页配置</a></li>
-                    <li><a href="#yaml-config" data-i18n="help.sections.yaml_config">YAML配置</a></li>
-                    <li><a href="#ssh-config" data-i18n="help.sections.ssh_config">SSH配置</a></li>
-                    <li><a href="#interactive-auth-cli" data-i18n="help.sections.interactive_auth_cli">交互认证命令行</a></li>
-                    <li><a href="#advanced" data-i18n="help.sections.advanced">高级配置</a></li>
-                    <li><a href="#troubleshooting" data-i18n="help.sections.troubleshooting">故障排除</a></li>
+                    <li><a href="#overview" data-i18n="help.sections.overview">Overview</a></li>
+                    <li><a href="#setup" data-i18n="help.sections.setup">Quick Setup</a></li>
+                    <li><a href="#web-config" data-i18n="help.sections.web_config">Web Config</a></li>
+                    <li><a href="#yaml-config" data-i18n="help.sections.yaml_config">YAML Config</a></li>
+                    <li><a href="#ssh-config" data-i18n="help.sections.ssh_config">SSH Config</a></li>
+                    <li><a href="#interactive-auth-cli" data-i18n="help.sections.interactive_auth_cli">Interactive Auth CLI</a></li>
+                    <li><a href="#advanced" data-i18n="help.sections.advanced">Advanced</a></li>
+                    <li><a href="#troubleshooting" data-i18n="help.sections.troubleshooting">Troubleshooting</a></li>
                 </ul>
             </div>
 
@@ -86,126 +88,110 @@
             <div class="help-content">
                 <!-- Overview Section -->
                 <section id="overview" class="help-section">
-                    <h2><i class="material-icons">info</i> <span data-i18n="help.overview.title">概述</span></h2>
+                    <h2><i class="material-icons">info</i> <span data-i18n="help.overview.title">Overview</span></h2>
                     <div class="help-card">
-                        <p data-i18n="help.overview.description">SSH Tunnel Manager 是一个基于 Docker 的解决方案，使用 autossh 和 YAML
-                            配置文件来管理 SSH 隧道。</p>
-
-                        <h4 data-i18n="help.overview.features.title">主要功能：</h4>
+                        <p data-i18n="help.overview.description">SSH Tunnel Manager is a Docker-based solution for managing SSH tunnels using autossh and YAML configuration files.</p>
+                        <h4 data-i18n="help.overview.features.title">Key Features:</h4>
                         <ul>
-                            <li><strong data-i18n="help.overview.features.dockerized">Docker化：环境封装，易于部署和管理</strong></li>
-                            <li><strong data-i18n="help.overview.features.web_config">网页配置：通过可视化界面管理隧道配置</strong></li>
-                            <li><strong data-i18n="help.overview.features.auto_reload">自动重载：检测配置变化并自动重载服务</strong></li>
-                            <li><strong data-i18n="help.overview.features.bidirectional">双向隧道：支持本地到远程和远程到本地的隧道</strong>
-                            </li>
-                            <li><strong data-i18n="help.overview.features.multi_arch">多架构支持：支持 AMD64、ARM64
-                                    等多种架构</strong></li>
+                            <li><strong data-i18n="help.overview.features.dockerized">Dockerized: Environment encapsulation, easy to deploy and manage</strong></li>
+                            <li><strong data-i18n="help.overview.features.web_config">Web Config: Visual interface for managing tunnel configurations</strong></li>
+                            <li><strong data-i18n="help.overview.features.auto_reload">Auto Reload: Detects configuration changes and automatically reloads services</strong></li>
+                            <li><strong data-i18n="help.overview.features.bidirectional">Bidirectional Tunnels: Supports both local-to-remote and remote-to-local tunnels</strong></li>
+                            <li><strong data-i18n="help.overview.features.multi_arch">Multi-arch Support: Supports AMD64, ARM64 and more architectures</strong></li>
                         </ul>
                     </div>
                 </section>
 
                 <!-- Quick Setup Section -->
                 <section id="setup" class="help-section">
-                    <h2><i class="material-icons">rocket_launch</i> <span data-i18n="help.setup.title">快速设置</span></h2>
+                    <h2><i class="material-icons">rocket_launch</i> <span data-i18n="help.setup.title">Quick Setup</span></h2>
                     <div class="help-card">
-                        <h4 data-i18n="help.setup.step1">1. 下载配置文件</h4>
+                        <h4 data-i18n="help.setup.step1">1. Download Configuration Files</h4>
                         <div class="code-block">
                             <pre><code>mkdir autossh-tunnel
 cd autossh-tunnel
 
-# <span data-i18n="help.setup.step1_desc">下载 docker-compose.yaml</span>
+# <span data-i18n="help.setup.step1_desc">Download docker-compose.yaml</span>
 curl -O https://oaklight.github.io/autossh-tunnel-dockerized/compose.yaml
 
-# <span data-i18n="help.setup.step1_create">创建配置目录</span>
+# <span data-i18n="help.setup.step1_create">Create config directory</span>
 mkdir config
 touch config/config.yaml</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.setup.step2">2. 配置用户权限</h4>
+                        <h4 data-i18n="help.setup.step2">2. Configure User Permissions</h4>
                         <div class="code-block">
-                            <pre><code># <span data-i18n="help.setup.step2_check">查看当前用户 UID/GID</span>
+                            <pre><code># <span data-i18n="help.setup.step2_check">Check current user UID/GID</span>
 id
 
-# <span data-i18n="help.setup.step2_set">设置环境变量</span>
+# <span data-i18n="help.setup.step2_set">Set environment variables</span>
 export PUID=$(id -u)
 export PGID=$(id -g)</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.setup.step3">3. 启动服务</h4>
+                        <h4 data-i18n="help.setup.step3">3. Start Services</h4>
                         <div class="code-block">
                             <pre><code>docker compose up -d</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.setup.step4">4. 访问网页界面</h4>
-                        <p><span data-i18n="help.setup.step4_desc">打开浏览器访问：</span><a href="http://localhost:5000"
-                                target="_blank" data-i18n="help.setup.access_url">http://localhost:5000</a></p>
+                        <h4 data-i18n="help.setup.step4">4. Access Web Interface</h4>
+                        <p><span data-i18n="help.setup.step4_desc">Open browser and visit: </span><a href="http://localhost:5000" target="_blank" data-i18n="help.setup.access_url">http://localhost:5000</a></p>
                     </div>
                 </section>
 
                 <!-- Web Configuration Section -->
                 <section id="web-config" class="help-section">
-                    <h2><i class="material-icons">web</i> <span data-i18n="help.web_config.title">网页配置</span></h2>
+                    <h2><i class="material-icons">web</i> <span data-i18n="help.web_config.title">Web Configuration</span></h2>
                     <div class="help-card">
-                        <h4 data-i18n="help.web_config.interface.title">界面说明：</h4>
+                        <h4 data-i18n="help.web_config.interface.title">Interface Description:</h4>
                         <ul>
-                            <li><strong data-i18n="help.web_config.interface.name">Name：隧道名称，用于标识</strong></li>
-                            <li><strong data-i18n="help.web_config.interface.status">Status：隧道当前状态（运行/停止/错误）</strong>
-                            </li>
-                            <li><strong data-i18n="help.web_config.interface.remote_host">Remote
-                                    Host：远程主机地址（如：user@server.com）</strong></li>
-                            <li><strong data-i18n="help.web_config.interface.remote_port">Remote
-                                    Port：远程端口或主机:端口格式</strong></li>
-                            <li><strong data-i18n="help.web_config.interface.local_port">Local
-                                    Port：本地端口或IP:端口格式</strong></li>
-                            <li><strong
-                                    data-i18n="help.web_config.interface.direction">Direction：隧道方向（远程到本地/本地到远程）</strong>
-                            </li>
-                            <li><strong data-i18n="help.web_config.interface.actions">Actions：操作按钮（交互认证/删除）</strong>
-                            </li>
+                            <li><strong data-i18n="help.web_config.interface.name">Name: Tunnel name for identification</strong></li>
+                            <li><strong data-i18n="help.web_config.interface.status">Status: Current tunnel status (Running/Stopped/Error)</strong></li>
+                            <li><strong data-i18n="help.web_config.interface.remote_host">Remote Host: Remote host address (e.g., user@server.com)</strong></li>
+                            <li><strong data-i18n="help.web_config.interface.remote_port">Remote Port: Remote port or host:port format</strong></li>
+                            <li><strong data-i18n="help.web_config.interface.local_port">Local Port: Local port or IP:port format</strong></li>
+                            <li><strong data-i18n="help.web_config.interface.direction">Direction: Tunnel direction (Remote to Local / Local to Remote)</strong></li>
+                            <li><strong data-i18n="help.web_config.interface.actions">Actions: Action buttons (Interactive Auth / Delete)</strong></li>
                         </ul>
 
-                        <h4 data-i18n="help.web_config.interactive_auth.title">交互认证：</h4>
-                        <p data-i18n="help.web_config.interactive_auth.description">点击指纹图标可以切换交互认证状态：</p>
+                        <h4 data-i18n="help.web_config.interactive_auth.title">Interactive Auth:</h4>
+                        <p data-i18n="help.web_config.interactive_auth.description">Click the fingerprint icon to toggle interactive auth status:</p>
                         <ul>
-                            <li><span style="color: #4caf50;" data-i18n="help.web_config.interactive_auth.enabled">🫆
-                                    绿色：启用交互认证</span></li>
-                            <li><span style="color: #9e9e9e;" data-i18n="help.web_config.interactive_auth.disabled">🫆
-                                    灰色：禁用交互认证</span></li>
+                            <li><span style="color: var(--success);" data-i18n="help.web_config.interactive_auth.enabled">Green: Interactive auth enabled</span></li>
+                            <li><span style="color: var(--text-secondary);" data-i18n="help.web_config.interactive_auth.disabled">Gray: Interactive auth disabled</span></li>
                         </ul>
 
-                        <h4 data-i18n="help.web_config.save_config.title">保存配置：</h4>
-                        <p data-i18n="help.web_config.save_config.description">点击 <strong style="color: #ff9800;">Save &
-                                Restart</strong> 按钮保存配置并重启隧道服务。</p>
+                        <h4 data-i18n="help.web_config.save_config.title">Save Configuration:</h4>
+                        <p data-i18n="help.web_config.save_config.description">Click the <strong style="color: var(--warning);">Save & Restart</strong> button to save configuration and restart tunnel services.</p>
 
-                        <h4 data-i18n="help.web_config.tunnel_detail.title">隧道详情页面：</h4>
-                        <p data-i18n="help.web_config.tunnel_detail.description">点击主页面表格中的隧道名称可以打开该隧道的详情页面。</p>
-                        <p data-i18n="help.web_config.tunnel_detail.features">详情页面提供以下功能：</p>
+                        <h4 data-i18n="help.web_config.tunnel_detail.title">Tunnel Detail Page:</h4>
+                        <p data-i18n="help.web_config.tunnel_detail.description">Click the tunnel name in the main page table to open the tunnel detail page.</p>
+                        <p data-i18n="help.web_config.tunnel_detail.features">The detail page provides the following features:</p>
                         <ul>
-                            <li data-i18n="help.web_config.tunnel_detail.feature_config">查看隧道的完整配置信息</li>
-                            <li data-i18n="help.web_config.tunnel_detail.feature_control">启动、重启或停止隧道</li>
-                            <li data-i18n="help.web_config.tunnel_detail.feature_logs">实时查看隧道日志</li>
-                            <li data-i18n="help.web_config.tunnel_detail.feature_status">监控隧道运行状态</li>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_config">View complete tunnel configuration</li>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_control">Start, restart, or stop the tunnel</li>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_logs">View real-time tunnel logs</li>
+                            <li data-i18n="help.web_config.tunnel_detail.feature_status">Monitor tunnel running status</li>
                         </ul>
                     </div>
                 </section>
 
                 <!-- YAML Configuration Section -->
                 <section id="yaml-config" class="help-section">
-                    <h2><i class="material-icons">description</i> <span data-i18n="help.yaml_config.title">YAML配置</span>
-                    </h2>
+                    <h2><i class="material-icons">description</i> <span data-i18n="help.yaml_config.title">YAML Configuration</span></h2>
                     <div class="help-card">
-                        <h4 data-i18n="help.yaml_config.basic_format">基本格式：</h4>
+                        <h4 data-i18n="help.yaml_config.basic_format">Basic Format:</h4>
                         <div class="code-block">
                             <pre><code>tunnels:
-  # <span data-i18n="help.yaml_config.basic_comment1">将本地服务暴露到远程服务器</span>
+  # <span data-i18n="help.yaml_config.basic_comment1">Expose local service to remote server</span>
   - name: "web-service"
     remote_host: "user@remote-host1"
     remote_port: 22323
     local_port: 18120
     direction: local_to_remote
     interactive: false
-    
-  # <span data-i18n="help.yaml_config.basic_comment2">将远程服务映射到本地端口</span>
+
+  # <span data-i18n="help.yaml_config.basic_comment2">Map remote service to local port</span>
   - name: "database"
     remote_host: "user@remote-host2"
     remote_port: 8000
@@ -214,16 +200,16 @@ export PGID=$(id -g)</code></pre>
     interactive: true</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.yaml_config.advanced_format">高级配置 - 指定绑定地址：</h4>
+                        <h4 data-i18n="help.yaml_config.advanced_format">Advanced - Specify Bind Address:</h4>
                         <div class="code-block">
                             <pre><code>tunnels:
-  # <span data-i18n="help.yaml_config.advanced_comment1">指定远程绑定地址</span>
+  # <span data-i18n="help.yaml_config.advanced_comment1">Specify remote bind address</span>
   - remote_host: "user@server"
     remote_port: "192.168.45.130:22323"
     local_port: 18120
     direction: local_to_remote
-    
-  # <span data-i18n="help.yaml_config.advanced_comment2">指定本地绑定地址</span>
+
+  # <span data-i18n="help.yaml_config.advanced_comment2">Specify local bind address</span>
   - remote_host: "user@server"
     remote_port: 22323
     local_port: "192.168.1.100:18120"
@@ -234,13 +220,11 @@ export PGID=$(id -g)</code></pre>
 
                 <!-- SSH Configuration Section -->
                 <section id="ssh-config" class="help-section">
-                    <h2><i class="material-icons">vpn_key</i> <span data-i18n="help.ssh_config.title">SSH配置</span></h2>
+                    <h2><i class="material-icons">vpn_key</i> <span data-i18n="help.ssh_config.title">SSH Configuration</span></h2>
                     <div class="help-card">
-                        <p><strong data-i18n="help.ssh_config.important">重要</strong>：<span
-                                data-i18n="help.ssh_config.important_desc">本项目严重依赖 <code>~/.ssh/config</code> 文件进行 SSH
-                                连接配置。</span></p>
+                        <p><strong data-i18n="help.ssh_config.important">Important</strong>: <span data-i18n="help.ssh_config.important_desc">This project relies heavily on <code>~/.ssh/config</code> for SSH connection configuration.</span></p>
 
-                        <h4 data-i18n="help.ssh_config.example">SSH配置文件示例 (~/.ssh/config)：</h4>
+                        <h4 data-i18n="help.ssh_config.example">SSH Config Example (~/.ssh/config):</h4>
                         <div class="code-block">
                             <pre><code>Host myserver
     HostName 192.168.1.100
@@ -258,7 +242,7 @@ Host production
     ProxyJump bastion</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.ssh_config.permissions">SSH密钥权限：</h4>
+                        <h4 data-i18n="help.ssh_config.permissions">SSH Key Permissions:</h4>
                         <div class="code-block">
                             <pre><code>chmod 700 ~/.ssh
 chmod 600 ~/.ssh/*
@@ -269,153 +253,128 @@ chmod 644 ~/.ssh/*.pub</code></pre>
 
                 <!-- Interactive Auth CLI Section -->
                 <section id="interactive-auth-cli" class="help-section">
-                    <h2><i class="material-icons">terminal</i> <span
-                            data-i18n="help.interactive_auth_cli.title">交互认证命令行</span></h2>
+                    <h2><i class="material-icons">terminal</i> <span data-i18n="help.interactive_auth_cli.title">Interactive Auth CLI</span></h2>
                     <div class="help-card">
-                        <p data-i18n="help.interactive_auth_cli.description">对于需要双因素认证（2FA）或密码认证的 SSH 服务器，您需要使用
-                            autossh-cli 命令行工具进行交互式认证。</p>
+                        <p data-i18n="help.interactive_auth_cli.description">For SSH servers requiring 2FA or password authentication, use the autossh-cli command line tool for interactive authentication.</p>
 
-                        <h4 data-i18n="help.interactive_auth_cli.when_to_use.title">何时使用：</h4>
+                        <h4 data-i18n="help.interactive_auth_cli.when_to_use.title">When to Use:</h4>
                         <ul>
-                            <li data-i18n="help.interactive_auth_cli.when_to_use.2fa">服务器启用了双因素认证（2FA/MFA）</li>
-                            <li data-i18n="help.interactive_auth_cli.when_to_use.password">服务器需要密码认证而非密钥认证</li>
-                            <li data-i18n="help.interactive_auth_cli.when_to_use.keyboard">服务器使用键盘交互式认证</li>
+                            <li data-i18n="help.interactive_auth_cli.when_to_use.2fa">Server has 2FA/MFA enabled</li>
+                            <li data-i18n="help.interactive_auth_cli.when_to_use.password">Server requires password authentication instead of key-based</li>
+                            <li data-i18n="help.interactive_auth_cli.when_to_use.keyboard">Server uses keyboard-interactive authentication</li>
                         </ul>
 
-                        <h4 data-i18n="help.interactive_auth_cli.usage.title">使用方法：</h4>
-                        <p data-i18n="help.interactive_auth_cli.usage.intro">按照以下步骤启动交互式隧道：</p>
+                        <h4 data-i18n="help.interactive_auth_cli.usage.title">Usage:</h4>
+                        <p data-i18n="help.interactive_auth_cli.usage.intro">Follow these steps to start an interactive tunnel:</p>
                         <ol>
-                            <li data-i18n="help.interactive_auth_cli.usage.step1">在网页界面启用隧道的交互认证选项</li>
-                            <li data-i18n="help.interactive_auth_cli.usage.step2">保存配置后，获取隧道的哈希值</li>
-                            <li data-i18n="help.interactive_auth_cli.usage.step3">使用以下命令启动交互式隧道</li>
+                            <li data-i18n="help.interactive_auth_cli.usage.step1">Enable interactive auth in the web interface</li>
+                            <li data-i18n="help.interactive_auth_cli.usage.step2">After saving config, get the tunnel hash</li>
+                            <li data-i18n="help.interactive_auth_cli.usage.step3">Use the following command to start the interactive tunnel</li>
                         </ol>
 
-                        <h4 data-i18n="help.interactive_auth_cli.commands.title">命令示例：</h4>
+                        <h4 data-i18n="help.interactive_auth_cli.commands.title">Command Examples:</h4>
 
-                        <p data-i18n="help.interactive_auth_cli.commands.docker_compose_desc">使用 docker compose（推荐）：</p>
-                        <div class="code-block copyable"
-                            data-copy-text="docker compose exec -it -u myuser autossh autossh-cli auth <hash>">
-                            <button class="copy-button" title="Copy to clipboard"
-                                data-i18n-title="messages.click_to_copy">
+                        <p data-i18n="help.interactive_auth_cli.commands.docker_compose_desc">Using docker compose (recommended):</p>
+                        <div class="code-block copyable" data-copy-text="docker compose exec -it -u myuser autossh autossh-cli auth <hash>">
+                            <button class="copy-button" title="Copy to clipboard" data-i18n-title="messages.click_to_copy">
                                 <i class="material-icons">content_copy</i>
                             </button>
                             <pre><code>docker compose exec -it -u myuser autossh autossh-cli auth &lt;hash&gt;</code></pre>
                         </div>
 
-                        <p data-i18n="help.interactive_auth_cli.commands.docker_exec_desc">使用 docker exec（需要容器名称）：</p>
-                        <div class="code-block copyable"
-                            data-copy-text="docker exec -it -u myuser autossh-tunnel-autossh-1 autossh-cli auth <hash>">
-                            <button class="copy-button" title="Copy to clipboard"
-                                data-i18n-title="messages.click_to_copy">
+                        <p data-i18n="help.interactive_auth_cli.commands.docker_exec_desc">Using docker exec (requires container name):</p>
+                        <div class="code-block copyable" data-copy-text="docker exec -it -u myuser autossh-tunnel-autossh-1 autossh-cli auth <hash>">
+                            <button class="copy-button" title="Copy to clipboard" data-i18n-title="messages.click_to_copy">
                                 <i class="material-icons">content_copy</i>
                             </button>
                             <pre><code>docker exec -it -u myuser autossh-tunnel-autossh-1 autossh-cli auth &lt;hash&gt;</code></pre>
                         </div>
 
-                        <p><span data-i18n="help.interactive_auth_cli.commands.example_prefix">示例（使用 8 位哈希前缀）：</span>
-                        </p>
-                        <div class="code-block copyable"
-                            data-copy-text="docker compose exec -it -u myuser autossh autossh-cli auth 7b840f83">
-                            <button class="copy-button" title="Copy to clipboard"
-                                data-i18n-title="messages.click_to_copy">
+                        <p><span data-i18n="help.interactive_auth_cli.commands.example_prefix">Example (using 8-char hash prefix):</span></p>
+                        <div class="code-block copyable" data-copy-text="docker compose exec -it -u myuser autossh autossh-cli auth 7b840f83">
+                            <button class="copy-button" title="Copy to clipboard" data-i18n-title="messages.click_to_copy">
                                 <i class="material-icons">content_copy</i>
                             </button>
                             <pre><code>docker compose exec -it -u myuser autossh autossh-cli auth 7b840f83</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.interactive_auth_cli.hash_prefix.title">哈希前缀支持：</h4>
-                        <p data-i18n="help.interactive_auth_cli.hash_prefix.description">类似于 Git 的短哈希，您可以使用 8
-                            个或更多字符的哈希前缀来标识隧道。</p>
+                        <h4 data-i18n="help.interactive_auth_cli.hash_prefix.title">Hash Prefix Support:</h4>
+                        <p data-i18n="help.interactive_auth_cli.hash_prefix.description">Similar to Git short hashes, you can use 8 or more characters of the hash prefix to identify a tunnel.</p>
 
-                        <h4 data-i18n="help.interactive_auth_cli.other_commands.title">其他常用命令：</h4>
+                        <h4 data-i18n="help.interactive_auth_cli.other_commands.title">Other Common Commands:</h4>
 
-                        <p data-i18n="help.interactive_auth_cli.other_commands.list">列出所有配置的隧道：</p>
-                        <div class="code-block copyable"
-                            data-copy-text="docker compose exec -u myuser autossh autossh-cli list">
-                            <button class="copy-button" title="Copy to clipboard"
-                                data-i18n-title="messages.click_to_copy">
+                        <p data-i18n="help.interactive_auth_cli.other_commands.list">List all configured tunnels:</p>
+                        <div class="code-block copyable" data-copy-text="docker compose exec -u myuser autossh autossh-cli list">
+                            <button class="copy-button" title="Copy to clipboard" data-i18n-title="messages.click_to_copy">
                                 <i class="material-icons">content_copy</i>
                             </button>
                             <pre><code>docker compose exec -u myuser autossh autossh-cli list</code></pre>
                         </div>
 
-                        <p data-i18n="help.interactive_auth_cli.other_commands.status">查看隧道状态：</p>
-                        <div class="code-block copyable"
-                            data-copy-text="docker compose exec -u myuser autossh autossh-cli status">
-                            <button class="copy-button" title="Copy to clipboard"
-                                data-i18n-title="messages.click_to_copy">
+                        <p data-i18n="help.interactive_auth_cli.other_commands.status">View tunnel status:</p>
+                        <div class="code-block copyable" data-copy-text="docker compose exec -u myuser autossh autossh-cli status">
+                            <button class="copy-button" title="Copy to clipboard" data-i18n-title="messages.click_to_copy">
                                 <i class="material-icons">content_copy</i>
                             </button>
                             <pre><code>docker compose exec -u myuser autossh autossh-cli status</code></pre>
                         </div>
 
-                        <p data-i18n="help.interactive_auth_cli.other_commands.logs">查看特定隧道的日志：</p>
-                        <div class="code-block copyable"
-                            data-copy-text="docker compose exec -u myuser autossh autossh-cli logs <hash>">
-                            <button class="copy-button" title="Copy to clipboard"
-                                data-i18n-title="messages.click_to_copy">
+                        <p data-i18n="help.interactive_auth_cli.other_commands.logs">View logs for a specific tunnel:</p>
+                        <div class="code-block copyable" data-copy-text="docker compose exec -u myuser autossh autossh-cli logs <hash>">
+                            <button class="copy-button" title="Copy to clipboard" data-i18n-title="messages.click_to_copy">
                                 <i class="material-icons">content_copy</i>
                             </button>
                             <pre><code>docker compose exec -u myuser autossh autossh-cli logs &lt;hash&gt;</code></pre>
                         </div>
 
-                        <p data-i18n="help.interactive_auth_cli.other_commands.stop">停止特定隧道：</p>
-                        <div class="code-block copyable"
-                            data-copy-text="docker compose exec -u myuser autossh autossh-cli stop-tunnel <hash>">
-                            <button class="copy-button" title="Copy to clipboard"
-                                data-i18n-title="messages.click_to_copy">
+                        <p data-i18n="help.interactive_auth_cli.other_commands.stop">Stop a specific tunnel:</p>
+                        <div class="code-block copyable" data-copy-text="docker compose exec -u myuser autossh autossh-cli stop-tunnel <hash>">
+                            <button class="copy-button" title="Copy to clipboard" data-i18n-title="messages.click_to_copy">
                                 <i class="material-icons">content_copy</i>
                             </button>
                             <pre><code>docker compose exec -u myuser autossh autossh-cli stop-tunnel &lt;hash&gt;</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.interactive_auth_cli.notes.title">注意事项：</h4>
+                        <h4 data-i18n="help.interactive_auth_cli.notes.title">Notes:</h4>
                         <ul>
-                            <li data-i18n="help.interactive_auth_cli.notes.tty">必须使用 <code>-it</code> 参数以启用交互式终端</li>
-                            <li data-i18n="help.interactive_auth_cli.notes.user">使用 <code>-u myuser</code> 指定正确的用户身份
-                            </li>
-                            <li data-i18n="help.interactive_auth_cli.notes.foreground">交互式隧道会在前台运行，认证成功后会自动转入后台</li>
-                            <li data-i18n="help.interactive_auth_cli.notes.web_disabled">启用交互认证的隧道暂时无法通过网页界面启动，必须使用命令行
-                            </li>
+                            <li data-i18n="help.interactive_auth_cli.notes.tty">Must use <code>-it</code> flag to enable interactive terminal</li>
+                            <li data-i18n="help.interactive_auth_cli.notes.user">Use <code>-u myuser</code> to specify the correct user identity</li>
+                            <li data-i18n="help.interactive_auth_cli.notes.foreground">Interactive tunnel runs in foreground, automatically moves to background after authentication</li>
+                            <li data-i18n="help.interactive_auth_cli.notes.web_disabled">Tunnels with interactive auth cannot be started via web interface, must use CLI</li>
                         </ul>
                     </div>
                 </section>
 
                 <!-- Advanced Configuration Section -->
                 <section id="advanced" class="help-section">
-                    <h2><i class="material-icons">settings</i> <span data-i18n="help.advanced.title">高级配置</span></h2>
+                    <h2><i class="material-icons">settings</i> <span data-i18n="help.advanced.title">Advanced Configuration</span></h2>
                     <div class="help-card">
-                        <h4 data-i18n="help.advanced.env_vars">环境变量：</h4>
+                        <h4 data-i18n="help.advanced.env_vars">Environment Variables:</h4>
                         <ul>
-                            <li><code>PUID</code>：<span data-i18n="help.advanced.env_puid">容器用户 UID（默认：1000）</span></li>
-                            <li><code>PGID</code>：<span data-i18n="help.advanced.env_pgid">容器用户 GID（默认：1000）</span></li>
+                            <li><code>PUID</code>: <span data-i18n="help.advanced.env_puid">Container user UID (default: 1000)</span></li>
+                            <li><code>PGID</code>: <span data-i18n="help.advanced.env_pgid">Container user GID (default: 1000)</span></li>
                         </ul>
 
-                        <h4 data-i18n="help.advanced.port_formats">端口格式：</h4>
+                        <h4 data-i18n="help.advanced.port_formats">Port Formats:</h4>
                         <ul>
-                            <li><strong data-i18n="help.advanced.port_simple">简单端口</strong>：<code>8080</code></li>
-                            <li><strong
-                                    data-i18n="help.advanced.port_hostname">主机:端口</strong>：<code>hostname:8080</code>
-                            </li>
-                            <li><strong data-i18n="help.advanced.port_ip">IP:端口</strong>：<code>192.168.1.100:8080</code>
-                            </li>
+                            <li><strong data-i18n="help.advanced.port_simple">Simple port</strong>: <code>8080</code></li>
+                            <li><strong data-i18n="help.advanced.port_hostname">Host:port</strong>: <code>hostname:8080</code></li>
+                            <li><strong data-i18n="help.advanced.port_ip">IP:port</strong>: <code>192.168.1.100:8080</code></li>
                         </ul>
 
-                        <h4 data-i18n="help.advanced.tunnel_directions">隧道方向：</h4>
+                        <h4 data-i18n="help.advanced.tunnel_directions">Tunnel Directions:</h4>
                         <ul>
-                            <li><code>remote_to_local</code>：<span
-                                    data-i18n="help.advanced.direction_r2l">将远程服务映射到本地（默认）</span></li>
-                            <li><code>local_to_remote</code>：<span
-                                    data-i18n="help.advanced.direction_l2r">将本地服务暴露到远程</span></li>
+                            <li><code>remote_to_local</code>: <span data-i18n="help.advanced.direction_r2l">Map remote service to local (default)</span></li>
+                            <li><code>local_to_remote</code>: <span data-i18n="help.advanced.direction_l2r">Expose local service to remote</span></li>
                         </ul>
 
-                        <h4 data-i18n="help.advanced.security">安全注意事项：</h4>
-                        <p data-i18n="help.advanced.security_desc">启用远程端口转发时，可能需要在远程服务器配置 <code>GatewayPorts</code>：</p>
+                        <h4 data-i18n="help.advanced.security">Security Notes:</h4>
+                        <p data-i18n="help.advanced.security_desc">When enabling remote port forwarding, you may need to configure <code>GatewayPorts</code> on the remote server:</p>
                         <div class="code-block">
-                            <pre><code># <span data-i18n="help.advanced.security_edit">编辑 /etc/ssh/sshd_config</span>
+                            <pre><code># <span data-i18n="help.advanced.security_edit">Edit /etc/ssh/sshd_config</span>
 GatewayPorts clientspecified
 
-# <span data-i18n="help.advanced.security_restart">重启 SSH 服务</span>
+# <span data-i18n="help.advanced.security_restart">Restart SSH service</span>
 sudo systemctl restart sshd</code></pre>
                         </div>
                     </div>
@@ -423,58 +382,53 @@ sudo systemctl restart sshd</code></pre>
 
                 <!-- Troubleshooting Section -->
                 <section id="troubleshooting" class="help-section">
-                    <h2><i class="material-icons">bug_report</i> <span
-                            data-i18n="help.troubleshooting.title">故障排除</span></h2>
+                    <h2><i class="material-icons">bug_report</i> <span data-i18n="help.troubleshooting.title">Troubleshooting</span></h2>
                     <div class="help-card">
-                        <h4 data-i18n="help.troubleshooting.common_issues">常见问题：</h4>
+                        <h4 data-i18n="help.troubleshooting.common_issues">Common Issues:</h4>
 
                         <div class="troubleshoot-item">
-                            <h5 data-i18n="help.troubleshooting.tunnel_failed">🔴 隧道连接失败</h5>
+                            <h5 data-i18n="help.troubleshooting.tunnel_failed">Tunnel Connection Failed</h5>
                             <ul>
-                                <li data-i18n="help.troubleshooting.solutions.check_ssh_config">检查 SSH 配置文件
-                                    <code>~/.ssh/config</code>
-                                </li>
-                                <li data-i18n="help.troubleshooting.solutions.verify_ssh_keys">验证 SSH 密钥权限</li>
-                                <li data-i18n="help.troubleshooting.solutions.confirm_remote_access">确认远程主机可访问</li>
+                                <li data-i18n="help.troubleshooting.solutions.check_ssh_config">Check SSH config file <code>~/.ssh/config</code></li>
+                                <li data-i18n="help.troubleshooting.solutions.verify_ssh_keys">Verify SSH key permissions</li>
+                                <li data-i18n="help.troubleshooting.solutions.confirm_remote_access">Confirm remote host is accessible</li>
                             </ul>
                         </div>
 
                         <div class="troubleshoot-item">
-                            <h5 data-i18n="help.troubleshooting.permission_error">🔴 权限错误</h5>
+                            <h5 data-i18n="help.troubleshooting.permission_error">Permission Error</h5>
                             <ul>
-                                <li data-i18n="help.troubleshooting.solutions.check_puid_pgid">检查 PUID/PGID 设置</li>
-                                <li data-i18n="help.troubleshooting.solutions.confirm_ssh_permissions">确认 SSH 密钥文件权限
-                                </li>
-                                <li data-i18n="help.troubleshooting.solutions.verify_docker_permissions">验证 Docker 用户组权限
-                                </li>
+                                <li data-i18n="help.troubleshooting.solutions.check_puid_pgid">Check PUID/PGID settings</li>
+                                <li data-i18n="help.troubleshooting.solutions.confirm_ssh_permissions">Confirm SSH key file permissions</li>
+                                <li data-i18n="help.troubleshooting.solutions.verify_docker_permissions">Verify Docker user group permissions</li>
                             </ul>
                         </div>
 
                         <div class="troubleshoot-item">
-                            <h5 data-i18n="help.troubleshooting.config_not_effective">🔴 配置不生效</h5>
+                            <h5 data-i18n="help.troubleshooting.config_not_effective">Configuration Not Taking Effect</h5>
                             <ul>
-                                <li data-i18n="help.troubleshooting.solutions.check_yaml_syntax">检查 YAML 语法是否正确</li>
-                                <li data-i18n="help.troubleshooting.solutions.confirm_config_path">确认配置文件路径</li>
-                                <li data-i18n="help.troubleshooting.solutions.restart_container">重启容器服务</li>
+                                <li data-i18n="help.troubleshooting.solutions.check_yaml_syntax">Check YAML syntax</li>
+                                <li data-i18n="help.troubleshooting.solutions.confirm_config_path">Confirm config file path</li>
+                                <li data-i18n="help.troubleshooting.solutions.restart_container">Restart container services</li>
                             </ul>
                         </div>
 
-                        <h4 data-i18n="help.troubleshooting.view_logs">查看日志：</h4>
+                        <h4 data-i18n="help.troubleshooting.view_logs">View Logs:</h4>
                         <div class="code-block">
-                            <pre><code># <span data-i18n="help.troubleshooting.view_logs_all">查看所有服务日志</span>
+                            <pre><code># <span data-i18n="help.troubleshooting.view_logs_all">View all service logs</span>
 docker compose logs -f
 
-# <span data-i18n="help.troubleshooting.view_logs_specific">查看特定服务日志</span>
+# <span data-i18n="help.troubleshooting.view_logs_specific">View specific service logs</span>
 docker compose logs -f autossh
 docker compose logs -f web</code></pre>
                         </div>
 
-                        <h4 data-i18n="help.troubleshooting.restart_services">重启服务：</h4>
+                        <h4 data-i18n="help.troubleshooting.restart_services">Restart Services:</h4>
                         <div class="code-block">
-                            <pre><code># <span data-i18n="help.troubleshooting.restart_all">重启所有服务</span>
+                            <pre><code># <span data-i18n="help.troubleshooting.restart_all">Restart all services</span>
 docker compose restart
 
-# <span data-i18n="help.troubleshooting.restart_specific">重启特定服务</span>
+# <span data-i18n="help.troubleshooting.restart_specific">Restart specific service</span>
 docker compose restart autossh</code></pre>
                         </div>
                     </div>
@@ -483,110 +437,21 @@ docker compose restart autossh</code></pre>
         </div>
     </main>
 
-    <!-- Material Design JavaScript (local) -->
-    <script src="/static/vendor/material-components-web.min.js"></script>
-    <!-- Internationalization -->
-    <script src="/static/i18n.js"></script>
-    <!-- Universal Tooltip System -->
-    <script src="/static/tooltip.js"></script>
+    <!-- Scripts -->
+    <script src="/static/i18n.js?v=3"></script>
+    <script src="/static/tooltip.js?v=3"></script>
 
-    <!-- Help Page JavaScript -->
+    <!-- Help Page JavaScript (TOC + copy) -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize corner icon links
-            const dockerhubLink = document.getElementById('dockerhub-link');
-            const githubLink = document.getElementById('github-link');
-
-            // Set URLs from configuration
-            if (window.PROJECT_CONFIG) {
-                dockerhubLink.href = window.PROJECT_CONFIG.dockerHubUrl;
-                githubLink.href = window.PROJECT_CONFIG.githubUrl;
-            }
-
-            // Language dropdown functionality
-            const languageToggle = document.getElementById('languageToggle');
-            const languageDropdown = document.getElementById('languageDropdown');
-
-            // Initialize language dropdown
-            function initLanguageDropdown() {
-                if (!window.i18n) return;
-
-                const supportedLanguages = window.i18n.getSupportedLanguages();
-                const currentLang = window.i18n.getCurrentLanguage();
-
-                // Clear existing options
-                languageDropdown.innerHTML = '';
-
-                // Add language options
-                supportedLanguages.forEach(lang => {
-                    const item = document.createElement('button');
-                    item.className = 'language-dropdown-item';
-                    if (lang.code === currentLang) {
-                        item.classList.add('active');
-                    }
-
-                    // Display language name only
-                    item.textContent = lang.name;
-
-                    item.addEventListener('click', function (e) {
-                        e.stopPropagation();
-                        if (lang.code !== currentLang) {
-                            window.i18n.switchLanguage(lang.code);
-                        }
-                        hideLanguageDropdown();
-                    });
-
-                    languageDropdown.appendChild(item);
-                });
-            }
-
-            // Show dropdown
-            function showLanguageDropdown() {
-                initLanguageDropdown();
-                languageDropdown.classList.add('show');
-                document.addEventListener('click', hideLanguageDropdown);
-            }
-
-            // Hide dropdown
-            function hideLanguageDropdown() {
-                languageDropdown.classList.remove('show');
-                document.removeEventListener('click', hideLanguageDropdown);
-            }
-
-            // Toggle dropdown on button click
-            languageToggle.addEventListener('click', function (e) {
-                e.stopPropagation();
-                if (languageDropdown.classList.contains('show')) {
-                    hideLanguageDropdown();
-                } else {
-                    showLanguageDropdown();
-                }
-            });
-
-            // Update dropdown when language changes
-            window.addEventListener('languageChanged', function () {
-                if (languageDropdown.classList.contains('show')) {
-                    initLanguageDropdown();
-                }
-            });
-
-            // Initialize dropdown when i18n is ready
-            window.addEventListener('i18nReady', function () {
-                initLanguageDropdown();
-            });
-
             // Smooth scrolling for TOC links
-            const tocLinks = document.querySelectorAll('.help-toc a');
-            tocLinks.forEach(link => {
+            document.querySelectorAll('.help-toc a').forEach(link => {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
                     const targetId = this.getAttribute('href').substring(1);
                     const targetElement = document.getElementById(targetId);
                     if (targetElement) {
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 });
             });
@@ -598,13 +463,10 @@ docker compose restart autossh</code></pre>
             function highlightCurrentSection() {
                 let current = '';
                 sections.forEach(section => {
-                    const sectionTop = section.offsetTop;
-                    const sectionHeight = section.clientHeight;
-                    if (window.pageYOffset >= sectionTop - 100) {
+                    if (window.pageYOffset >= section.offsetTop - 100) {
                         current = section.getAttribute('id');
                     }
                 });
-
                 tocItems.forEach(item => {
                     item.classList.remove('active');
                     if (item.getAttribute('href') === '#' + current) {
@@ -614,9 +476,9 @@ docker compose restart autossh</code></pre>
             }
 
             window.addEventListener('scroll', highlightCurrentSection);
-            highlightCurrentSection(); // Initial call
+            highlightCurrentSection();
 
-            // Copy to clipboard functionality for code blocks
+            // Copy to clipboard for code blocks
             document.querySelectorAll('.code-block.copyable .copy-button').forEach(button => {
                 button.addEventListener('click', async function () {
                     const codeBlock = this.closest('.code-block');
@@ -624,18 +486,14 @@ docker compose restart autossh</code></pre>
 
                     try {
                         await navigator.clipboard.writeText(textToCopy);
-
-                        // Show success feedback
                         const icon = this.querySelector('i');
                         const originalIcon = icon.textContent;
                         icon.textContent = 'check';
                         this.classList.add('copied');
 
-                        // Show toast message
                         const message = window.i18n ? window.i18n.t('messages.hash_copied') : 'Copied to clipboard';
                         showCopyToast(message);
 
-                        // Reset after 2 seconds
                         setTimeout(() => {
                             icon.textContent = originalIcon;
                             this.classList.remove('copied');
@@ -648,23 +506,16 @@ docker compose restart autossh</code></pre>
                 });
             });
 
-            // Toast notification for copy feedback
             function showCopyToast(message) {
-                // Remove existing toast if any
                 const existingToast = document.querySelector('.copy-toast');
-                if (existingToast) {
-                    existingToast.remove();
-                }
+                if (existingToast) existingToast.remove();
 
                 const toast = document.createElement('div');
                 toast.className = 'copy-toast';
                 toast.textContent = message;
                 document.body.appendChild(toast);
 
-                // Trigger animation
                 setTimeout(() => toast.classList.add('show'), 10);
-
-                // Remove after 2 seconds
                 setTimeout(() => {
                     toast.classList.remove('show');
                     setTimeout(() => toast.remove(), 300);

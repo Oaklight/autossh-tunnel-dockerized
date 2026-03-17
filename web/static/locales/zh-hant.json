@@ -11,7 +11,13 @@
     "back": "返回",
     "language_toggle": "Language / 語言",
     "language_toggle_prefix": "可用語言",
-    "switch_language": "切換語言"
+    "switch_language": "切換語言",
+    "theme": "切換主題",
+    "color_scheme": "配色方案",
+    "scheme_gold": "金色",
+    "scheme_teal": "青色",
+    "scheme_blue": "藍色",
+    "scheme_slate": "灰色"
   },
   "table": {
     "headers": {

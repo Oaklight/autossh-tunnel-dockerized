@@ -1,52 +1,31 @@
-/* Help Page Specific Styles */
-
-/* Back Button Styling */
-.mdc-top-app-bar__navigation-icon {
-    color: rgba(255, 255, 255, 0.9) !important;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    padding: 8px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.mdc-top-app-bar__navigation-icon:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff !important;
-    transform: scale(1.05);
-}
-
-.mdc-top-app-bar__navigation-icon:active {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(0.95);
-}
+/* Help Page Styles */
 
 .help-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 24px;
     display: grid;
-    grid-template-columns: 250px 1fr;
+    grid-template-columns: 230px 1fr;
     gap: 32px;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 56px);
 }
 
 /* Table of Contents */
 .help-toc {
     position: sticky;
-    top: 88px;
+    top: 80px;
     height: fit-content;
-    background: var(--mdc-theme-surface);
+    background: var(--bg-secondary);
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
 }
 
 .help-toc h3 {
-    margin: 0 0 16px 0;
-    color: var(--mdc-theme-primary);
-    font-size: 1.1rem;
+    margin: 0 0 14px 0;
+    color: var(--accent);
+    font-size: 1rem;
     font-weight: 600;
 }
 
@@ -56,14 +35,10 @@
     margin: 0;
 }
 
-.help-toc li {
-    margin: 0;
-}
-
 .help-toc a {
     display: block;
-    padding: 8px 12px;
-    color: rgba(0, 0, 0, 0.7);
+    padding: 7px 12px;
+    color: var(--text-secondary);
     text-decoration: none;
     border-radius: 6px;
     transition: all 0.2s ease;
@@ -72,113 +47,120 @@
 }
 
 .help-toc a:hover {
-    background-color: rgba(33, 150, 243, 0.08);
-    color: var(--mdc-theme-primary);
-    border-left-color: var(--mdc-theme-primary);
+    background: var(--accent-light);
+    color: var(--accent);
+    border-left-color: var(--accent);
 }
 
 .help-toc a.active {
-    background-color: rgba(33, 150, 243, 0.12);
-    color: var(--mdc-theme-primary);
-    border-left-color: var(--mdc-theme-primary);
+    background: var(--accent-light);
+    color: var(--accent);
+    border-left-color: var(--accent);
     font-weight: 500;
 }
 
 /* Help Content */
 .help-content {
     min-width: 0;
-    /* Prevent grid overflow */
 }
 
 .help-section {
     margin-bottom: 48px;
-    scroll-margin-top: 88px;
-    /* Account for fixed header */
+    scroll-margin-top: 80px;
 }
 
 .help-section h2 {
     display: flex;
     align-items: center;
-    gap: 12px;
-    color: var(--mdc-theme-primary);
-    font-size: 1.8rem;
+    gap: 10px;
+    color: var(--accent);
+    font-size: 1.6rem;
     font-weight: 600;
-    margin: 0 0 20px 0;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--border-color);
+    margin: 0 0 18px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
 }
 
 .help-section h2 .material-icons {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
 }
 
 .help-card {
-    background: var(--mdc-theme-surface);
+    background: var(--bg-secondary);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
     margin-bottom: 16px;
 }
 
 .help-card h4 {
-    color: rgba(0, 0, 0, 0.87);
-    font-size: 1.2rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
     font-weight: 500;
-    margin: 0 0 12px 0;
+    margin: 0 0 10px 0;
 }
 
 .help-card h5 {
-    color: rgba(0, 0, 0, 0.8);
-    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
     font-weight: 500;
-    margin: 16px 0 8px 0;
+    margin: 14px 0 6px 0;
 }
 
 .help-card p {
-    color: rgba(0, 0, 0, 0.7);
-    line-height: 1.6;
-    margin: 0 0 16px 0;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0 0 14px 0;
 }
 
-.help-card ul {
-    color: rgba(0, 0, 0, 0.7);
-    line-height: 1.6;
-    margin: 0 0 16px 0;
-    padding-left: 20px;
+.help-card ul,
+.help-card ol {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0 0 14px 0;
+    padding-left: 22px;
 }
 
 .help-card li {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .help-card code {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--accent-light);
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 0.9em;
-    color: #d32f2f;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 0.88em;
+    color: var(--accent);
 }
 
 /* Code Blocks */
 .code-block {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    margin: 16px 0;
+    margin: 14px 0;
     overflow: hidden;
+}
+
+[data-theme="dark"] .code-block {
+    background: #1a1a1a;
+    border-color: #333;
 }
 
 .code-block pre {
     margin: 0;
-    padding: 16px;
+    padding: 14px 16px;
     overflow-x: auto;
-    background: transparent;
-    color: #333;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 0.9rem;
-    line-height: 1.4;
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+[data-theme="dark"] .code-block pre {
+    color: #d4d4d4;
 }
 
 .code-block code {
@@ -190,16 +172,16 @@
 
 /* Troubleshooting Items */
 .troubleshoot-item {
-    background: rgba(255, 152, 0, 0.05);
-    border-left: 4px solid #ff9800;
-    padding: 16px;
-    margin: 16px 0;
+    background: var(--troubleshoot-bg);
+    border-left: 3px solid var(--warning);
+    padding: 14px 16px;
+    margin: 14px 0;
     border-radius: 0 8px 8px 0;
 }
 
 .troubleshoot-item h5 {
-    margin: 0 0 12px 0;
-    color: #f57c00;
+    margin: 0 0 10px 0;
+    color: var(--warning);
     font-weight: 600;
 }
 
@@ -207,21 +189,88 @@
     margin: 0;
 }
 
-/* Responsive Design */
+/* Copyable Code Blocks */
+.code-block.copyable {
+    position: relative;
+}
+
+.code-block .copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0;
+    z-index: 10;
+}
+
+.code-block.copyable:hover .copy-button {
+    opacity: 1;
+}
+
+.code-block .copy-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.code-block .copy-button .material-icons {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.code-block .copy-button:hover .material-icons {
+    color: var(--accent);
+}
+
+.code-block .copy-button.copied {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.code-block .copy-button.copied .material-icons {
+    color: #fff;
+}
+
+/* Copy Toast */
+.copy-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+}
+
+.copy-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* Responsive */
 @media (max-width: 1024px) {
     .help-container {
-        grid-template-columns: 200px 1fr;
+        grid-template-columns: 190px 1fr;
         gap: 24px;
         padding: 16px;
     }
 
-    .help-toc {
-        padding: 16px;
-    }
-
-    .help-card {
-        padding: 20px;
-    }
+    .help-toc { padding: 16px; }
+    .help-card { padding: 20px; }
 }
 
 @media (max-width: 768px) {
@@ -237,179 +286,37 @@
         margin-top: 24px;
     }
 
-    .help-content {
-        order: 1;
-    }
+    .help-content { order: 1; }
 
-    .help-section h2 {
-        font-size: 1.5rem;
-    }
+    .help-section h2 { font-size: 1.3rem; }
+    .help-section h2 .material-icons { font-size: 1.1rem; }
+    .help-card { padding: 16px; }
+    .code-block pre { padding: 12px; font-size: 0.8rem; }
 
-    .help-section h2 .material-icons {
-        font-size: 1.3rem;
-    }
-
-    .help-card {
-        padding: 16px;
-    }
-
-    .code-block pre {
-        padding: 12px;
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .help-container {
-        padding: 8px;
-    }
-
-    .help-section {
-        margin-bottom: 32px;
-    }
-
-    .help-section h2 {
-        font-size: 1.3rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .help-card {
-        padding: 12px;
-    }
-
-    .help-card h4 {
-        font-size: 1.1rem;
-    }
-
-    .code-block pre {
-        padding: 8px;
-        font-size: 0.75rem;
-    }
-}
-
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Custom scrollbar for code blocks */
-.code-block pre::-webkit-scrollbar {
-    height: 6px;
-}
-
-.code-block pre::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.code-block pre::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-}
-
-.code-block pre::-webkit-scrollbar-thumb:hover {
-    background: #999;
-}
-
-/* Copyable Code Blocks */
-.code-block.copyable {
-    position: relative;
-}
-
-.code-block .copy-button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    opacity: 0;
-    z-index: 10;
-}
-
-.code-block.copyable:hover .copy-button {
-    opacity: 1;
-}
-
-.code-block .copy-button:hover {
-    background: #fff;
-    border-color: var(--mdc-theme-primary);
-    color: var(--mdc-theme-primary);
-    transform: scale(1.05);
-}
-
-.code-block .copy-button:active {
-    transform: scale(0.95);
-}
-
-.code-block .copy-button .material-icons {
-    font-size: 18px;
-    color: #666;
-}
-
-.code-block .copy-button:hover .material-icons {
-    color: var(--mdc-theme-primary);
-}
-
-.code-block .copy-button.copied {
-    background: #4caf50;
-    border-color: #4caf50;
-}
-
-.code-block .copy-button.copied .material-icons {
-    color: #fff;
-}
-
-/* Copy Toast Notification */
-.copy-toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: #323232;
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    z-index: 10000;
-    opacity: 0;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.copy-toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-}
-
-/* Ordered list styling for steps */
-.help-card ol {
-    color: rgba(0, 0, 0, 0.7);
-    line-height: 1.6;
-    margin: 0 0 16px 0;
-    padding-left: 24px;
-}
-
-.help-card ol li {
-    margin-bottom: 8px;
-}
-
-/* Mobile adjustments for copy button */
-@media (max-width: 768px) {
     .code-block .copy-button {
         opacity: 1;
         padding: 4px;
     }
-
-    .code-block .copy-button .material-icons {
-        font-size: 16px;
-    }
 }
+
+@media (max-width: 480px) {
+    .help-container { padding: 8px; }
+    .help-section { margin-bottom: 32px; }
+
+    .help-section h2 {
+        font-size: 1.2rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .help-card { padding: 12px; }
+    .help-card h4 { font-size: 1rem; }
+    .code-block pre { padding: 8px; font-size: 0.75rem; }
+}
+
+/* Scrollbar for code blocks */
+.code-block pre::-webkit-scrollbar { height: 6px; }
+.code-block pre::-webkit-scrollbar-track { background: transparent; border-radius: 3px; }
+.code-block pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.code-block pre::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }

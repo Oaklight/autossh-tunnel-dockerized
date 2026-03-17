@@ -24,6 +24,12 @@
   font-family: "Roboto", sans-serif;
 }
 
+[data-theme="dark"] .universal-tooltip {
+  background: rgba(30, 30, 26, 0.95);
+  border: 1px solid var(--tooltip-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
 /* Show state */
 .universal-tooltip.show {
   opacity: 1;
@@ -48,6 +54,10 @@
   border-bottom: none;
 }
 
+[data-theme="dark"] .universal-tooltip.position-top::before {
+  border-top-color: rgba(30, 30, 26, 0.95);
+}
+
 /* Bottom position (tooltip below element) */
 .universal-tooltip.position-bottom::before {
   top: -10px;
@@ -55,6 +65,10 @@
   transform: translateX(-50%);
   border-bottom-color: rgba(0, 0, 0, 0.9);
   border-top: none;
+}
+
+[data-theme="dark"] .universal-tooltip.position-bottom::before {
+  border-bottom-color: rgba(30, 30, 26, 0.95);
 }
 
 /* Left position (tooltip to the left of element) */
@@ -66,6 +80,10 @@
   border-right: none;
 }
 
+[data-theme="dark"] .universal-tooltip.position-left::before {
+  border-left-color: rgba(30, 30, 26, 0.95);
+}
+
 /* Right position (tooltip to the right of element) */
 .universal-tooltip.position-right::before {
   left: -10px;
@@ -73,6 +91,10 @@
   transform: translateY(-50%);
   border-right-color: rgba(0, 0, 0, 0.9);
   border-left: none;
+}
+
+[data-theme="dark"] .universal-tooltip.position-right::before {
+  border-right-color: rgba(30, 30, 26, 0.95);
 }
 
 /* Animation variants */
