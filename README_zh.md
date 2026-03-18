@@ -1,8 +1,7 @@
 # 基于 Docker 和 Autossh 的 SSH 隧道管理器
 
-[![GitHub version](https://badge.fury.io/gh/oaklight%2Fautossh-tunnel-dockerized.svg?icon=si%3Agithub)](https://badge.fury.io/gh/oaklight%2Fautossh-tunnel-dockerized)
-[![Docker Hub - autossh-tunnel](https://img.shields.io/docker/v/oaklight/autossh-tunnel?sort=semver&label=autossh-tunnel&logo=docker)](https://hub.docker.com/r/oaklight/autossh-tunnel)
-[![Docker Hub - autossh-tunnel-web-panel](https://img.shields.io/docker/v/oaklight/autossh-tunnel-web-panel?sort=semver&label=autossh-tunnel-web-panel&logo=docker)](https://hub.docker.com/r/oaklight/autossh-tunnel-web-panel)
+[![Docker - autossh-tunnel](https://img.shields.io/docker/v/oaklight/autossh-tunnel?sort=semver&label=autossh-tunnel&color=green)](https://hub.docker.com/r/oaklight/autossh-tunnel)
+[![Docker - autossh-tunnel-web-panel](https://img.shields.io/docker/v/oaklight/autossh-tunnel-web-panel?sort=semver&label=autossh-tunnel-web-panel&color=green)](https://hub.docker.com/r/oaklight/autossh-tunnel-web-panel)
 
 [中文版](README_zh.md) | [English](README_en.md)
 
