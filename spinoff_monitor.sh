@@ -6,6 +6,23 @@
 CONFIG_FILE="${AUTOSSH_CONFIG_FILE:-/etc/autossh/config/config.yaml}"
 CONFIG_DIR=$(dirname "$CONFIG_FILE")
 
+VERSION=$(cat /etc/autossh-version 2>/dev/null || echo "dev")
+
+print_banner() {
+	_label="AutoSSH Tunnel Manager  $VERSION"
+	_len=${#_label}
+	_pad=$((_len + 6))
+	_border=""
+	_i=0
+	while [ "$_i" -lt "$_pad" ]; do
+		_border="${_border}═"
+		_i=$((_i + 1))
+	done
+	printf '  ╔%s╗\n' "$_border"
+	printf '  ║   %s   ║\n' "$_label"
+	printf '  ╚%s╝\n' "$_border"
+}
+
 # Function to handle shutdown
 cleanup() {
 	echo "Stopping autossh tunnels..."
@@ -34,6 +51,8 @@ if [ ! -d /tmp/autossh-logs ]; then
 	mkdir -p /tmp/autossh-logs
 	chmod 777 /tmp/autossh-logs
 fi
+
+print_banner
 
 # Start API server if enabled
 if [ "${API_ENABLE:-false}" = "true" ]; then

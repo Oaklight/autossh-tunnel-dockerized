@@ -18,8 +18,23 @@ const (
 	defaultPort  = ":5000"
 )
 
+var version = "dev"
 var apiBaseURL string
 var apiKey string
+
+func printBanner() {
+	line1 := fmt.Sprintf("AutoSSH Tunnel Manager  %s", version)
+	line2 := fmt.Sprintf("Web Panel: http://0.0.0.0%s", defaultPort)
+	width := len(line1)
+	if len(line2) > width {
+		width = len(line2)
+	}
+	border := strings.Repeat("═", width+6)
+	fmt.Printf("  ╔%s╗\n", border)
+	fmt.Printf("  ║   %-*s   ║\n", width, line1)
+	fmt.Printf("  ║   %-*s   ║\n", width, line2)
+	fmt.Printf("  ╚%s╝\n", border)
+}
 
 func logMsg(level, component, format string, v ...interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
@@ -75,21 +90,21 @@ func getAPIConfigHandler(w http.ResponseWriter, r *http.Request) {
 func getLanguagesHandler(w http.ResponseWriter, r *http.Request) {
 	logMsg("DEBUG", "WEB", "GET /api/languages from %s", r.RemoteAddr)
 	localesDir := filepath.Join(staticDir, "locales")
-	
+
 	// Check if locales directory exists
 	if _, err := os.Stat(localesDir); os.IsNotExist(err) {
 		logMsg("ERROR", "WEB", "Locales directory not found: %s", localesDir)
 		http.Error(w, "Locales directory not found", http.StatusNotFound)
 		return
 	}
-	
+
 	// Read directory contents
 	files, err := os.ReadDir(localesDir)
 	if err != nil {
 		http.Error(w, "Failed to read locales directory", http.StatusInternalServerError)
 		return
 	}
-	
+
 	var languages []Language
 	// 9 core languages: Chinese (Simplified & Traditional), English, Japanese, Korean, Spanish, French, Russian, Arabic
 	languageNames := map[string]string{
@@ -103,26 +118,26 @@ func getLanguagesHandler(w http.ResponseWriter, r *http.Request) {
 		"ru":      "Русский",
 		"ar":      "العربية",
 	}
-	
+
 	// Scan for .json files
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".json") {
 			// Extract language code from filename (e.g., "en.json" -> "en")
 			langCode := strings.TrimSuffix(file.Name(), ".json")
-			
+
 			// Get language name from map, fallback to code if not found
 			langName := languageNames[langCode]
 			if langName == "" {
 				langName = strings.ToUpper(langCode) // Fallback to uppercase code
 			}
-			
+
 			languages = append(languages, Language{
 				Code: langCode,
 				Name: langName,
 			})
 		}
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(languages)
 }
@@ -132,6 +147,8 @@ func main() {
 	// [YYYY-MM-DD HH:MM:SS] [LEVEL] [COMPONENT] Message
 	log.SetFlags(0) // Disable default flags
 	log.SetOutput(os.Stdout)
+
+	printBanner()
 
 	apiBaseURL = os.Getenv("API_BASE_URL")
 	apiKey = os.Getenv("API_KEY")

@@ -2,6 +2,8 @@
 ARG REGISTRY_MIRROR=docker.io
 FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0 AS base
 
+ARG VERSION=dev
+
 # install dependencies
 RUN apk add --no-cache \
     autossh \
@@ -25,6 +27,8 @@ RUN chmod +x /usr/local/bin/autossh-cli \
     /usr/local/bin/spinoff_monitor.sh \
     /usr/local/bin/scripts/*.sh \
     /entrypoint.sh
+
+RUN echo "$VERSION" > /etc/autossh-version
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]

@@ -5,6 +5,8 @@ FROM ${REGISTRY_MIRROR}/library/golang:tip-alpine AS builder
 # Proxy support
 ARG GOPROXY
 
+ARG VERSION=dev
+
 WORKDIR /app
 
 # Copy the rest of the application code
@@ -18,7 +20,7 @@ RUN go mod tidy && go mod download
 
 # Build the Go binary with optimization flags
 RUN CGO_ENABLED=0 go build \
-    -ldflags="-s -w" \
+    -ldflags="-s -w -X main.version=$VERSION" \
     -trimpath \
     -o app .
 

@@ -29,6 +29,7 @@ build-autossh:
 	@echo "Using registry mirror: $(REGISTRY_MIRROR)"
 	docker buildx build --platform $(PLATFORMS_AUTOSSH) \
 		$(BUILD_ARGS) \
+		--build-arg VERSION=$(ADDITIONAL_TAGS_AUTOSSH) \
 		-t $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH) \
 		$(foreach tag, $(ADDITIONAL_TAGS_AUTOSSH), -t $(IMAGE_NAME_AUTOSSH):$(tag)) \
 		.
@@ -40,6 +41,7 @@ build-web:
 	@echo "Using registry mirror: $(REGISTRY_MIRROR)"
 	docker buildx build --platform $(PLATFORMS_WEB) \
 		$(BUILD_ARGS) \
+		--build-arg VERSION=$(ADDITIONAL_TAGS_WEB) \
 		-f Dockerfile.web \
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
 		$(foreach tag, $(ADDITIONAL_TAGS_WEB), -t $(IMAGE_NAME_WEB):$(tag)) \
@@ -55,6 +57,7 @@ push-autossh:
 	@echo "Tags: $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH), $(ADDITIONAL_TAGS_AUTOSSH)"
 	docker buildx build --platform $(PLATFORMS_AUTOSSH) \
 		$(BUILD_ARGS) \
+		--build-arg VERSION=$(ADDITIONAL_TAGS_AUTOSSH) \
 		-t $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH) \
 		$(foreach tag, $(ADDITIONAL_TAGS_AUTOSSH), -t $(IMAGE_NAME_AUTOSSH):$(tag)) \
 		--push .
@@ -65,6 +68,7 @@ push-web:
 	@echo "Tags: $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB), $(ADDITIONAL_TAGS_WEB)"
 	docker buildx build --platform $(PLATFORMS_WEB) \
 		$(BUILD_ARGS) \
+		--build-arg VERSION=$(ADDITIONAL_TAGS_WEB) \
 		-f Dockerfile.web \
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
 		$(foreach tag, $(ADDITIONAL_TAGS_WEB), -t $(IMAGE_NAME_WEB):$(tag)) \
@@ -86,6 +90,7 @@ build-test-autossh:
 	@echo "Using registry mirror: $(REGISTRY_MIRROR)"
 	docker buildx build --platform linux/amd64 \
 		$(BUILD_ARGS) \
+		--build-arg VERSION=$(ADDITIONAL_TAGS_AUTOSSH) \
 		-t $(IMAGE_NAME_AUTOSSH):$(IMAGE_TAG_AUTOSSH) \
 		--load .
 
@@ -95,6 +100,7 @@ build-test-web:
 	@echo "Using registry mirror: $(REGISTRY_MIRROR)"
 	docker buildx build --platform linux/amd64 \
 		$(BUILD_ARGS) \
+		--build-arg VERSION=$(ADDITIONAL_TAGS_WEB) \
 		-f Dockerfile.web \
 		-t $(IMAGE_NAME_WEB):$(IMAGE_TAG_WEB) \
 		--load .
