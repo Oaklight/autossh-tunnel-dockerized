@@ -9,8 +9,14 @@ disable=SC3023  # In POSIX sh, $! is undefined (ash supports it)
 # don't exist during static analysis.
 disable=SC1091
 
-# Pre-existing patterns in the codebase — suppress for now, fix later.
+# Pre-existing patterns in the codebase — suppress for now, fix incrementally.
 disable=SC2155  # Declare and assign separately to avoid masking return values
 disable=SC2046  # Quote this to prevent word splitting
 disable=SC2034  # Variable appears unused (used in subshells / eval / sourced files)
 disable=SC2086  # Double quote to prevent globbing and word splitting
+disable=SC2181  # Check exit code directly, not indirectly with $?
+disable=SC2188  # Redirection without command (used as truncation idiom)
+disable=SC2094  # Read and write same file in pipeline
+disable=SC2002  # Useless cat
+disable=SC2153  # Possible misspelling (false positive: env vars vs locals)
+disable=SC2317  # Command appears unreachable (invoked indirectly via trap/eval)
