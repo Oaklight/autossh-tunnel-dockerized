@@ -1,0 +1,10 @@
+# All scripts run on BusyBox ash (Alpine), which supports these POSIX
+# extensions.  Suppress the "not defined in POSIX sh" family of warnings.
+disable=SC3043  # 'local' is undefined in POSIX sh (supported by ash)
+disable=SC3003  # In POSIX sh, ERR traps are undefined
+disable=SC3037  # In POSIX sh, echo flags are undefined
+disable=SC3023  # In POSIX sh, $! is undefined (ash supports it)
+
+# SC1091: Not following sourced files — we source at runtime paths that
+# don't exist during static analysis.
+disable=SC1091

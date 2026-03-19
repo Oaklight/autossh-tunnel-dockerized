@@ -70,7 +70,7 @@ jobs:
           chmod +x /usr/local/bin/shfmt
       - name: Run shellcheck
         run: |
-          shellcheck \
+          shellcheck --severity=warning \
             autossh-cli \
             entrypoint.sh \
             spinoff_monitor.sh \

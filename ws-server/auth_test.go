@@ -31,8 +31,8 @@ func TestValidateHash_Invalid(t *testing.T) {
 		"AAAABBBBCCCCDDDDEEEEFFFFAAAABBBB",   // uppercase
 		"gggghhhhiiiijjjjkkkkllllmmmmnnnn",   // non-hex chars
 		"aaaabbbbccccddddeeeeffffaaaabbb!",   // special char
-		"aaaa bbbb cccc dddd eeee ffff aaaa",  // spaces
-		"aaaa\nbbbbccccddddeeeeffffaaaabbbb",  // newline
+		"aaaa bbbb cccc dddd eeee ffff aaaa", // spaces
+		"aaaa\nbbbbccccddddeeeeffffaaaabbbb", // newline
 	}
 	for _, h := range invalid {
 		if validateHash(h) {
