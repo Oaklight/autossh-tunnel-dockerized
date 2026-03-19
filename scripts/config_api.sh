@@ -79,7 +79,7 @@ config_to_json() {
 
 	# Build the complete JSON
 	{
-		echo '{"tunnels": ['
+		printf '{"tunnels": ['
 		parse_config "$CONFIG_FILE" | {
 			first=true
 			while IFS='	' read -r remote_host remote_port local_port direction name hash interactive; do
@@ -108,7 +108,6 @@ config_to_json() {
   }' "$name" "$remote_host" "$remote_port" "$local_port" "$direction" "$interactive_json" "$hash"
 			done
 		}
-		echo ""
 		echo "]}"
 	}
 }
