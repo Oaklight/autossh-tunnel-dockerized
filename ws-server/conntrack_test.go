@@ -226,8 +226,8 @@ func TestConcurrentDuplicateAcquire(t *testing.T) {
 	n := 20
 
 	var (
-		wg       sync.WaitGroup
-		mu       sync.Mutex
+		wg        sync.WaitGroup
+		mu        sync.Mutex
 		successes int
 		hashInUse int
 	)
