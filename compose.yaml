@@ -11,6 +11,8 @@ services:
       - AUTOSSH_GATETIME=0
       - API_ENABLE=true
       - API_PORT=8080
+      # Optional: WebSocket server port for interactive auth (default: 8022)
+      # - WS_PORT=8022
       # Optional: Enable API authentication with Bearer token
       # Multiple keys can be specified, separated by commas
       # - API_KEY=your-secret-key
@@ -31,6 +33,9 @@ services:
       # API_BASE_URL is used by the browser to connect to the API server
       # Use localhost since the browser runs on the host machine
       - API_BASE_URL=http://localhost:8080
+      # WS_BASE_URL is used by the web server to proxy WebSocket connections
+      # for interactive authentication sessions
+      - WS_BASE_URL=ws://localhost:8022
       # Optional: Must match one of the API_KEY values in autossh service
       # - API_KEY=your-secret-key
     restart: always

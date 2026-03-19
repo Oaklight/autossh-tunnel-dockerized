@@ -16,6 +16,11 @@ if [ -n "$AUTOSSH_STATE_FILE" ]; then
 	export AUTOSSH_STATE_FILE
 fi
 
+# Export WebSocket server environment variables if set
+for _var in WS_PORT WS_MAX_CONNECTIONS WS_IDLE_TIMEOUT WS_MAX_DURATION WS_ALLOWED_ORIGINS; do
+	eval "[ -n \"\$$_var\" ] && export $_var"
+done
+
 # Modify the existing user and group to match PUID and PGID
 if [ "$(id -u myuser)" != "$PUID" ] || [ "$(id -g myuser)" != "$PGID" ]; then
 	sed -i "s/^myuser:x:[0-9]*:[0-9]*:/myuser:x:$PUID:$PGID:/" /etc/passwd

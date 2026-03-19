@@ -10,6 +10,7 @@ services:
       - AUTOSSH_GATETIME=0
       - API_ENABLE=true
       - API_PORT=8080
+      - WS_PORT=8022
       - CONFIG_FILE=/etc/autossh/config/config.yaml
       - CONFIG_BACKUP_DIR=/etc/autossh/config/backups
     network_mode: "host"
@@ -24,3 +25,4 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080
+      - WS_BASE_URL=ws://localhost:8022

@@ -27,6 +27,10 @@ print_banner() {
 cleanup() {
 	echo "Stopping autossh tunnels..."
 	autossh-cli stop
+	if [ -n "$WS_PID" ]; then
+		echo "Stopping WebSocket server..."
+		kill "$WS_PID" 2>/dev/null
+	fi
 	if [ -n "$API_PID" ]; then
 		echo "Stopping API server..."
 		kill "$API_PID" 2>/dev/null
@@ -59,6 +63,13 @@ if [ "${API_ENABLE:-false}" = "true" ]; then
 	echo "Starting API server..."
 	/usr/local/bin/scripts/api_server.sh &
 	API_PID=$!
+fi
+
+# Start WebSocket server for interactive auth if API is enabled
+if [ "${API_ENABLE:-false}" = "true" ]; then
+	echo "Starting WebSocket server for interactive auth..."
+	/usr/local/bin/ws-server &
+	WS_PID=$!
 fi
 
 # Initial start

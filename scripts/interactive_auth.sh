@@ -136,7 +136,8 @@ start_interactive_tunnel() {
 	# -N: Do not execute a remote command (port forwarding only)
 	# -M: Master mode for connection sharing (used here for PID tracking via socket)
 	# -S: Control socket path
-	local ssh_opts="-f -N -M -S $ctrl_socket"
+	# -e none: Disable SSH escape sequences (important for WebSocket mode)
+	local ssh_opts="-f -N -M -S $ctrl_socket -e none"
 	ssh_opts="$ssh_opts -o ServerAliveInterval=30"
 	ssh_opts="$ssh_opts -o ServerAliveCountMax=3"
 	ssh_opts="$ssh_opts -o SetEnv=TUNNEL_HASH=$target_hash"
@@ -163,28 +164,47 @@ start_interactive_tunnel() {
 	# We use a temporary file to capture the exit code since we're in /bin/sh (not bash)
 	local ssh_result
 	local ssh_exit_file=$(mktemp)
-	if [ "$direction" = "local_to_remote" ]; then
-		# Remote Forwarding (-R): expose local service to remote
-		log_info "INTERACTIVE" "Direction: local_to_remote (Remote Forwarding)" | tee -a "$log_file"
-		log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num -> $remote_host:$target_host:$target_port" | tee -a "$log_file"
-		# Run ssh and capture exit code, while still showing output to terminal and log
-		(
+
+	# WS_MODE bypass: When running under WebSocket server, skip tee wrapping
+	# so output goes straight to PTY for proper terminal emulation
+	if [ "${WS_MODE:-0}" = "1" ]; then
+		if [ "$direction" = "local_to_remote" ]; then
+			log_info "INTERACTIVE" "Direction: local_to_remote (Remote Forwarding)"
+			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num -> $remote_host:$target_host:$target_port"
 			ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $remote_host 2>&1
-			echo $? >"$ssh_exit_file"
-		) | tee -a "$log_file"
-		ssh_result=$(cat "$ssh_exit_file")
-	else
-		# Local Forwarding (-L): bring remote service to local (default)
-		log_info "INTERACTIVE" "Direction: remote_to_local (Local Forwarding)" | tee -a "$log_file"
-		log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num <- $remote_host:$target_host:$target_port" | tee -a "$log_file"
-		# Run ssh and capture exit code, while still showing output to terminal and log
-		(
+			ssh_result=$?
+		else
+			log_info "INTERACTIVE" "Direction: remote_to_local (Local Forwarding)"
+			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num <- $remote_host:$target_host:$target_port"
 			ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $remote_host 2>&1
-			echo $? >"$ssh_exit_file"
-		) | tee -a "$log_file"
-		ssh_result=$(cat "$ssh_exit_file")
+			ssh_result=$?
+		fi
+		rm -f "$ssh_exit_file"
+	else
+		# Standard mode: use tee for logging
+		if [ "$direction" = "local_to_remote" ]; then
+			# Remote Forwarding (-R): expose local service to remote
+			log_info "INTERACTIVE" "Direction: local_to_remote (Remote Forwarding)" | tee -a "$log_file"
+			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num -> $remote_host:$target_host:$target_port" | tee -a "$log_file"
+			# Run ssh and capture exit code, while still showing output to terminal and log
+			(
+				ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $remote_host 2>&1
+				echo $? >"$ssh_exit_file"
+			) | tee -a "$log_file"
+			ssh_result=$(cat "$ssh_exit_file")
+		else
+			# Local Forwarding (-L): bring remote service to local (default)
+			log_info "INTERACTIVE" "Direction: remote_to_local (Local Forwarding)" | tee -a "$log_file"
+			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num <- $remote_host:$target_host:$target_port" | tee -a "$log_file"
+			# Run ssh and capture exit code, while still showing output to terminal and log
+			(
+				ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $remote_host 2>&1
+				echo $? >"$ssh_exit_file"
+			) | tee -a "$log_file"
+			ssh_result=$(cat "$ssh_exit_file")
+		fi
+		rm -f "$ssh_exit_file"
 	fi
-	rm -f "$ssh_exit_file"
 
 	if [ $ssh_result -eq 0 ]; then
 		echo "" | tee -a "$log_file"

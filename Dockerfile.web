@@ -12,11 +12,12 @@ WORKDIR /app
 # Copy the rest of the application code
 COPY web .
 
-# Initialize Go modules
-RUN go mod init app
+# Initialize Go modules (remove existing go.mod/go.sum if present)
+RUN rm -f go.mod go.sum && go mod init app
 
 # Force regenerate go.sum and download dependencies
-RUN go mod tidy && go mod download
+RUN if [ -n "$GOPROXY" ]; then export GOPROXY="$GOPROXY"; fi && \
+    go mod tidy && go mod download
 
 # Build the Go binary with optimization flags
 RUN CGO_ENABLED=0 go build \
