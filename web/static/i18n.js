@@ -272,12 +272,7 @@ class I18n {
         const buttons = document.querySelectorAll('button[data-i18n]');
         buttons.forEach(button => {
             const key = button.getAttribute('data-i18n');
-            const labelElement = button.querySelector('.mdc-button__label');
-            if (labelElement) {
-                labelElement.textContent = this.t(key);
-            } else {
-                button.textContent = this.t(key);
-            }
+            button.textContent = this.t(key);
         });
 
         // 更新选择框选项

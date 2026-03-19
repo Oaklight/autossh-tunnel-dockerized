@@ -39,9 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentTunnel = null;
     let currentHash = tunnelHash; // Track current hash (may change after save)
 
-    // Initialize Material Design Components
-    initializeMDC();
-
     // Load API config first, then load tunnel details
     loadAPIConfig().then(() => {
         loadTunnelDetails();
@@ -86,12 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Setup auto-refresh checkbox
     if (autoRefreshCheckbox) {
-        // Initialize MDC checkbox
-        const checkboxEl = autoRefreshCheckbox.closest('.mdc-checkbox');
-        if (checkboxEl) {
-            new mdc.checkbox.MDCCheckbox(checkboxEl);
-        }
-
         // Set checkbox to checked by default (auto-refresh is enabled by default)
         autoRefreshCheckbox.checked = true;
 
@@ -152,13 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (toggleLabel) {
             toggleLabel.textContent = isActive ? enabledText : disabledText;
         }
-    }
-
-    function initializeMDC() {
-        const buttons = document.querySelectorAll('.mdc-button');
-        buttons.forEach(button => {
-            mdc.ripple.MDCRipple.attachTo(button);
-        });
     }
 
     // Load API configuration
@@ -313,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateStatusDisplay(status) {
-        let statusColor = "#9E9E9E";
+        let statusColor = "var(--text-secondary)";
         let statusIcon = "help_outline";
         let statusText = status || 'Unknown';
 
@@ -324,32 +308,32 @@ document.addEventListener("DOMContentLoaded", () => {
             case 'RUNNING':
             case 'NORMAL':
                 statusIcon = "check_circle";
-                statusColor = "#4CAF50";
+                statusColor = "var(--success)";
                 statusText = getTranslation('table.status.running', 'Running');
                 break;
             case 'STOPPED':
                 statusIcon = "stop_circle";
-                statusColor = "#9E9E9E";
+                statusColor = "var(--text-secondary)";
                 statusText = getTranslation('table.status.stopped', 'Stopped');
                 break;
             case 'STARTING':
                 statusIcon = "hourglass_empty";
-                statusColor = "#FF9800";
+                statusColor = "var(--warning)";
                 statusText = getTranslation('table.status.starting', 'Starting');
                 break;
             case 'DEAD':
                 statusIcon = "cancel";
-                statusColor = "#F44336";
+                statusColor = "var(--error)";
                 statusText = getTranslation('table.status.dead', 'Dead');
                 break;
             case 'LOADING':
                 statusIcon = "hourglass_empty";
-                statusColor = "#FF9800";
+                statusColor = "var(--warning)";
                 statusText = getTranslation('table.status.loading', 'Loading...');
                 break;
             case 'SAVING':
                 statusIcon = "hourglass_empty";
-                statusColor = "#2196F3";
+                statusColor = "var(--accent)";
                 statusText = getTranslation('table.status.saving', 'Saving...');
                 break;
         }
@@ -781,13 +765,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function showError(text) {
         const container = document.querySelector('.container');
         container.innerHTML = `
-            <div class="mdc-card detail-card">
+            <div class="card">
                 <div class="card-content" style="text-align: center; padding: 40px;">
-                    <i class="material-icons" style="font-size: 64px; color: #f44336;">error</i>
-                    <h2 style="margin-top: 16px; color: #f44336;">${text}</h2>
-                    <a href="/" class="mdc-button mdc-button--raised" style="margin-top: 24px;">
-                        <span class="mdc-button__ripple"></span>
-                        <span class="mdc-button__label">Back to Home</span>
+                    <i class="material-icons" style="font-size: 64px; color: var(--error);">error</i>
+                    <h2 style="margin-top: 16px; color: var(--error);">${text}</h2>
+                    <a href="/" class="btn btn-primary" style="margin-top: 24px; display: inline-flex;">
+                        Back to Home
                     </a>
                 </div>
             </div>

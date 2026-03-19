@@ -1,13 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.querySelector("#tunnelTable tbody");
-    let dataTable;
     let apiConfig = { base_url: '', api_key: '' };
     let autoRefreshInterval = null;
     const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
     let isConfigSaving = false; // Flag to prevent clicks during save/reload
-
-    // Initialize Material Design Components
-    initializeMDC();
 
     // Load API config first, then load configuration
     loadAPIConfig().then(() => {
@@ -45,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const stopBtn = row.querySelector('.stop-button');
 
             if (saveRowBtn) saveRowBtn.title = getTranslation('buttons.save_restart_row', 'Save & Restart');
-            // Check if buttons are disabled for interactive tunnels
             if (startBtn) {
                 if (startBtn.classList.contains('disabled-interactive')) {
                     startBtn.title = getTranslation('buttons.interactive_start_disabled', 'Interactive Auth Required - Use CLI');
@@ -100,21 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Setup refresh button and auto-refresh checkbox
     setupRefreshControls();
 
-    // Initialize Material Design Components
-    function initializeMDC() {
-        // Initialize buttons
-        const buttons = document.querySelectorAll('.mdc-button');
-        buttons.forEach(button => {
-            mdc.ripple.MDCRipple.attachTo(button);
-        });
-
-        // Initialize data table
-        const dataTableEl = document.querySelector('.mdc-data-table');
-        if (dataTableEl) {
-            dataTable = new mdc.dataTable.MDCDataTable(dataTableEl);
-        }
-    }
-
     // Load API configuration
     async function loadAPIConfig() {
         try {
@@ -166,12 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Load configuration from autossh API server
     async function loadConfiguration() {
-        // Only show loading if not already in a save operation
         if (!isConfigSaving) {
             showLoading(true);
         }
         try {
-            // Use Config API from autossh container
             if (!apiConfig.base_url) {
                 throw new Error('API server not configured');
             }
@@ -186,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
             tableBody.innerHTML = '';
             if (data.tunnels && Array.isArray(data.tunnels)) {
                 data.tunnels.forEach((tunnel) => {
-                    // Set initial status to LOADING while fetching actual status
                     tunnel.status = 'LOADING';
                     addRow(tunnel);
                 });
@@ -202,62 +179,58 @@ document.addEventListener("DOMContentLoaded", () => {
             const errorMsg = window.i18n ? window.i18n.t('messages.config_load_failed') : 'Failed to load configuration';
             showMessage(errorMsg, "error");
         } finally {
-            // Only hide loading if not in a save operation (save handles its own loading state)
             if (!isConfigSaving) {
                 showLoading(false);
             }
         }
     }
 
-    // Add row function with Material Design styling
+    // Add row function
     function addRow(tunnel = { name: "", remote_host: "", remote_port: "", local_port: "", interactive: false, direction: "remote_to_local", status: "STOPPED" }) {
         const row = document.createElement("tr");
-        row.className = "mdc-data-table__row new-row";
+        row.className = "new-row";
 
         let statusColor = "grey";
         let statusIcon = "radio_button_unchecked";
         let statusTooltip = tunnel.status || "STOPPED";
 
-        // Set status icon and color based on status
         switch (tunnel.status) {
             case "RUNNING":
             case "NORMAL":
                 statusIcon = "check_circle";
-                statusColor = "#4CAF50"; // Green
+                statusColor = "var(--success)";
                 statusTooltip = "Running";
                 break;
             case "DEAD":
                 statusIcon = "cancel";
-                statusColor = "#F44336"; // Red
+                statusColor = "var(--error)";
                 statusTooltip = "Dead";
                 break;
             case "STARTING":
                 statusIcon = "hourglass_empty";
-                statusColor = "#FF9800"; // Orange
+                statusColor = "var(--warning)";
                 statusTooltip = "Starting";
                 break;
             case "STOPPED":
                 statusIcon = "stop_circle";
-                statusColor = "#9E9E9E"; // Grey
+                statusColor = "var(--text-secondary)";
                 statusTooltip = "Stopped";
                 break;
             case "LOADING":
                 statusIcon = "hourglass_empty";
-                statusColor = "#FF9800"; // Orange
+                statusColor = "var(--warning)";
                 statusTooltip = "Loading...";
                 break;
             case "N/A":
             default:
                 statusIcon = "help_outline";
-                statusColor = "#9E9E9E"; // Grey
+                statusColor = "var(--text-secondary)";
                 statusTooltip = "Unknown";
                 break;
         }
 
-        // Use server-provided hash or empty string for new tunnels
         const tunnelHash = tunnel.hash || '';
 
-        // Get translated placeholders (use helper function that checks isReady)
         const tunnelNamePlaceholder = getTranslation('table.placeholders.tunnel_name', 'Tunnel name');
         const remoteHostPlaceholder = getTranslation('table.placeholders.remote_host', 'Remote host');
         const remotePortPlaceholder = getTranslation('table.placeholders.remote_port', 'Remote port (e.g., 44497 or hostname:44497)');
@@ -276,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const stopTunnelText = getTranslation('buttons.stop_tunnel', 'Stop tunnel');
 
         row.innerHTML = `
-            <td class="mdc-data-table__cell">
+            <td>
                 <div class="control-buttons-cell">
                     <button class="control-button save-row-button" data-hash="${tunnelHash}" title="${saveRestartText}" data-i18n-title="buttons.save_restart_row">
                         <i class="material-icons">save</i>
@@ -292,28 +265,28 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                 </div>
             </td>
-            <td class="mdc-data-table__cell">
+            <td>
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.name || "")}" placeholder="${tunnelNamePlaceholder}" data-i18n-placeholder="table.placeholders.tunnel_name">
             </td>
-            <td class="mdc-data-table__cell">
+            <td>
                 <i class="material-icons status-indicator" data-hash="${tunnelHash}" style="color: ${statusColor}; font-size: 20px; vertical-align: middle; cursor: pointer;" title="${statusTooltip}">${statusIcon}</i>
             </td>
-            <td class="mdc-data-table__cell">
+            <td>
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.remote_host || "")}" placeholder="${remoteHostPlaceholder}" data-i18n-placeholder="table.placeholders.remote_host">
             </td>
-            <td class="mdc-data-table__cell">
+            <td>
                 <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="${remotePortPlaceholder}" data-i18n-placeholder="table.placeholders.remote_port">
             </td>
-            <td class="mdc-data-table__cell">
+            <td>
                 <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="${localPortPlaceholder}" data-i18n-placeholder="table.placeholders.local_port">
             </td>
-            <td class="mdc-data-table__cell">
+            <td>
                 <select class="table-select">
                     <option value="remote_to_local" ${tunnel.direction === "remote_to_local" ? "selected" : ""} data-i18n="table.direction.remote_to_local">${remoteToLocalText}</option>
                     <option value="local_to_remote" ${tunnel.direction === "local_to_remote" ? "selected" : ""} data-i18n="table.direction.local_to_remote">${localToRemoteText}</option>
                 </select>
             </td>
-            <td class="mdc-data-table__cell">
+            <td>
                 <div class="action-buttons-cell">
                     <button class="interactive-toggle-button ${tunnel.interactive ? 'active' : ''}" title="${tunnel.interactive ? interactiveEnabledText : interactiveDisabledText}" data-interactive="${tunnel.interactive ? 'true' : 'false'}">
                         <i class="material-icons">fingerprint</i>
@@ -334,7 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // If tunnel has a hash, delete via Config API
             if (tunnelHash) {
                 try {
                     const response = await apiCall(`/config/${tunnelHash}/delete`, { method: 'POST' });
@@ -344,7 +316,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     const successMsg = window.i18n ? window.i18n.t('messages.delete_success') : 'Tunnel deleted successfully';
                     showMessage(successMsg, 'success');
-                    // Reload configuration to refresh the list
                     setTimeout(() => loadConfiguration(), 500);
                 } catch (error) {
                     console.error('Error deleting tunnel:', error);
@@ -352,7 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     showMessage(errorMsg, 'error');
                 }
             } else {
-                // New unsaved row, just remove from DOM
                 row.style.animation = "fadeOut 0.3s ease-out";
                 setTimeout(() => row.remove(), 300);
             }
@@ -364,11 +334,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const isActive = interactiveToggle.classList.contains('active');
             const newState = !isActive;
 
-            // Update button state
             interactiveToggle.classList.toggle('active', newState);
             interactiveToggle.setAttribute('data-interactive', newState.toString());
 
-            // Update title (icon stays the same, only color changes via CSS)
             const enabledText = getTranslation('buttons.interactive_auth_enabled', 'Interactive Auth Enabled');
             const disabledText = getTranslation('buttons.interactive_auth_disabled', 'Interactive Auth Disabled');
             interactiveToggle.title = newState ? enabledText : disabledText;
@@ -380,11 +348,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const restartButton = row.querySelector(".restart-button");
         const stopButton = row.querySelector(".stop-button");
 
-        // Check if this is an interactive tunnel
         const isInteractive = tunnel.interactive || false;
 
         if (isInteractive) {
-            // Disable start and restart buttons for interactive tunnels
             startButton.disabled = true;
             restartButton.disabled = true;
             startButton.classList.add('disabled-interactive');
@@ -402,7 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const statusIndicator = row.querySelector(".status-indicator");
         if (statusIndicator && tunnelHash) {
             statusIndicator.addEventListener("click", () => {
-                // Prevent navigation during config save/reload
                 if (isConfigSaving) {
                     const waitMsg = window.i18n ? window.i18n.t('messages.please_wait') : 'Please wait for configuration to reload...';
                     showMessage(waitMsg, 'info');
@@ -410,7 +375,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 window.location.href = `/tunnel-detail?hash=${tunnelHash}`;
             });
-            // Add hover effect
             statusIndicator.style.transition = "transform 0.2s ease";
             statusIndicator.addEventListener("mouseenter", () => {
                 statusIndicator.style.transform = "scale(1.2)";
@@ -427,7 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => row.classList.remove("new-row"), 300);
     }
 
-    // Handle save single row (update tunnel config and restart)
+    // Handle save single row
     async function handleSaveRow(hash, row) {
         const cells = row.cells;
         const interactiveToggle = cells[7].querySelector(".interactive-toggle-button");
@@ -441,14 +405,12 @@ document.addEventListener("DOMContentLoaded", () => {
             direction: cells[6].querySelector("select").value,
         };
 
-        // Validate required fields
         if (!tunnelData.name || !tunnelData.remote_host || !tunnelData.remote_port || !tunnelData.local_port) {
             const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fill in all required fields';
             showMessage(errorMsg, 'error');
             return;
         }
 
-        // Validate inputs
         let hasErrors = false;
         const inputs = row.querySelectorAll('input');
         inputs.forEach(input => {
@@ -470,29 +432,25 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Disable all control buttons during operation
         const controlButtons = row.querySelectorAll('.control-button');
         controlButtons.forEach(btn => btn.disabled = true);
 
-        // Show loading indicator on status
         const statusIndicator = row.querySelector('.status-indicator');
         if (statusIndicator) {
             statusIndicator.textContent = 'hourglass_empty';
-            statusIndicator.style.color = '#FF9800';
+            statusIndicator.style.color = 'var(--warning)';
             statusIndicator.title = 'Saving...';
         }
 
         try {
             let response;
             if (hash) {
-                // Update existing tunnel via Config API
                 response = await apiCall(`/config/${hash}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(tunnelData),
                 });
             } else {
-                // Create new tunnel via Config API
                 response = await apiCall('/config/new', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -505,21 +463,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(`Save failed: ${response.status} - ${errorData}`);
             }
 
-            // Get the new hash from response
             const responseData = await response.json();
             const newHash = responseData.hash || hash;
 
-            // Re-enable control buttons before updating hash (which replaces them)
             controlButtons.forEach(btn => btn.disabled = false);
-
-            // Update the row's hash references
             updateRowHash(row, newHash);
 
             const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
             showMessage(successMsg, 'success');
 
-            // Wait for file monitor to detect changes and complete smart restart
-            // Then refresh only this row's status
             setTimeout(async () => {
                 await refreshRowStatus(row, newHash);
             }, 3000);
@@ -528,36 +480,30 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Error saving tunnel:', error);
             const errorMsg = window.i18n ? window.i18n.t('messages.config_save_failed') : 'Failed to save configuration';
             showMessage(errorMsg, 'error');
-            // Reset status indicator on error
             if (statusIndicator) {
                 updateStatusIndicator(statusIndicator, 'STOPPED');
             }
-            // Re-enable control buttons on error
             controlButtons.forEach(btn => btn.disabled = false);
         }
     }
 
     // Update a row's hash references after save
     function updateRowHash(row, newHash) {
-        // Update status indicator
         const statusIndicator = row.querySelector('.status-indicator');
         if (statusIndicator) {
             statusIndicator.dataset.hash = newHash;
         }
 
-        // Update control buttons
         const controlButtons = row.querySelectorAll('.control-button');
         controlButtons.forEach(btn => {
             btn.dataset.hash = newHash;
         });
 
-        // Update event listeners for control buttons
         const saveRowButton = row.querySelector(".save-row-button");
         const startButton = row.querySelector(".start-button");
         const restartButton = row.querySelector(".restart-button");
         const stopButton = row.querySelector(".stop-button");
 
-        // Clone and replace to remove old event listeners
         const newSaveBtn = saveRowButton.cloneNode(true);
         const newStartBtn = startButton.cloneNode(true);
         const newRestartBtn = restartButton.cloneNode(true);
@@ -568,13 +514,11 @@ document.addEventListener("DOMContentLoaded", () => {
         restartButton.parentNode.replaceChild(newRestartBtn, restartButton);
         stopButton.parentNode.replaceChild(newStopBtn, stopButton);
 
-        // Add new event listeners with updated hash
         newSaveBtn.addEventListener("click", () => handleSaveRow(newHash, row));
         newStartBtn.addEventListener("click", () => handleTunnelControl('start', newHash, row));
         newRestartBtn.addEventListener("click", () => handleTunnelControl('restart', newHash, row));
         newStopBtn.addEventListener("click", () => handleTunnelControl('stop', newHash, row));
 
-        // Update status indicator click handler
         if (statusIndicator && newHash) {
             const newStatusIndicator = statusIndicator.cloneNode(true);
             newStatusIndicator.dataset.hash = newHash;
@@ -612,70 +556,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle tunnel control actions
     async function handleTunnelControl(action, hash, row, isInteractive = false) {
-        // Check if hash is available
         if (!hash) {
             const errorMsg = window.i18n ? window.i18n.t('messages.save_first') : 'Please save the configuration first';
             showMessage(errorMsg, 'error');
             return;
         }
 
-        // For interactive tunnels, show hint for start/restart actions
         if (isInteractive && (action === 'start' || action === 'restart')) {
             const hintKey = action === 'start' ? 'messages.interactive_start_hint' : 'messages.interactive_restart_hint';
             const defaultHint = action === 'start'
                 ? 'This tunnel requires interactive authentication. Please start it via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + hash
                 : 'This tunnel requires interactive authentication. Please stop it first, then start via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + hash;
             let hintMsg = window.i18n ? window.i18n.t(hintKey) : defaultHint;
-            // Replace {hash} placeholder with actual hash
             hintMsg = hintMsg.replace('{hash}', hash.substring(0, 8));
             showMessage(hintMsg, 'info');
             return;
         }
 
-        const actionText = window.i18n ? window.i18n.t(`buttons.${action}_tunnel`) : `${action} tunnel`;
         const confirmMsg = window.i18n ? window.i18n.t(`messages.confirm_${action}`) : `Are you sure you want to ${action} this tunnel?`;
 
-        // For restart and stop, ask for confirmation
         if ((action === 'restart' || action === 'stop') && !confirm(confirmMsg)) {
             return;
         }
 
-        // Disable all control buttons during operation
         const controlButtons = row.querySelectorAll('.control-button');
         controlButtons.forEach(btn => btn.disabled = true);
 
         try {
-            let endpoint, method;
-
             if (!apiConfig.base_url) {
                 throw new Error('API server not configured');
             }
 
             if (action === 'restart') {
-                // Restart = stop + start
-                endpoint = `/stop/${hash}`;
-                method = 'POST';
-
-                const stopResponse = await apiCall(endpoint, { method });
+                const stopResponse = await apiCall(`/stop/${hash}`, { method: 'POST' });
                 if (!stopResponse.ok) {
                     const stopData = await stopResponse.text();
                     throw new Error(`Stop failed: ${stopResponse.status} - ${stopData}`);
                 }
 
-                // Wait a bit before starting
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                endpoint = `/start/${hash}`;
-                const startResponse = await apiCall(endpoint, { method });
+                const startResponse = await apiCall(`/start/${hash}`, { method: 'POST' });
                 if (!startResponse.ok) {
                     const startData = await startResponse.text();
                     throw new Error(`Start failed: ${startResponse.status} - ${startData}`);
                 }
             } else {
-                endpoint = `/${action}/${hash}`;
-                method = 'POST';
-
-                const response = await apiCall(endpoint, { method });
+                const response = await apiCall(`/${action}/${hash}`, { method: 'POST' });
                 if (!response.ok) {
                     const responseData = await response.text();
                     throw new Error(`${action} failed: ${response.status} - ${responseData}`);
@@ -685,7 +612,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const successMsg = window.i18n ? window.i18n.t(`messages.${action}_success`) : `Tunnel ${action}ed successfully`;
             showMessage(successMsg, 'success');
 
-            // Reload status after a short delay
             setTimeout(() => loadConfiguration(), 1500);
 
         } catch (error) {
@@ -693,7 +619,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const errorMsg = window.i18n ? window.i18n.t(`messages.${action}_failed`) : `Failed to ${action} tunnel: ${error.message}`;
             showMessage(errorMsg, 'error');
         } finally {
-            // Re-enable control buttons
             controlButtons.forEach(btn => btn.disabled = false);
         }
     }
@@ -712,10 +637,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = event.target;
         const value = input.value.trim();
 
-        // Remove existing error styling
         input.classList.remove('error');
 
-        // Validate based on input type and requirements
         if (input.type === 'number') {
             const num = parseInt(value);
             if (value && (isNaN(num) || num < 1 || num > 65535)) {
@@ -724,22 +647,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 input.title = errorMsg;
             }
         } else if (input.classList.contains('remote-port-input') || input.placeholder && input.placeholder.includes('Remote port')) {
-            // Validate remote_port which can be "port" or "hostname:port" format
             if (value) {
                 const portPattern = /^[\w.-]+:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    const errorMsg = window.i18n ? window.i18n.t('validation.remote_port_format') : 'Invalid port format. Use "port" or "hostname:port" (e.g., 44497 or lambda5:44497)';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.remote_port_format') : 'Invalid port format. Use "port" or "hostname:port"';
                     input.title = errorMsg;
                 }
             }
         } else if (input.placeholder && input.placeholder.includes('Local port')) {
-            // Validate local_port which can be "port" or "ip:port" format
             if (value) {
                 const portPattern = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "ip:port" (e.g., 55001 or 192.168.1.100:55001)';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "ip:port"';
                     input.title = errorMsg;
                 }
             }
@@ -767,7 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (show && !loadingEl) {
             loadingEl = document.createElement('div');
             loadingEl.className = 'loading';
-            loadingEl.innerHTML = '<div class="mdc-circular-progress" style="width:48px;height:48px;" role="progressbar"><div class="mdc-circular-progress__determinate-container"><svg class="mdc-circular-progress__determinate-circle-graphic" viewBox="0 0 48 48"><circle class="mdc-circular-progress__determinate-track" cx="24" cy="24" r="18" stroke-width="4"/><circle class="mdc-circular-progress__determinate-circle" cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="113.097" stroke-width="4"/></svg></div><div class="mdc-circular-progress__indeterminate-container"><div class="mdc-circular-progress__spinner-layer"><div class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-left"><svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="4"/></svg></div><div class="mdc-circular-progress__gap-patch"><svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="3.2"/></svg></div><div class="mdc-circular-progress__circle-clipper mdc-circular-progress__circle-right"><svg class="mdc-circular-progress__indeterminate-circle-graphic" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" stroke-dasharray="113.097" stroke-dashoffset="56.549" stroke-width="4"/></svg></div></div></div></div>';
+            loadingEl.innerHTML = '<i class="material-icons" style="font-size:32px; animation: spin 1s linear infinite;">refresh</i>';
             container.appendChild(loadingEl);
         } else if (!show && loadingEl) {
             loadingEl.remove();
@@ -792,27 +713,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const message = document.createElement('div');
         message.className = `message ${type}`;
 
-        // Create message content wrapper
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'message-content';
 
-        // Create message text
         const textSpan = document.createElement('span');
         textSpan.textContent = text;
         contentWrapper.appendChild(textSpan);
 
-        // Add click hint for copyable messages
         const hintText = getTranslation('messages.click_to_copy', 'Click to copy');
         const hint = document.createElement('div');
         hint.className = 'message-hint';
         hint.textContent = hintText;
         contentWrapper.appendChild(hint);
 
-        // Create action buttons container
         const actions = document.createElement('div');
         actions.className = 'message-actions';
 
-        // Create copy button
         const copyBtn = document.createElement('button');
         copyBtn.className = 'message-copy';
         copyBtn.innerHTML = '<i class="material-icons" style="font-size: 16px;">content_copy</i>';
@@ -822,10 +738,9 @@ document.addEventListener("DOMContentLoaded", () => {
             copyToClipboard(text, copyBtn);
         });
 
-        // Create close button
         const closeBtn = document.createElement('button');
         closeBtn.className = 'message-close';
-        closeBtn.innerHTML = '×';
+        closeBtn.innerHTML = '\u00d7';
         closeBtn.setAttribute('aria-label', 'Close');
         closeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -838,19 +753,16 @@ document.addEventListener("DOMContentLoaded", () => {
         message.appendChild(contentWrapper);
         message.appendChild(actions);
 
-        // Add click to copy on the whole message
         message.addEventListener('click', () => {
             copyToClipboard(text, copyBtn);
         });
 
         container.appendChild(message);
 
-        // Auto-remove after 5 seconds
         const autoRemoveTimeout = setTimeout(() => {
             dismissToast(message);
         }, 5000);
 
-        // Store timeout reference for cleanup
         message._autoRemoveTimeout = autoRemoveTimeout;
     }
 
@@ -859,7 +771,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             await navigator.clipboard.writeText(text);
 
-            // Visual feedback
             if (button) {
                 button.classList.add('copied');
                 const icon = button.querySelector('.material-icons');
@@ -867,7 +778,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     icon.textContent = 'check';
                 }
 
-                // Reset after 2 seconds
                 setTimeout(() => {
                     button.classList.remove('copied');
                     if (icon) {
@@ -884,15 +794,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function dismissToast(message) {
         if (!message || !message.parentNode) return;
 
-        // Clear auto-remove timeout if exists
         if (message._autoRemoveTimeout) {
             clearTimeout(message._autoRemoveTimeout);
         }
 
-        // Add hiding class for animation
         message.classList.add('hiding');
 
-        // Remove after animation completes
         setTimeout(() => {
             if (message.parentNode) {
                 message.remove();
@@ -912,13 +819,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (autoRefreshCheckbox) {
-            // Initialize MDC checkbox
-            const checkboxEl = autoRefreshCheckbox.closest('.mdc-checkbox');
-            if (checkboxEl) {
-                new mdc.checkbox.MDCCheckbox(checkboxEl);
-            }
-
-            // Set checkbox to checked by default (auto-refresh is enabled by default)
+            // Set checkbox to checked by default
             autoRefreshCheckbox.checked = true;
 
             autoRefreshCheckbox.addEventListener('change', () => {
@@ -931,22 +832,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Refresh only statuses (not full config reload)
-    // retryCount is used for fast retry on initial load
+    // Refresh only statuses
     async function refreshStatuses(retryCount = 0) {
         const statuses = await fetchTunnelStatuses();
 
-        // If empty and we haven't retried too many times, retry quickly
         if (Object.keys(statuses).length === 0) {
             if (retryCount < 5) {
-                const delay = 500; // 500ms fast retry
-                console.log(`Status fetch returned empty, retrying in ${delay}ms (attempt ${retryCount + 1}/5)`);
+                const delay = 500;
                 setTimeout(() => refreshStatuses(retryCount + 1), delay);
             }
             return;
         }
 
-        // Update status indicators in existing rows
         const rows = tableBody.querySelectorAll('tr');
         rows.forEach(row => {
             const statusIndicator = row.querySelector('.status-indicator');
@@ -961,7 +858,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Update a single status indicator
     function updateStatusIndicator(indicator, status) {
-        let statusColor = "#9E9E9E";
+        let statusColor = "var(--text-secondary)";
         let statusIcon = "help_outline";
         let statusTooltip = "Unknown";
 
@@ -969,22 +866,22 @@ document.addEventListener("DOMContentLoaded", () => {
             case "RUNNING":
             case "NORMAL":
                 statusIcon = "check_circle";
-                statusColor = "#4CAF50";
+                statusColor = "var(--success)";
                 statusTooltip = "Running";
                 break;
             case "DEAD":
                 statusIcon = "cancel";
-                statusColor = "#F44336";
+                statusColor = "var(--error)";
                 statusTooltip = "Dead";
                 break;
             case "STARTING":
                 statusIcon = "hourglass_empty";
-                statusColor = "#FF9800";
+                statusColor = "var(--warning)";
                 statusTooltip = "Starting";
                 break;
             case "STOPPED":
                 statusIcon = "stop_circle";
-                statusColor = "#9E9E9E";
+                statusColor = "var(--text-secondary)";
                 statusTooltip = "Stopped";
                 break;
         }
@@ -1015,11 +912,10 @@ document.addEventListener("DOMContentLoaded", () => {
         addRow();
     });
 
-    // Save config button event - uses Config API to replace all configurations
+    // Save config button event
     document.getElementById("saveConfig").addEventListener("click", async () => {
         const rows = Array.from(tableBody.rows);
 
-        // Validate all inputs before saving
         let hasErrors = false;
         rows.forEach(row => {
             const inputs = row.querySelectorAll('input, textarea');
@@ -1056,17 +952,14 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         });
 
-        // Filter out empty rows
         const validTunnels = updatedData.filter(tunnel =>
             tunnel.name && tunnel.remote_host && tunnel.remote_port && tunnel.local_port
         );
 
-        // Set flag to prevent status indicator clicks during save/reload
         isConfigSaving = true;
         showLoading(true);
 
         try {
-            // Use Config API from autossh container
             const response = await apiCall('/config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1081,10 +974,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const successMsg = window.i18n ? window.i18n.t('messages.config_saved') : 'Configuration saved successfully!';
             showMessage(successMsg, "success");
 
-            // Reload configuration immediately to get updated hashes
             await loadConfiguration();
 
-            // Configuration reloaded successfully, re-enable clicks
             isConfigSaving = false;
             showLoading(false);
         } catch (error) {
@@ -1097,4 +988,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
-
