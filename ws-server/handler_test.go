@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -239,119 +240,115 @@ func TestHealthHandler_WithActiveConnections(t *testing.T) {
 	}
 }
 
-// --- WebSocket upgrade integration test ---
+// --- WebSocket upgrade integration tests ---
+//
+// These tests use httptest.NewServer which spawns handler goroutines that
+// access the package-level connTracker. To avoid data races between
+// lingering handler goroutines and t.Cleanup restoring globals, all WS
+// integration tests run as sequential subtests within a single parent
+// that owns one setupTestTracker call. The server is closed between
+// subtests, and a brief sleep ensures handler goroutines fully drain.
 
-func TestWsAuthHandler_WebSocketUpgrade(t *testing.T) {
+func TestWsAuthHandler_WebSocket(t *testing.T) {
 	setupTestTracker(t, 5)
 	withAPIKey(t, "")
 	withAllowedOrigins(t, []string{"*"})
 
-	// Create a test HTTP server with the handler
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ws/auth/", wsAuthHandler)
-	server := httptest.NewServer(mux)
-	defer server.Close()
+	t.Run("Upgrade", func(t *testing.T) {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/ws/auth/", wsAuthHandler)
+		server := httptest.NewServer(mux)
+		defer server.Close()
 
-	hash := "aaaabbbbccccddddeeeeffffaaaabbbb"
-	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/auth/" + hash
+		hash := "aaaabbbbccccddddeeeeffffaaaabbbb"
+		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/auth/" + hash
 
-	// Attempt WebSocket connection.
-	// The upgrade itself should succeed, but the PTY command
-	// (/usr/local/bin/autossh-cli) won't exist in the test env,
-	// so we expect to receive an error status message.
-	dialer := websocket.Dialer{}
-	conn, resp, err := dialer.Dial(wsURL, nil)
-	if err != nil {
-		// If running outside the container, autossh-cli doesn't exist.
-		// The upgrade may still succeed, but the session will fail.
-		// If the upgrade itself fails (e.g., 400/401), that's also valid
-		// depending on the error.
-		if resp != nil {
-			t.Logf("WebSocket upgrade returned status %d (expected in test env without autossh-cli)", resp.StatusCode)
+		dialer := websocket.Dialer{}
+		conn, resp, err := dialer.Dial(wsURL, nil)
+		if err != nil {
+			if resp != nil {
+				t.Logf("WebSocket upgrade returned status %d (expected in test env without autossh-cli)", resp.StatusCode)
+			} else {
+				t.Logf("WebSocket dial error (expected in test env): %v", err)
+			}
 			return
 		}
-		t.Logf("WebSocket dial error (expected in test env): %v", err)
-		return
-	}
-	defer conn.Close()
 
-	// If we successfully connected, read the first message.
-	// It should be a status message (likely error since autossh-cli isn't available)
-	_, msg, err := conn.ReadMessage()
-	if err != nil {
-		t.Logf("Read error after connect (expected): %v", err)
-		return
-	}
-
-	var status StatusMessage
-	if err := json.Unmarshal(msg, &status); err == nil {
-		t.Logf("Received status: code=%s, message=%s", status.Code, status.Message)
-		if status.Type != "status" {
-			t.Errorf("status.Type = %q, want 'status'", status.Type)
+		// Read the first message — should be an error status since autossh-cli isn't available
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			t.Logf("Read error after connect (expected): %v", err)
+			conn.Close()
+			return
 		}
-	}
 
-	// After session ends, the hash should be released
-	// Give a moment for cleanup goroutines
-	conn.Close()
-}
+		var status StatusMessage
+		if err := json.Unmarshal(msg, &status); err == nil {
+			t.Logf("Received status: code=%s, message=%s", status.Code, status.Message)
+			if status.Type != "status" {
+				t.Errorf("status.Type = %q, want 'status'", status.Type)
+			}
+		}
 
-func TestWsAuthHandler_WebSocket_AuthRequired(t *testing.T) {
-	setupTestTracker(t, 5)
-	withAPIKey(t, "test-secret-key")
-	withAllowedOrigins(t, []string{"*"})
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ws/auth/", wsAuthHandler)
-	server := httptest.NewServer(mux)
-	defer server.Close()
-
-	hash := "aaaabbbbccccddddeeeeffffaaaabbbb"
-
-	// Without credentials — should be rejected before WS upgrade
-	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/auth/" + hash
-	dialer := websocket.Dialer{}
-	_, resp, err := dialer.Dial(wsURL, nil)
-	if err == nil {
-		t.Error("WebSocket dial should fail without API key")
-	}
-	if resp != nil && resp.StatusCode != http.StatusUnauthorized {
-		t.Errorf("expected 401, got %d", resp.StatusCode)
-	}
-
-	// With correct token in query param — should at least upgrade
-	wsURLWithToken := wsURL + "?token=test-secret-key"
-	conn, _, err := dialer.Dial(wsURLWithToken, nil)
-	if err != nil {
-		// May fail due to missing autossh-cli, but the upgrade should succeed
-		t.Logf("Dial with token: %v (may be expected without autossh-cli)", err)
-	} else {
 		conn.Close()
-	}
-}
+		// Wait for handler goroutines to drain after closing connection
+		time.Sleep(50 * time.Millisecond)
+	})
 
-func TestWsAuthHandler_WebSocket_DuplicateHash(t *testing.T) {
-	setupTestTracker(t, 5)
-	withAPIKey(t, "")
-	withAllowedOrigins(t, []string{"*"})
+	t.Run("AuthRequired", func(t *testing.T) {
+		withAPIKey(t, "test-secret-key")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ws/auth/", wsAuthHandler)
-	server := httptest.NewServer(mux)
-	defer server.Close()
+		mux := http.NewServeMux()
+		mux.HandleFunc("/ws/auth/", wsAuthHandler)
+		server := httptest.NewServer(mux)
+		defer server.Close()
 
-	hash := "aaaabbbbccccddddeeeeffffaaaabbbb"
+		hash := "bbbbccccddddeeeeffffaaaabbbbcccc"
+		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/auth/" + hash
+		dialer := websocket.Dialer{}
 
-	// Pre-acquire hash to simulate active session
-	connTracker.Acquire(hash)
+		// Without credentials — should be rejected before WS upgrade
+		_, resp, err := dialer.Dial(wsURL, nil)
+		if err == nil {
+			t.Error("WebSocket dial should fail without API key")
+		}
+		if resp != nil && resp.StatusCode != http.StatusUnauthorized {
+			t.Errorf("expected 401, got %d", resp.StatusCode)
+		}
 
-	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/auth/" + hash
-	dialer := websocket.Dialer{}
-	_, resp, err := dialer.Dial(wsURL, nil)
-	if err == nil {
-		t.Error("WebSocket dial should fail for already-active hash")
-	}
-	if resp != nil && resp.StatusCode != http.StatusConflict {
-		t.Errorf("expected 409 Conflict, got %d", resp.StatusCode)
-	}
+		// With correct token in query param — should at least upgrade
+		wsURLWithToken := wsURL + "?token=test-secret-key"
+		conn, _, err := dialer.Dial(wsURLWithToken, nil)
+		if err != nil {
+			t.Logf("Dial with token: %v (may be expected without autossh-cli)", err)
+		} else {
+			conn.Close()
+		}
+
+		// Wait for handler goroutines to drain
+		time.Sleep(50 * time.Millisecond)
+	})
+
+	t.Run("DuplicateHash", func(t *testing.T) {
+		withAPIKey(t, "")
+
+		mux := http.NewServeMux()
+		mux.HandleFunc("/ws/auth/", wsAuthHandler)
+		server := httptest.NewServer(mux)
+		defer server.Close()
+
+		hash := "ccccddddeeeeffffaaaabbbbccccdddd"
+		connTracker.Acquire(hash)
+		defer connTracker.Release(hash)
+
+		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws/auth/" + hash
+		dialer := websocket.Dialer{}
+		_, resp, err := dialer.Dial(wsURL, nil)
+		if err == nil {
+			t.Error("WebSocket dial should fail for already-active hash")
+		}
+		if resp != nil && resp.StatusCode != http.StatusConflict {
+			t.Errorf("expected 409 Conflict, got %d", resp.StatusCode)
+		}
+	})
 }
