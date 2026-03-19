@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  go-test:
+    name: Go Test & Vet
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [ws-server, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+      - name: Run go vet
+        working-directory: ${{ matrix.module }}
+        run: go vet ./...
+      - name: Run tests
+        working-directory: ${{ matrix.module }}
+        run: go test -v -count=1 -race ./...
+      - name: Verify build
+        working-directory: ${{ matrix.module }}
+        run: go build -o /dev/null .
+
+  go-fmt:
+    name: Go Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Check gofmt (ws-server)
+        run: |
+          out="$(gofmt -l ws-server/)"
+          if [ -n "$out" ]; then
+            echo "::error::Files not formatted: $out"
+            gofmt -d ws-server/
+            exit 1
+          fi
+      - name: Check gofmt (web)
+        run: |
+          out="$(gofmt -l web/)"
+          if [ -n "$out" ]; then
+            echo "::error::Files not formatted: $out"
+            gofmt -d web/
+            exit 1
+          fi
+
+  shell-lint:
+    name: Shell Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shfmt
+        run: |
+          SHFMT_VERSION="3.10.0"
+          curl -sSfL "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64" \
+            -o /usr/local/bin/shfmt
+          chmod +x /usr/local/bin/shfmt
+      - name: Run shellcheck
+        run: |
+          shellcheck \
+            autossh-cli \
+            entrypoint.sh \
+            spinoff_monitor.sh \
+            scripts/*.sh
+      - name: Run shfmt
+        run: |
+          shfmt -d \
+            autossh-cli \
+            entrypoint.sh \
+            spinoff_monitor.sh \
+            scripts/*.sh
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - image: autossh-tunnel
+            dockerfile: Dockerfile
+          - image: autossh-tunnel-web
+            dockerfile: Dockerfile.web
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.image }}
+        run: |
+          docker build \
+            --build-arg VERSION=ci-${{ github.sha }} \
+            -t ${{ matrix.image }}:test \
+            -f ${{ matrix.dockerfile }} .
+      - name: Smoke test
+        if: matrix.image == 'autossh-tunnel'
+        run: |
+          docker run --rm ${{ matrix.image }}:test \
+            ls -la /usr/local/bin/ws-server /usr/local/bin/autossh-cli
