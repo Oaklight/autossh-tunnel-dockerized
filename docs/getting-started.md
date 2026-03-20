@@ -116,8 +116,9 @@ tunnels:
 If you're using the web panel (included in `compose.yaml`):
 
 1. Start with an empty `config/config.yaml` file
-2. Access the web interface at `http://localhost:5000` after starting the services
+2. Access the web interface at `http://localhost:5000` after starting the services (port configurable via `PORT` env var)
 3. Configure tunnels through the visual interface
+4. For tunnels requiring password or 2FA authentication, set `interactive: true` and configure WebSocket support (see [Web Panel - WebSocket Configuration](web-panel.md#websocket-configuration-for-interactive-auth))
 
 !!! tip "Web Panel Tips"
     - The web panel automatically backs up your configuration to `config/backups/` every time you save changes

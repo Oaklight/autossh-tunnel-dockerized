@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.3.0] - 2026-03-20
+
+### Added
+
+- **WebSocket Server (ws-server)**: New WebSocket server in the autossh container for in-browser interactive authentication
+    - Configurable via `WS_PORT` environment variable (default: `8022`)
+    - Spawns `autossh-cli auth` sessions for interactive tunnels
+- **In-Browser Terminal Modal**: xterm.js-based terminal modal in the web panel for interactive SSH authentication
+    - Supports password and 2FA/TOTP input directly in the browser
+    - Auto-closes on successful authentication and refreshes tunnel status
+    - Terminal icon badge on Start/Restart buttons for interactive tunnels
+- **Dark/Light Theme Support**: Color scheme picker in the web panel navigation bar
+    - User preference saved in browser storage and persists across sessions
+- **Configurable Web Panel Port**: `PORT` environment variable to change the web panel listen port (default: `5000`)
+- **WebSocket Proxy**: Go web server proxies WebSocket connections from browser to ws-server via `WS_BASE_URL`
+- **Tunnel Detail Page Enhancements**: Interactive auth badge and terminal-enabled controls on the tunnel detail page
+
+### Changed
+
+- **Web Panel Architecture**: Go web server now handles WebSocket proxy in addition to static file serving
+- **Interactive Auth UX**: Interactive tunnels can now be started from the web interface when ws-server is configured
+
 ## [v2.2.0] - 2026-02-04
 
 ### Added

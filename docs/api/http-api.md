@@ -830,6 +830,7 @@ services:
     environment:
       - API_BASE_URL=http://localhost:8080
       - API_KEY=your-secret-key  # Must match autossh API_KEY
+      - WS_BASE_URL=ws://localhost:8022  # Optional: enable in-browser interactive auth
 ```
 
 ## Integration Examples

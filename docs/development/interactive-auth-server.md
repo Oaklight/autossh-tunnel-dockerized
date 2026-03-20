@@ -104,6 +104,13 @@ To test `autossh-cli auth` with this server:
       interactive: true
     ```
 3.  Start the autossh container.
-4.  Run the auth command:
+4.  Authenticate via one of the following methods:
+
+    **Option A: CLI**
     ```bash
     docker compose exec -it -u myuser autossh autossh-cli auth <hash>
+    ```
+
+    **Option B: Web Panel (in-browser terminal)**
+
+    If `WS_BASE_URL` is configured on the web container, click the Start button on the interactive tunnel row in the web panel. An xterm.js terminal modal will open for you to enter your credentials. See [Web Panel - WebSocket Configuration](../web-panel.md#websocket-configuration-for-interactive-auth) for setup details.

@@ -123,10 +123,12 @@ This ensures minimal disruption to existing connections.
 
 Tunnels marked as `interactive: true` in the configuration:
 
-- Require manual password input
+- Require manual password input (password, 2FA/TOTP)
 - Won't start automatically
 - Show as `INTERACTIVE` status in the list
-- Must be started manually after providing credentials
+- Can be authenticated via:
+    - **CLI**: `autossh-cli auth <hash>` (inside the container)
+    - **Web panel**: In-browser xterm.js terminal modal (when ws-server is configured with `WS_BASE_URL`)
 
 ## Cleanup Rules
 

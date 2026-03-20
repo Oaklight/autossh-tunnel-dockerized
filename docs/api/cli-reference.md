@@ -144,7 +144,7 @@ SUCCESS: Interactive tunnel started successfully
 - Uses SSH control sockets for PID tracking and management
 
 !!! note "Interactive Tunnels"
-    Interactive tunnels are marked with `interactive: true` in the configuration file. They are **not** started automatically when the container starts. You must manually authenticate using the `auth` command.
+    Interactive tunnels are marked with `interactive: true` in the configuration file. They are **not** started automatically when the container starts. You must manually authenticate using the `auth` command or the in-browser terminal modal (see [Web Panel - WebSocket Configuration](../web-panel.md#websocket-configuration-for-interactive-auth)).
 
 ### Start a Single Tunnel
 
@@ -304,6 +304,7 @@ docker exec -it autotunnel-autossh-1 autossh-cli validate
 | `AUTOSSH_STATE_FILE` | Path to state file | `/tmp/autossh_tunnels.state` |
 | `API_ENABLE` | Enable HTTP API server | `false` |
 | `API_PORT` | HTTP API server port | `8080` |
+| `WS_PORT` | WebSocket server (ws-server) listen port for interactive auth | `8022` |
 | `PUID` | User ID for file permissions | `1000` |
 | `PGID` | Group ID for file permissions | `1000` |
 | `AUTOSSH_GATETIME` | Autossh gate time | `0` |

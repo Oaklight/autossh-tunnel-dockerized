@@ -196,7 +196,12 @@ When the configuration file is updated, the system will:
 
 ### Interactive Tunnels
 
-Tunnels marked with `interactive: true` require manual password input and will not start automatically. These tunnels are displayed as `INTERACTIVE` status in the list.
+Tunnels marked with `interactive: true` require manual password or 2FA input and will not start automatically. These tunnels are displayed as `INTERACTIVE` status in the list.
+
+Interactive tunnels can be authenticated via:
+
+- **CLI**: `autossh-cli auth <hash>` (inside the container)
+- **Web panel**: In-browser xterm.js terminal modal when ws-server is configured (see [Web Panel - WebSocket Configuration](../web-panel.md#websocket-configuration-for-interactive-auth))
 
 ### Batch Operations
 

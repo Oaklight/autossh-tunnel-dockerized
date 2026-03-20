@@ -19,7 +19,8 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 - **Multi-architecture Support**: Supports all Alpine base architectures, including `linux/amd64`, `linux/arm64/v8`, `linux/arm/v7`, `linux/arm/v6`, `linux/386`, `linux/ppc64le`, `linux/s390x`, and `linux/riscv64`.
 - **Flexible Direction Configuration**: Support exposing local services to a remote server (`local_to_remote`) or mapping remote services to a local port (`remote_to_local`).
 - **Automatic Reload**: Detect changes in `config.yaml` and automatically reload the service configuration.
-- **Web-Based Configuration**: Manage tunnels and configuration updates via a web panel.
+- **Web-Based Configuration**: Manage tunnels and configuration updates via a web panel with dark/light theme support.
+- **In-Browser Interactive Authentication**: Authenticate interactive SSH tunnels (password/2FA) directly from the web panel via an embedded xterm.js terminal powered by a WebSocket server.
 - **CLI Tool (autossh-cli)**: Command-line interface for managing tunnels, viewing status, and controlling individual tunnels.
 - **HTTP API**: RESTful API for programmatic tunnel control, enabling integration with other tools and automation.
 - **Individual Tunnel Control**: Start, stop, and manage each tunnel independently without affecting others.

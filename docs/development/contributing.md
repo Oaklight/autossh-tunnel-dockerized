@@ -46,9 +46,20 @@ autossh-tunnel-dockerized/
 │   ├── start_autossh.sh  # Tunnel starter
 │   └── state_manager.sh  # State management
 ├── web/
-│   ├── main.go           # Web server
+│   ├── main.go           # Web server (static files + WebSocket proxy)
 │   ├── templates/        # HTML templates
+│   │   ├── index.html
+│   │   ├── help.html
+│   │   └── tunnel-detail.html
 │   └── static/           # CSS, JS, locales
+│       ├── script.js
+│       ├── style.css
+│       ├── terminal.js   # xterm.js terminal modal logic
+│       ├── terminal.css  # Terminal modal styles
+│       ├── tunnel-detail.js
+│       ├── tunnel-detail.css
+│       ├── locales/      # i18n language files
+│       └── vendor/xterm/ # Bundled xterm.js library
 └── config/
     └── config.yaml.sample
 ```
@@ -143,7 +154,10 @@ autossh-tunnel-dockerized/
 - [ ] Configuration changes apply correctly
 - [ ] Web panel displays correctly
 - [ ] Language switching works
+- [ ] Dark/light theme switching works
 - [ ] API endpoints respond correctly
+- [ ] Interactive auth via CLI works
+- [ ] Interactive auth via in-browser terminal works (when ws-server configured)
 
 ## Submitting Changes
 

@@ -181,32 +181,46 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
 
 ### Interactive Tunnel Won't Start
 
-**Symptom:** Running `autossh-cli auth <hash>` fails or shows errors.
+**Symptom:** Running `autossh-cli auth <hash>` fails or shows errors, or the in-browser terminal modal fails to connect.
 
 **Solutions:**
 
-1. **Ensure using correct user context:**
-   
+1. **Ensure using correct user context (CLI):**
+
    The `auth` command must be run as `myuser` user:
    ```bash
    docker exec -it -u myuser <container_name> autossh-cli auth <hash>
    ```
-   
+
    Without `-u myuser`, you may see permission errors accessing SSH config files.
 
 2. **Verify tunnel is marked as interactive:**
-   
+
    Check if the tunnel has `interactive: true` in config:
    ```bash
    docker exec -it autossh-1 autossh-cli show-tunnel <hash>
    ```
 
 3. **Check SSH host configuration:**
-   
+
    Ensure the remote host is properly configured in `~/.ssh/config`:
    ```bash
    docker exec -it autossh-1 cat /home/myuser/.ssh/config
    ```
+
+4. **WebSocket connection fails (in-browser terminal):**
+
+   If the xterm.js terminal modal shows "Failed to connect to authentication server":
+
+   - Verify `WS_BASE_URL` is set correctly on the web container:
+     ```bash
+     docker compose exec web env | grep WS_BASE_URL
+     ```
+   - Verify the ws-server is running in the autossh container:
+     ```bash
+     docker compose logs autossh | grep ws-server
+     ```
+   - Check that `WS_PORT` (default `8022`) is accessible from the web container. When autossh uses `network_mode: "host"`, use `ws://localhost:8022`.
 
 ### Authentication Fails
 
@@ -360,6 +374,44 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
    ```bash
    curl http://localhost:8080/status
    ```
+
+### Terminal Modal Does Not Open
+
+**Symptom:** Clicking Start/Restart on an interactive tunnel does not open the terminal modal.
+
+**Solutions:**
+
+1. Verify `WS_BASE_URL` is configured on the web container:
+   ```bash
+   docker compose exec web env | grep WS_BASE_URL
+   ```
+
+2. Check that the web panel reports WebSocket as enabled:
+   ```bash
+   curl http://localhost:5000/api/config/api
+   # Should show "ws_enabled": true
+   ```
+
+3. Verify the tunnel has `interactive: true` set in its configuration.
+
+### Terminal Modal Opens But Shows Connection Error
+
+**Symptom:** The xterm.js terminal modal opens but displays an error message.
+
+**Solutions:**
+
+1. Check that the ws-server is running:
+   ```bash
+   docker compose logs autossh | grep -i "ws-server\|websocket"
+   ```
+
+2. Verify the ws-server port is accessible:
+   ```bash
+   # If autossh uses host network mode
+   curl -v http://localhost:8022
+   ```
+
+3. Ensure `WS_BASE_URL` uses the correct protocol (`ws://` not `http://`) and port.
 
 ## API Issues
 
