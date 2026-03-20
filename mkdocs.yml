@@ -85,9 +85,6 @@ hooks: []
 # Extensions
 markdown_extensions:
   - admonition
-  - codehilite:
-      guess_lang: true
-  - fenced_code
   - footnotes
   - pymdownx.tabbed:
       alternate_style: true
