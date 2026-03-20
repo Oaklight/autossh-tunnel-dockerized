@@ -63,6 +63,8 @@
     "stop_tunnel": "إيقاف النفق",
     "interactive_start_disabled": "مطلوب مصادقة تفاعلية - استخدم سطر الأوامر",
     "interactive_restart_disabled": "مطلوب مصادقة تفاعلية - استخدم سطر الأوامر",
+    "interactive_start_terminal": "Start with Interactive Auth",
+    "interactive_restart_terminal": "Restart with Interactive Auth",
     "refresh": "تحديث",
     "auto_refresh": "تحديث تلقائي (5 ثوانٍ)",
     "copy_hash": "نسخ التجزئة"
@@ -285,5 +287,22 @@
         "restart_container": "إعادة تشغيل خدمة الحاوية"
       }
     }
+  },
+  "terminal": {
+    "title": "Interactive Authentication",
+    "status_connecting": "Connecting...",
+    "status_connected": "Connected",
+    "status_success": "Success",
+    "status_error": "Error",
+    "status_timeout": "Timed Out",
+    "status_disconnected": "Disconnected",
+    "auth_success": "Authentication successful! Tunnel is now running.",
+    "auth_failed": "Authentication failed.",
+    "session_timeout": "Session timed out due to inactivity.",
+    "connection_error": "Failed to connect to authentication server.",
+    "ws_not_available": "WebSocket server is not configured. Please use CLI for interactive authentication.",
+    "confirm_close": "Authentication session is active. Close terminal?",
+    "close_hint": "You may close this terminal.",
+    "footer_hint": "Type your password or 2FA code when prompted. Press Enter to submit."
   }
 }

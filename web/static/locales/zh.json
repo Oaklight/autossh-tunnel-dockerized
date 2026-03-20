@@ -63,6 +63,8 @@
     "stop_tunnel": "停止隧道",
     "interactive_start_disabled": "需要交互认证 - 请使用命令行",
     "interactive_restart_disabled": "需要交互认证 - 请使用命令行",
+    "interactive_start_terminal": "交互认证启动",
+    "interactive_restart_terminal": "交互认证重启",
     "refresh": "刷新",
     "auto_refresh": "自动刷新 (5秒)",
     "copy_hash": "复制哈希值"
@@ -285,5 +287,22 @@
         "restart_container": "重启容器服务"
       }
     }
+  },
+  "terminal": {
+    "title": "交互式认证",
+    "status_connecting": "连接中...",
+    "status_connected": "已连接",
+    "status_success": "成功",
+    "status_error": "错误",
+    "status_timeout": "已超时",
+    "status_disconnected": "已断开",
+    "auth_success": "认证成功！隧道已启动运行。",
+    "auth_failed": "认证失败。",
+    "session_timeout": "会话因空闲超时而结束。",
+    "connection_error": "无法连接到认证服务器。",
+    "ws_not_available": "WebSocket 服务器未配置。请使用命令行进行交互认证。",
+    "confirm_close": "认证会话正在进行中。关闭终端？",
+    "close_hint": "您可以关闭此终端。",
+    "footer_hint": "在提示时输入密码或验证码，按 Enter 提交。"
   }
 }

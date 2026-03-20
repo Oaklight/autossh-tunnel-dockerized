@@ -110,13 +110,16 @@ list_to_json() {
 	autossh-cli list | tail -n +2 | while read -r line; do
 		if [ -z "$line" ]; then continue; fi
 
-		# Parse line: name status local -> remote:port (hash)
-		name=$(echo "$line" | awk '{print $1}')
-		status=$(echo "$line" | awk '{print $2}')
-		local_port=$(echo "$line" | awk '{print $3}')
-		remote_host=$(echo "$line" | awk '{print $5}' | cut -d: -f1)
-		remote_port=$(echo "$line" | awk '{print $5}' | cut -d: -f2)
-		hash=$(echo "$line" | awk '{print $6}' | tr -d '()')
+		# Output format: "  %-20s %-10s %s -> %s:%s (%s)"
+		# After read -r strips leading spaces:
+		#   chars 1-20 = name, 22-31 = status, 33+ = rest
+		name=$(echo "$line" | cut -c1-20 | sed 's/[[:space:]]*$//')
+		status=$(echo "$line" | cut -c22-31 | sed 's/[[:space:]]*$//')
+		rest=$(echo "$line" | cut -c33-)
+		local_port=$(echo "$rest" | awk '{print $1}')
+		remote_host=$(echo "$rest" | awk '{print $3}' | cut -d: -f1)
+		remote_port=$(echo "$rest" | awk '{print $3}' | cut -d: -f2)
+		hash=$(echo "$rest" | awk '{print $4}' | tr -d '()')
 
 		if [ "$first" = "true" ]; then
 			first=false
@@ -135,17 +138,21 @@ status_to_json() {
 	echo "["
 	first=true
 	# Skip header line and "Managed tunnels:" line if present
-	autossh-cli status | grep -v "Tunnel Status" | grep -v "Managed tunnels:" | while read -r line; do
+	# Strip ANSI escape codes to avoid column-position shifts
+	autossh-cli status | sed 's/\x1b\[[0-9;]*m//g' | grep -v "Tunnel Status" | grep -v "Managed tunnels:" | while read -r line; do
 		if [ -z "$line" ]; then continue; fi
 		if echo "$line" | grep -q "No managed tunnels found"; then continue; fi
 
-		# Parse line: name status local -> remote:port (hash)
-		name=$(echo "$line" | awk '{print $1}')
-		status=$(echo "$line" | awk '{print $2}')
-		local_port=$(echo "$line" | awk '{print $3}')
-		remote_host=$(echo "$line" | awk '{print $5}' | cut -d: -f1)
-		remote_port=$(echo "$line" | awk '{print $5}' | cut -d: -f2)
-		hash=$(echo "$line" | awk '{print $6}' | tr -d '()')
+		# Output format: "  %-20s %-10s %s -> %s:%s (%s)"
+		# After read -r strips leading spaces:
+		#   chars 1-20 = name, 22-31 = status, 33+ = rest
+		name=$(echo "$line" | cut -c1-20 | sed 's/[[:space:]]*$//')
+		status=$(echo "$line" | cut -c22-31 | sed 's/[[:space:]]*$//')
+		rest=$(echo "$line" | cut -c33-)
+		local_port=$(echo "$rest" | awk '{print $1}')
+		remote_host=$(echo "$rest" | awk '{print $3}' | cut -d: -f1)
+		remote_port=$(echo "$rest" | awk '{print $3}' | cut -d: -f2)
+		hash=$(echo "$rest" | awk '{print $4}' | tr -d '()')
 
 		if [ "$first" = "true" ]; then
 			first=false

@@ -285,6 +285,14 @@ func main() {
 		logMsg("INFO", "WEB", "WebSocket proxy disabled (WS_BASE_URL not set)")
 	}
 
+	listenAddr := defaultPort
+	if p := os.Getenv("PORT"); p != "" {
+		if !strings.HasPrefix(p, ":") {
+			p = ":" + p
+		}
+		listenAddr = p
+	}
+
 	fs := http.FileServer(http.Dir(staticDir))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
@@ -295,9 +303,9 @@ func main() {
 	http.HandleFunc("/api/config/api", getAPIConfigHandler)
 	http.HandleFunc("/ws/auth/", wsProxyHandler)
 
-	logMsg("INFO", "WEB", "Starting server on %s", defaultPort)
+	logMsg("INFO", "WEB", "Starting server on %s", listenAddr)
 	logMsg("INFO", "WEB", "Web panel is now a static server - all config operations go through autossh API")
-	err := http.ListenAndServe(defaultPort, nil)
+	err := http.ListenAndServe(listenAddr, nil)
 	if err != nil {
 		logMsg("ERROR", "WEB", "Server failed: %v", err)
 		os.Exit(1)

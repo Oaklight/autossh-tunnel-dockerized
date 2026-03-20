@@ -93,10 +93,10 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 		"WS_MODE=1", // Tells interactive_auth.sh to skip tee
 	)
 
-	// Set process group for cleanup
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
+	// Note: pty.Start() sets Setsid and Setctty on SysProcAttr internally.
+	// Do NOT set Setpgid here — it conflicts with Setsid (EPERM).
+	// Process group cleanup still works because setsid() makes the child
+	// its own session leader, so PID == PGID.
 
 	// Start command with PTY
 	ptmx, err := pty.Start(cmd)
@@ -228,10 +228,10 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 	// Wait for session to complete
 	<-sessionDone
 
-	// Wait for I/O goroutines to finish
-	wg.Wait()
-
-	// Determine exit status and send appropriate message
+	// Determine exit status and send status message BEFORE waiting for
+	// I/O goroutines — the PTY read goroutine may have already errored
+	// out, which can cause the browser to close the WebSocket before we
+	// get a chance to send the status.
 	exitCode := 0
 	if cmd.ProcessState != nil {
 		exitCode = cmd.ProcessState.ExitCode()
@@ -246,6 +246,9 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 	} else {
 		sendStatus(conn, "error", "Authentication failed", exitCode)
 	}
+
+	// Wait for I/O goroutines to finish
+	wg.Wait()
 }
 
 // sendStatus sends a JSON status message over the WebSocket connection.

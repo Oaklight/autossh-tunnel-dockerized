@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     // API configuration - will be loaded from server
-    let apiConfig = { base_url: '', api_key: '' };
+    let apiConfig = { base_url: '', api_key: '', ws_enabled: false };
 
     // Auto refresh settings
     let autoRefreshInterval = null;
@@ -39,8 +39,27 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentTunnel = null;
     let currentHash = tunnelHash; // Track current hash (may change after save)
 
+    // Terminal modal for interactive auth
+    let terminalModal = null;
+
     // Load API config first, then load tunnel details
     loadAPIConfig().then(() => {
+        // Initialize terminal modal if WebSocket is enabled
+        if (apiConfig.ws_enabled && typeof TerminalModal === 'function') {
+            terminalModal = new TerminalModal({
+                getApiConfig: () => apiConfig,
+                showMessage: showMessage,
+                onSuccess: () => {
+                    setTimeout(() => {
+                        refreshTunnelStatus();
+                        loadLogs();
+                    }, 1500);
+                },
+                onError: () => {},
+                getTranslation: getTranslation,
+            });
+        }
+
         loadTunnelDetails();
         // Start auto-refresh by default
         startAutoRefresh();
@@ -124,7 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update control button titles based on interactive state
     function updateControlButtonTitles() {
         const isInteractive = currentTunnel?.interactive || false;
-        if (isInteractive) {
+        if (isInteractive && apiConfig.ws_enabled) {
+            startBtn.title = getTranslation('buttons.interactive_start_terminal', 'Start with Interactive Auth');
+            restartBtn.title = getTranslation('buttons.interactive_restart_terminal', 'Restart with Interactive Auth');
+        } else if (isInteractive) {
             startBtn.title = getTranslation('buttons.interactive_start_disabled', 'Interactive Auth Required - Use CLI');
             restartBtn.title = getTranslation('buttons.interactive_restart_disabled', 'Interactive Auth Required - Use CLI');
         } else {
@@ -153,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await response.json();
                 apiConfig.base_url = data.base_url || '';
                 apiConfig.api_key = data.api_key || '';
+                apiConfig.ws_enabled = data.ws_enabled || false;
             }
         } catch (error) {
             console.warn('Failed to load API config:', error);
@@ -276,8 +299,19 @@ document.addEventListener("DOMContentLoaded", () => {
         interactiveToggle.setAttribute('data-interactive', isInteractive.toString());
         updateInteractiveToggleLabel();
 
-        // Disable start/restart buttons for interactive tunnels
-        if (isInteractive) {
+        // Configure start/restart buttons for interactive tunnels
+        if (isInteractive && apiConfig.ws_enabled) {
+            // WebSocket available — buttons open terminal modal
+            startBtn.disabled = false;
+            restartBtn.disabled = false;
+            startBtn.classList.remove('disabled-interactive');
+            restartBtn.classList.remove('disabled-interactive');
+            startBtn.classList.add('interactive-ws');
+            restartBtn.classList.add('interactive-ws');
+            startBtn.title = getTranslation('buttons.interactive_start_terminal', 'Start with Interactive Auth');
+            restartBtn.title = getTranslation('buttons.interactive_restart_terminal', 'Restart with Interactive Auth');
+        } else if (isInteractive) {
+            // WebSocket not available — keep disabled with CLI hint
             startBtn.disabled = true;
             restartBtn.disabled = true;
             startBtn.classList.add('disabled-interactive');
@@ -289,6 +323,8 @@ document.addEventListener("DOMContentLoaded", () => {
             restartBtn.disabled = false;
             startBtn.classList.remove('disabled-interactive');
             restartBtn.classList.remove('disabled-interactive');
+            startBtn.classList.remove('interactive-ws');
+            restartBtn.classList.remove('interactive-ws');
             startBtn.title = getTranslation('buttons.start_tunnel', 'Start tunnel');
             restartBtn.title = getTranslation('buttons.restart_tunnel', 'Restart tunnel');
         }
@@ -490,16 +526,37 @@ document.addEventListener("DOMContentLoaded", () => {
         // Check if this is an interactive tunnel
         const isInteractive = currentTunnel?.interactive || false;
 
-        // For interactive tunnels, show hint for start/restart actions
+        // For interactive tunnels, open terminal modal or show CLI hint
         if (isInteractive && (action === 'start' || action === 'restart')) {
-            const hintKey = action === 'start' ? 'messages.interactive_start_hint' : 'messages.interactive_restart_hint';
-            const defaultHint = action === 'start'
-                ? 'This tunnel requires interactive authentication. Please start it via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + currentHash
-                : 'This tunnel requires interactive authentication. Please stop it first, then start via terminal:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + currentHash;
-            let hintMsg = window.i18n ? window.i18n.t(hintKey) : defaultHint;
-            // Replace {hash} placeholder with actual hash (first 8 chars)
-            hintMsg = hintMsg.replace('{hash}', currentHash.substring(0, 8));
-            showMessage(hintMsg, 'info');
+            if (terminalModal && apiConfig.ws_enabled) {
+                // For restart, stop the tunnel first
+                if (action === 'restart') {
+                    setAllButtonsEnabled(false);
+                    try {
+                        const stopResponse = await apiCall(`/stop/${currentHash}`, { method: 'POST' });
+                        if (!stopResponse.ok) {
+                            showMessage(getTranslation('messages.stop_failed', 'Failed to stop tunnel'), 'error');
+                            setAllButtonsEnabled(true);
+                            return;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    } catch (error) {
+                        showMessage(getTranslation('messages.stop_failed', 'Failed to stop tunnel'), 'error');
+                        setAllButtonsEnabled(true);
+                        return;
+                    }
+                    setAllButtonsEnabled(true);
+                }
+                const tunnelName = currentTunnel?.name || currentHash.substring(0, 8);
+                terminalModal.open(currentHash, tunnelName);
+            } else {
+                // Fallback: show CLI hint
+                const hintKey = action === 'start' ? 'messages.interactive_start_hint' : 'messages.interactive_restart_hint';
+                const defaultHint = 'This tunnel requires interactive authentication. Please use CLI:\ndocker compose exec -it -u myuser autossh autossh-cli auth ' + currentHash;
+                let hintMsg = window.i18n ? window.i18n.t(hintKey) : defaultHint;
+                hintMsg = hintMsg.replace('{hash}', currentHash.substring(0, 8));
+                showMessage(hintMsg, 'info');
+            }
             return;
         }
 

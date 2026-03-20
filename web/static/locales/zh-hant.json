@@ -63,6 +63,8 @@
     "stop_tunnel": "停止隧道",
     "interactive_start_disabled": "需要互動認證 - 請使用命令列",
     "interactive_restart_disabled": "需要互動認證 - 請使用命令列",
+    "interactive_start_terminal": "互動認證啟動",
+    "interactive_restart_terminal": "互動認證重啟",
     "refresh": "重新整理",
     "auto_refresh": "自動重新整理 (5秒)",
     "copy_hash": "複製雜湊值"
@@ -285,5 +287,22 @@
         "restart_container": "重新啟動容器服務"
       }
     }
+  },
+  "terminal": {
+    "title": "互動式認證",
+    "status_connecting": "連接中...",
+    "status_connected": "已連接",
+    "status_success": "成功",
+    "status_error": "錯誤",
+    "status_timeout": "已逾時",
+    "status_disconnected": "已斷開",
+    "auth_success": "認證成功！隧道已啟動運行。",
+    "auth_failed": "認證失敗。",
+    "session_timeout": "會話因閒置逾時而結束。",
+    "connection_error": "無法連接到認證伺服器。",
+    "ws_not_available": "WebSocket 伺服器未配置。請使用命令列進行互動認證。",
+    "confirm_close": "認證會話正在進行中。關閉終端？",
+    "close_hint": "您可以關閉此終端。",
+    "footer_hint": "在提示時輸入密碼或驗證碼，按 Enter 提交。"
   }
 }

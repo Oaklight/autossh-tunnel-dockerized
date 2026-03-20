@@ -407,6 +407,29 @@ body {
   filter: grayscale(100%);
 }
 
+/* Interactive with WebSocket terminal */
+.control-button.interactive-ws {
+  position: relative;
+}
+
+.control-button.interactive-ws::after {
+  content: 'terminal';
+  font-family: 'Material Icons';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 10px;
+  color: var(--accent);
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 /* Start */
 .start-button { color: var(--success); }
 .start-button:hover:not(:disabled) { background: rgba(61, 139, 95, 0.1); }
