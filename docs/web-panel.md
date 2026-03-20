@@ -316,15 +316,15 @@ This architecture provides:
 - **Single Source of Truth**: Configuration is managed only by the autossh container
 
 ```
-┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
-│     Browser       │────▶│   Web Container   │     │ autossh Container │
-│    (Frontend)     │     │  (Static + WS     │     │  (Config API +    │
-│                   │     │   Proxy)          │     │   ws-server)      │
-└─────────┬─────────┘     └─────────┬─────────┘     └─────────▲────────┘
-          │                         │  WebSocket               │
-          │  /config, /status,      │  /ws/auth/{hash}         │
-          │  /start, /stop, /logs   │                          │
-          └─────────────────────────┴──────────────────────────┘
++-------------------+     +-------------------+     +-------------------+
+|     Browser       |---->|   Web Container   |     | autossh Container |
+|    (Frontend)     |     |  (Static + WS     |     |  (Config API +    |
+|                   |     |   Proxy)          |     |   ws-server)      |
++---------+---------+     +---------+---------+     +---------^---------+
+          |                         |  WebSocket               |
+          |  /config, /status,      |  /ws/auth/{hash}         |
+          |  /start, /stop, /logs   |                          |
+          +-------------------------+--------------------------+
 ```
 
 !!! info "Network Requirements"
