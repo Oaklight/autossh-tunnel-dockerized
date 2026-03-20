@@ -82,9 +82,12 @@
    ```bash
    # 检查 5000 端口（Web 面板）
    netstat -tuln | grep 5000
-   
+
    # 检查 8080 端口（API 服务器）
    netstat -tuln | grep 8080
+
+   # 检查 8022 端口（WebSocket 服务器）
+   netstat -tuln | grep 8022
    ```
 
 3. **查看容器日志**：
@@ -181,7 +184,7 @@
 
 ### 交互式隧道无法启动
 
-**症状**：运行 `autossh-cli auth <hash>` 失败或显示错误
+**症状**：运行 `autossh-cli auth <hash>` 失败或显示错误，或者浏览器终端弹窗无法完成认证
 
 **解决方案**：
 
@@ -340,7 +343,15 @@
    docker compose port web 5000
    ```
 
-4. 检查 API 连接：
+4. 如果使用了 `PORT` 环境变量自定义端口，请确保端口映射与 `PORT` 值一致：
+   ```yaml
+   environment:
+     - PORT=3000
+   ports:
+     - "3000:3000"   # 必须与 PORT 值匹配
+   ```
+
+5. 检查 API 连接：
    ```bash
    # 在 compose.yaml 中确认 API_BASE_URL 设置正确
    docker compose exec web env | grep API_BASE_URL
@@ -359,6 +370,71 @@
 3. 验证 API 服务器是否运行：
    ```bash
    curl http://localhost:8080/status
+   ```
+
+### 交互式认证终端弹窗无法打开
+
+**症状**：点击交互式隧道的启动/重启按钮时，没有弹出终端弹窗
+
+**解决方案**：
+
+1. **确认 WebSocket 已配置**：
+
+   检查 Web 面板容器是否设置了 `WS_BASE_URL` 环境变量：
+   ```bash
+   docker compose exec web env | grep WS_BASE_URL
+   ```
+
+2. **确认 ws-server 已启动**：
+
+   检查 autossh 容器是否设置了 `WS_PORT` 环境变量：
+   ```bash
+   docker compose exec autossh env | grep WS_PORT
+   ```
+
+3. **检查 ws-server 端口是否可访问**：
+   ```bash
+   # 默认端口为 8022
+   netstat -tuln | grep 8022
+   ```
+
+4. **检查浏览器控制台**：
+
+   打开浏览器开发者工具（F12），查看 Console 和 Network 标签中是否有 WebSocket 连接错误。
+
+### 终端弹窗连接失败
+
+**症状**：终端弹窗打开但显示连接错误或无法输入
+
+**解决方案**：
+
+1. **验证 WS_BASE_URL 地址格式**：
+
+   确保使用正确的协议前缀：
+   ```yaml
+   # 正确
+   - WS_BASE_URL=ws://localhost:8022
+
+   # 如果使用 TLS
+   - WS_BASE_URL=wss://localhost:8022
+   ```
+
+2. **检查防火墙规则**：
+
+   确保 WebSocket 端口（默认 8022）未被防火墙阻止。
+
+3. **检查 autossh 容器日志**：
+   ```bash
+   docker compose logs autossh | grep ws-server
+   ```
+
+4. **测试 WebSocket 连接**：
+
+   在浏览器开发者工具的 Console 中：
+   ```javascript
+   const ws = new WebSocket('ws://localhost:8022');
+   ws.onopen = () => console.log('Connected');
+   ws.onerror = (e) => console.log('Error', e);
    ```
 
 ## API 问题

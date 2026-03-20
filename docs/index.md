@@ -5,7 +5,9 @@ hide:
 
 # 基于 Docker 和 Autossh 的 SSH 隧道管理器
 
-![网页面板界面](assets/images/web-panel.png)
+![网页面板界面（浅色主题）](assets/images/web-panel.png)
+
+![网页面板界面（深色主题）](assets/images/web-panel-dark.png)
 
 本项目提供了一个基于 Docker 的解决方案，使用 `autossh` 和 YAML 配置文件来管理 SSH 隧道。此设置允许您轻松地**将本地服务通过 SSH 隧道暴露到远程服务器**或**将远程服务映射到本地端口**，方便访问防火墙后的服务。
 
@@ -19,7 +21,8 @@ hide:
 - **多架构支持**：支持所有 Alpine 基础架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 - **自动重载**：检测 `config.yaml` 的变化并自动重载服务配置。
-- **Web 配置界面**：通过 Web 面板管理隧道和配置更新。
+- **Web 配置界面**：通过 Web 面板管理隧道和配置更新，支持深色/浅色主题切换。
+- **浏览器内交互式认证**：通过 xterm.js 终端弹窗在浏览器中直接完成密码和 2FA/TOTP 认证（基于 WebSocket 服务器）。
 - **CLI 工具 (autossh-cli)**：用于管理隧道、查看状态和控制单个隧道的命令行界面。
 - **HTTP API**：用于程序化隧道控制的 RESTful API，支持与其他工具和自动化集成。
 - **单个隧道控制**：独立启动、停止和管理每个隧道，不影响其他隧道。

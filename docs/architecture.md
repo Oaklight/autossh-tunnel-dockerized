@@ -19,39 +19,42 @@ graph TB
         CONFIG[./config<br/>config.yaml]
         BROWSER[浏览器]
     end
-    
+
     subgraph "Docker 容器"
         subgraph "autossh 容器（必需）"
             ENTRY[entrypoint.sh]
             MONITOR[spinoff_monitor.sh]
             CLI[autossh-cli]
             API[API 服务器<br/>:8080]
+            WSSERVER[ws-server<br/>:8022]
             AUTOSSH[autossh 进程]
             STATE[状态管理器]
         end
-        
+
         subgraph "web 容器（可选）"
             WEBSERVER[Go Web 服务器<br/>:5000]
         end
     end
-    
+
     subgraph "远程服务器"
         REMOTE1[远程主机 1]
         REMOTE2[远程主机 2]
     end
-    
+
     SSH -->|只读挂载| ENTRY
     CONFIG -->|读写挂载| ENTRY
     BROWSER -->|静态文件| WEBSERVER
-    
+
     ENTRY --> MONITOR
     MONITOR --> CLI
     CLI --> STATE
     CLI --> AUTOSSH
     API --> CLI
-    
+    WSSERVER --> CLI
+
     BROWSER -->|直接 API 调用| API
-    
+    BROWSER -->|WebSocket 终端| WSSERVER
+
     AUTOSSH -->|SSH 隧道| REMOTE1
     AUTOSSH -->|SSH 隧道| REMOTE2
 ```
@@ -72,6 +75,7 @@ graph TB
 | `spinoff_monitor.sh` | 监控配置文件变化并触发隧道重启 |
 | `autossh-cli` | 隧道管理的命令行界面 |
 | `API Server` | 用于程序化控制的 HTTP API（可选，端口 8080） |
+| `ws-server` | WebSocket 服务器，用于浏览器内交互式认证（可选，端口 8022） |
 | `autossh` | 实际的 SSH 隧道进程 |
 | `State Manager` | 跟踪运行中的隧道及其 PID |
 
@@ -90,6 +94,7 @@ graph TB
 | `PGID` | 文件权限的组 ID | `1000` | 否 |
 | `API_ENABLE` | 启用 HTTP API 服务器 | `false` | 否 |
 | `API_PORT` | HTTP API 服务器端口（启用 API 时） | `8080` | 否 |
+| `WS_PORT` | WebSocket 服务器（ws-server）监听端口，设置后启动 ws-server | `8022` | 否 |
 | `AUTOSSH_GATETIME` | Autossh 网关时间（连接被视为稳定前的秒数） | `0` | 否 |
 | `AUTOSSH_CONFIG_FILE` | 配置文件路径 | `/etc/autossh/config/config.yaml` | 否 |
 | `SSH_CONFIG_DIR` | SSH 配置目录 | `/home/myuser/.ssh` | 否 |
@@ -178,10 +183,12 @@ services:
 | 变量 | 描述 | 默认值 | 必需 |
 |------|------|--------|------|
 | `TZ` | 日志时间戳的时区 | `UTC` | 否 |
+| `PORT` | Web 服务器监听端口 | `5000` | 否 |
 | `API_BASE_URL` | autossh API 服务器的 URL（传递给浏览器） | `http://localhost:8080` | **是** |
+| `WS_BASE_URL` | WebSocket 服务器（ws-server）的 URL（传递给浏览器，用于交互式认证终端） | 未设置 | 否 |
 
 !!! info "直接 API 架构"
-    `API_BASE_URL` 会传递给基于浏览器的前端，前端直接向 autossh 容器发起 API 调用。Go Web 服务器不代理 API 请求 - 它只提供静态文件。所有配置管理都通过配置 API 完成。
+    `API_BASE_URL` 会传递给基于浏览器的前端，前端直接向 autossh 容器发起 API 调用。Go Web 服务器不代理 API 请求 - 它只提供静态文件。所有配置管理都通过配置 API 完成。`WS_BASE_URL` 用于浏览器内交互式认证终端的 WebSocket 连接。
 
 ### Docker Compose 示例
 
@@ -196,6 +203,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080
+      - WS_BASE_URL=ws://localhost:8022     # 可选：启用浏览器内交互式认证
     restart: always
 ```
 
@@ -222,6 +230,7 @@ services:
       - AUTOSSH_GATETIME=0
       - API_ENABLE=true
       - API_PORT=8080
+      - WS_PORT=8022          # 可选：启动 ws-server 用于浏览器内交互式认证
     network_mode: "host"
     restart: always
 
@@ -233,6 +242,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - API_BASE_URL=http://localhost:8080
+      - WS_BASE_URL=ws://localhost:8022   # 可选：指向 ws-server 以启用终端弹窗
     restart: always
 ```
 
@@ -243,6 +253,7 @@ services:
     - **autossh 容器** 使用 host 网络模式以允许隧道绑定到特定 IP 地址
     - **web 容器** 使用 bridge 网络和端口映射（5000:5000）
     - 浏览器 **直接调用 API** 到 autossh API 服务器（端口 8080）
+    - 浏览器通过 **WebSocket** 连接到 ws-server（端口 8022）进行交互式认证
     - Go Web 服务器只提供静态文件和配置管理端点
 
 ---
@@ -367,3 +378,4 @@ ports:
 2. **非 root 用户**：容器以 `myuser` 运行（可通过 PUID/PGID 配置）
 3. **状态隔离**：每个隧道都有独立的状态和日志
 4. **API 访问**：API 服务器默认仅在 localhost 上可访问（宿主机网络模式）
+5. **WebSocket 安全**：ws-server 默认仅在 localhost 上可访问，建议在非本地环境中使用 `wss://` 协议

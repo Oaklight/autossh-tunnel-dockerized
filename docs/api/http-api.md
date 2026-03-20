@@ -822,7 +822,7 @@ curl -X GET http://localhost:8080/logs/7b840f83
 
 ## Web 面板
 
-Web 面板运行在 5000 端口，提供隧道管理的图形界面。所有 API 调用都直接从浏览器发送到 API 服务器（8080 端口）。
+Web 面板运行在 5000 端口（可通过 `PORT` 环境变量自定义），提供隧道管理的图形界面。所有 API 调用都直接从浏览器发送到 API 服务器（8080 端口）。交互式隧道还可通过 WebSocket（默认 8022 端口）在浏览器中完成认证。
 
 !!! note "网络配置"
     Web 面板不再需要 host 网络模式。它使用 bridge 网络和端口映射，所有 API 调用都直接从浏览器发起。
@@ -837,6 +837,7 @@ services:
     environment:
       - API_BASE_URL=http://localhost:8080
       - API_KEY=your-secret-key  # 必须与 autossh 的 API_KEY 匹配
+      - WS_BASE_URL=ws://localhost:8022   # 可选：启用浏览器内交互式认证
 ```
 
 ## 集成示例

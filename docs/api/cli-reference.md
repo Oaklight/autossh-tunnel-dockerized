@@ -144,7 +144,7 @@ SUCCESS: Interactive tunnel started successfully
 - 使用 SSH 控制套接字进行 PID 跟踪和管理
 
 !!! note "交互式隧道"
-    交互式隧道在配置文件中标记为 `interactive: true`。它们在容器启动时**不会**自动启动。您必须使用 `auth` 命令手动进行认证。
+    交互式隧道在配置文件中标记为 `interactive: true`。它们在容器启动时**不会**自动启动。您可以使用 `auth` 命令手动进行认证，或者在配置了 WebSocket 服务器的情况下，通过 Web 面板的 xterm.js 终端弹窗在浏览器中直接完成认证。详见 [Web 面板 - 浏览器内交互式认证](../web-panel.md#浏览器内交互式认证终端弹窗)。
 
 ### 启动单个隧道
 
@@ -304,6 +304,7 @@ docker exec -it autotunnel-autossh-1 autossh-cli validate
 | `AUTOSSH_STATE_FILE` | 状态文件路径 | `/tmp/autossh_tunnels.state` |
 | `API_ENABLE` | 启用 HTTP API 服务器 | `false` |
 | `API_PORT` | HTTP API 服务器端口 | `8080` |
+| `WS_PORT` | WebSocket 服务器（ws-server）监听端口 | `8022` |
 | `PUID` | 文件权限的用户 ID | `1000` |
 | `PGID` | 文件权限的组 ID | `1000` |
 | `AUTOSSH_GATETIME` | Autossh 网关时间 | `0` |

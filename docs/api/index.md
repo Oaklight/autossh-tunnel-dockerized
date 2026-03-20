@@ -196,7 +196,12 @@ autossh-cli logs <hash>
 
 ### 交互式隧道
 
-标记为 `interactive: true` 的隧道需要手动输入密码，不会自动启动。这些隧道在列表中显示为 `INTERACTIVE` 状态。
+标记为 `interactive: true` 的隧道需要手动输入密码或 2FA 验证码，不会自动启动。这些隧道在列表中显示为 `INTERACTIVE` 状态。
+
+认证方式：
+
+- **CLI 认证**：使用 `autossh-cli auth <hash>` 命令进行交互式认证
+- **浏览器认证**：配置 WebSocket 服务器后，可通过 Web 面板的 xterm.js 终端弹窗直接在浏览器中完成认证（详见 [Web 面板 - 浏览器内交互式认证](../web-panel.md#浏览器内交互式认证终端弹窗)）
 
 ### 批量操作
 

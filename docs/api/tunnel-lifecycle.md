@@ -123,10 +123,12 @@ cloud.usa2	127.0.0.1:33000	0.0.0.0:33001	remote_to_local	done-hub	7b840f8344679d
 
 在配置中标记为 `interactive: true` 的隧道：
 
-- 需要手动输入密码
+- 需要手动输入密码或 2FA/TOTP 验证码
 - 不会自动启动
 - 在列表中显示为 `INTERACTIVE` 状态
-- 必须在提供凭据后手动启动
+- 可以通过以下两种方式进行认证：
+    - **CLI**：使用 `autossh-cli auth <hash>` 命令
+    - **浏览器**：通过 Web 面板的 xterm.js 终端弹窗（需配置 WebSocket 服务器）
 
 ## 清理规则
 
