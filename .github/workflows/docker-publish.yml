@@ -1,0 +1,128 @@
+name: Docker Build & Publish
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  # Run the same checks as CI before building
+  go-test:
+    name: Go Test & Vet
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [ws-server, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+      - name: Run go vet
+        working-directory: ${{ matrix.module }}
+        run: go vet ./...
+      - name: Run tests
+        working-directory: ${{ matrix.module }}
+        run: go test -v -count=1 -race ./...
+
+  go-fmt:
+    name: Go Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Check gofmt (ws-server)
+        run: |
+          out="$(gofmt -l ws-server/)"
+          if [ -n "$out" ]; then
+            echo "::error::Files not formatted: $out"
+            gofmt -d ws-server/
+            exit 1
+          fi
+      - name: Check gofmt (web)
+        run: |
+          out="$(gofmt -l web/)"
+          if [ -n "$out" ]; then
+            echo "::error::Files not formatted: $out"
+            gofmt -d web/
+            exit 1
+          fi
+
+  shell-lint:
+    name: Shell Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shfmt
+        run: |
+          SHFMT_VERSION="3.10.0"
+          curl -sSfL "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64" \
+            -o /usr/local/bin/shfmt
+          chmod +x /usr/local/bin/shfmt
+      - name: Run shellcheck
+        run: |
+          shellcheck \
+            autossh-cli \
+            entrypoint.sh \
+            spinoff_monitor.sh \
+            scripts/*.sh
+      - name: Run shfmt
+        run: |
+          shfmt -d \
+            autossh-cli \
+            entrypoint.sh \
+            spinoff_monitor.sh \
+            scripts/*.sh
+
+  # Build and push multi-arch images only after all checks pass
+  build-and-push:
+    name: Build & Push
+    runs-on: ubuntu-latest
+    needs: [go-test, go-fmt, shell-lint]
+    strategy:
+      matrix:
+        include:
+          - image: oaklight/autossh-tunnel
+            dockerfile: Dockerfile
+            platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
+          - image: oaklight/autossh-tunnel-web-panel
+            dockerfile: Dockerfile.web
+            platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6,linux/386,linux/ppc64le,linux/s390x,linux/riscv64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ matrix.platforms }}
+          push: true
+          tags: |
+            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:${{ steps.version.outputs.version }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
