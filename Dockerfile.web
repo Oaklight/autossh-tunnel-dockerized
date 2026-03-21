@@ -20,7 +20,7 @@ RUN if [ -n "$GOPROXY" ]; then export GOPROXY="$GOPROXY"; fi && \
     go mod tidy && go mod download
 
 # Build the Go binary with optimization flags
-RUN CGO_ENABLED=0 go build \
+RUN GOMAXPROCS=1 CGO_ENABLED=0 go build \
     -ldflags="-s -w -X main.version=$VERSION" \
     -trimpath \
     -o app .

@@ -7,7 +7,7 @@ COPY ws-server .
 RUN rm -f go.mod go.sum && \
     if [ -n "$GOPROXY" ]; then export GOPROXY="$GOPROXY"; fi && \
     go mod init ws-server && go mod tidy && go mod download
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o ws-server .
+RUN GOMAXPROCS=1 CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o ws-server .
 
 # Use an official lightweight Linux image
 FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0 AS base
