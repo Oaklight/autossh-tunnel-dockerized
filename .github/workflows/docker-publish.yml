@@ -3,6 +3,11 @@ name: Docker Build & Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag (e.g. v2.3.0)"
+        required: true
 
 permissions:
   contents: read
@@ -110,7 +115,7 @@ jobs:
 
       - name: Extract version from tag
         id: version
-        run: echo "version=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${{ github.event.release.tag_name || github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         uses: docker/build-push-action@v6
