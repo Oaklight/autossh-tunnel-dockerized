@@ -30,8 +30,8 @@ services:
     # No config volume needed - web panel uses Config API from autossh container
     environment:
       - TZ=Asia/Shanghai
-      # API_BASE_URL is used by the browser to connect to the API server
-      # Use localhost since the browser runs on the host machine
+      # API_BASE_URL is used by the web server to proxy API requests to the autossh backend
+      # This is a server-side URL, not accessed by the browser directly
       - API_BASE_URL=http://localhost:8080
       # WS_BASE_URL is used by the web server to proxy WebSocket connections
       # for interactive authentication sessions

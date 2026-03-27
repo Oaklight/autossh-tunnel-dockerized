@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -68,17 +68,11 @@ func helpHandler(w http.ResponseWriter, r *http.Request) {
 func tunnelDetailHandler(w http.ResponseWriter, r *http.Request) {
 	logMsg("INFO", "WEB", "GET /tunnel-detail?%s from %s", r.URL.RawQuery, r.RemoteAddr)
 	tmpl := template.Must(template.ParseFiles(filepath.Join(templatesDir, "tunnel-detail.html")))
-	data := struct {
-		APIBaseURL string
-	}{
-		APIBaseURL: apiBaseURL,
-	}
-	tmpl.Execute(w, data)
+	tmpl.Execute(w, nil)
 }
 
 // APIConfigResponse contains API configuration for frontend
 type APIConfigResponse struct {
-	BaseURL   string `json:"base_url"`
 	APIKey    string `json:"api_key,omitempty"`
 	WSEnabled bool   `json:"ws_enabled"`
 }
@@ -87,7 +81,6 @@ type APIConfigResponse struct {
 func getAPIConfigHandler(w http.ResponseWriter, r *http.Request) {
 	logMsg("DEBUG", "WEB", "GET /api/config/api from %s", r.RemoteAddr)
 	config := APIConfigResponse{
-		BaseURL:   apiBaseURL,
 		APIKey:    apiKey,
 		WSEnabled: wsBaseURL != "",
 	}
@@ -257,6 +250,36 @@ func wsProxyHandler(w http.ResponseWriter, r *http.Request) {
 	logMsg("INFO", "WEB", "WebSocket proxy closed for hash %s", hash)
 }
 
+// newAPIProxyHandler creates an HTTP reverse proxy that forwards requests
+// from /api/autossh/* to the backend autossh API server.
+func newAPIProxyHandler(targetURL string) http.Handler {
+	target, err := url.Parse(targetURL)
+	if err != nil {
+		logMsg("ERROR", "WEB", "Invalid API_BASE_URL for proxy: %v", err)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Error(w, "API proxy misconfigured", http.StatusBadGateway)
+		})
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(target)
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		// Strip the /api/autossh prefix
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/api/autossh")
+		if req.URL.Path == "" {
+			req.URL.Path = "/"
+		}
+		req.Host = target.Host
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logMsg("DEBUG", "WEB", "API proxy: %s %s -> %s%s from %s",
+			r.Method, r.URL.Path, targetURL, strings.TrimPrefix(r.URL.Path, "/api/autossh"), r.RemoteAddr)
+		proxy.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	// Configure logging to match the unified format
 	// [YYYY-MM-DD HH:MM:SS] [LEVEL] [COMPONENT] Message
@@ -274,9 +297,9 @@ func main() {
 	}
 
 	if apiBaseURL == "" {
-		logMsg("WARN", "WEB", "API_BASE_URL not set, frontend will not be able to communicate with autossh API")
+		logMsg("WARN", "WEB", "API_BASE_URL not set, API proxy will not work")
 	} else {
-		logMsg("INFO", "WEB", "API base URL: %s", apiBaseURL)
+		logMsg("INFO", "WEB", "API proxy enabled, backend URL: %s", apiBaseURL)
 	}
 
 	if wsBaseURL != "" {
@@ -301,16 +324,20 @@ func main() {
 	http.HandleFunc("/tunnel-detail", tunnelDetailHandler)
 	http.HandleFunc("/api/languages", getLanguagesHandler)
 	http.HandleFunc("/api/config/api", getAPIConfigHandler)
+	if apiBaseURL != "" {
+		http.Handle("/api/autossh/", newAPIProxyHandler(apiBaseURL))
+	} else {
+		http.HandleFunc("/api/autossh/", func(w http.ResponseWriter, r *http.Request) {
+			http.Error(w, "API_BASE_URL not configured", http.StatusBadGateway)
+		})
+	}
 	http.HandleFunc("/ws/auth/", wsProxyHandler)
 
 	logMsg("INFO", "WEB", "Starting server on %s", listenAddr)
-	logMsg("INFO", "WEB", "Web panel is now a static server - all config operations go through autossh API")
+	logMsg("INFO", "WEB", "All API requests are proxied through /api/autossh/ to backend")
 	err := http.ListenAndServe(listenAddr, nil)
 	if err != nil {
 		logMsg("ERROR", "WEB", "Server failed: %v", err)
 		os.Exit(1)
 	}
 }
-
-// Ensure io package is used (for potential future use)
-var _ = io.EOF

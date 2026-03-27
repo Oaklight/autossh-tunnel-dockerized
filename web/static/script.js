@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.querySelector("#tunnelTable tbody");
-    let apiConfig = { base_url: '', api_key: '', ws_enabled: false };
+    let apiConfig = { api_key: '', ws_enabled: false };
     let autoRefreshInterval = null;
     const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds
     let isConfigSaving = false; // Flag to prevent clicks during save/reload
@@ -115,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch('/api/config/api');
             if (response.ok) {
                 const data = await response.json();
-                apiConfig.base_url = data.base_url || '';
                 apiConfig.api_key = data.api_key || '';
                 apiConfig.ws_enabled = data.ws_enabled || false;
             }
@@ -124,9 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Helper function to make authenticated API calls
+    // Helper function to make authenticated API calls (proxied through web panel)
     function apiCall(endpoint, options = {}) {
-        const url = apiConfig.base_url + endpoint;
+        const url = '/api/autossh' + endpoint;
         const headers = options.headers || {};
 
         // Add Bearer token if API key is configured
@@ -139,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Fetch tunnel statuses from API server
     async function fetchTunnelStatuses() {
-        if (!apiConfig.base_url) return {};
 
         try {
             const response = await apiCall('/status');
@@ -165,10 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
             showLoading(true);
         }
         try {
-            if (!apiConfig.base_url) {
-                throw new Error('API server not configured');
-            }
-
             const response = await apiCall('/config');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -448,12 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (!apiConfig.base_url) {
-            const errorMsg = window.i18n ? window.i18n.t('messages.api_not_configured') : 'API server not configured';
-            showMessage(errorMsg, 'error');
-            return;
-        }
-
         const controlButtons = row.querySelectorAll('.control-button');
         controlButtons.forEach(btn => btn.disabled = true);
 
@@ -623,10 +611,6 @@ document.addEventListener("DOMContentLoaded", () => {
         controlButtons.forEach(btn => btn.disabled = true);
 
         try {
-            if (!apiConfig.base_url) {
-                throw new Error('API server not configured');
-            }
-
             if (action === 'restart') {
                 const stopResponse = await apiCall(`/stop/${hash}`, { method: 'POST' });
                 if (!stopResponse.ok) {
@@ -969,12 +953,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (hasErrors) {
             const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fix validation errors before saving';
-            showMessage(errorMsg, "error");
-            return;
-        }
-
-        if (!apiConfig.base_url) {
-            const errorMsg = window.i18n ? window.i18n.t('messages.api_not_configured') : 'API server not configured';
             showMessage(errorMsg, "error");
             return;
         }

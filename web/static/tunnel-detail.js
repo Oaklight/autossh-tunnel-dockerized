@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     // API configuration - will be loaded from server
-    let apiConfig = { base_url: '', api_key: '', ws_enabled: false };
+    let apiConfig = { api_key: '', ws_enabled: false };
 
     // Auto refresh settings
     let autoRefreshInterval = null;
@@ -173,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch('/api/config/api');
             if (response.ok) {
                 const data = await response.json();
-                apiConfig.base_url = data.base_url || '';
                 apiConfig.api_key = data.api_key || '';
                 apiConfig.ws_enabled = data.ws_enabled || false;
             }
@@ -182,9 +181,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Helper function to make authenticated API calls
+    // Helper function to make authenticated API calls (proxied through web panel)
     function apiCall(endpoint, options = {}) {
-        const url = apiConfig.base_url + endpoint;
+        const url = '/api/autossh' + endpoint;
         const headers = options.headers || {};
 
         // Add Bearer token if API key is configured
@@ -204,11 +203,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             // First, get the config to get tunnel details (only needed once on initial load)
             if (!currentTunnel) {
-                if (!apiConfig.base_url) {
-                    showError('API server not configured');
-                    return;
-                }
-
                 // Use Config API from autossh container
                 const configResponse = await apiCall('/config');
                 if (!configResponse.ok) throw new Error('Failed to load configuration');
@@ -247,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // retryCount is used for fast retry on initial load
     async function refreshTunnelStatus(retryCount = 0) {
-        if (!apiConfig.base_url || !currentTunnel) return;
+        if (!currentTunnel) return;
 
         try {
             const statusResponse = await apiCall('/status');
@@ -412,12 +406,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (hasErrors) {
             const errorMsg = window.i18n ? window.i18n.t('messages.validation_errors') : 'Please fix validation errors before saving';
-            showMessage(errorMsg, 'error');
-            return;
-        }
-
-        if (!apiConfig.base_url) {
-            const errorMsg = window.i18n ? window.i18n.t('messages.api_not_configured') : 'API server not configured';
             showMessage(errorMsg, 'error');
             return;
         }
