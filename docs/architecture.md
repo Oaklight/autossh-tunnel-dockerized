@@ -52,8 +52,9 @@ graph TB
     API --> CLI
     WSSERVER --> CLI
 
-    BROWSER -->|直接 API 调用| API
-    BROWSER -->|WebSocket 终端| WSSERVER
+    BROWSER -->|API + WebSocket| WEBSERVER
+    WEBSERVER -->|API 代理| API
+    WEBSERVER -->|WS 代理| WSSERVER
 
     AUTOSSH -->|SSH 隧道| REMOTE1
     AUTOSSH -->|SSH 隧道| REMOTE2
@@ -170,7 +171,9 @@ services:
 
 | 组件 | 描述 |
 |------|------|
-| `Go Web Server` | 仅提供静态文件 |
+| `Go Web Server` | 提供静态文件，代理 API 和 WebSocket 请求 |
+| `API Proxy` | 反向代理，将 `/api/autossh/*` 请求转发到 autossh API 后端 |
+| `WebSocket Proxy` | 代理浏览器 WebSocket 连接到 ws-server 用于交互式认证 |
 | `Web UI` | 支持国际化的 HTML/CSS/JavaScript 前端（在浏览器中运行） |
 
 ### 卷挂载
@@ -184,11 +187,11 @@ services:
 |------|------|--------|------|
 | `TZ` | 日志时间戳的时区 | `UTC` | 否 |
 | `PORT` | Web 服务器监听端口 | `5000` | 否 |
-| `API_BASE_URL` | autossh API 服务器的 URL（传递给浏览器） | `http://localhost:8080` | **是** |
-| `WS_BASE_URL` | WebSocket 服务器（ws-server）的 URL（传递给浏览器，用于交互式认证终端） | 未设置 | 否 |
+| `API_BASE_URL` | autossh API 服务器的 URL（服务端代理用，浏览器不直接访问） | `http://localhost:8080` | **是** |
+| `WS_BASE_URL` | WebSocket 服务器（ws-server）的 URL（服务端代理用，用于交互式认证） | 未设置 | 否 |
 
-!!! info "直接 API 架构"
-    `API_BASE_URL` 会传递给基于浏览器的前端，前端直接向 autossh 容器发起 API 调用。Go Web 服务器不代理 API 请求 - 它只提供静态文件。所有配置管理都通过配置 API 完成。`WS_BASE_URL` 用于浏览器内交互式认证终端的 WebSocket 连接。
+!!! info "API 代理架构"
+    `API_BASE_URL` 由 Go Web 服务器用于将 API 请求代理到 autossh 后端。浏览器不会直接访问 autossh API — 所有请求通过 Web 面板的 `/api/autossh/*` 路径代理。这确保了 Web 面板在远程访问时也能正常工作。
 
 ### Docker Compose 示例
 
@@ -202,13 +205,14 @@ services:
     # 无需配置卷挂载 - Web 面板使用 autossh 容器的配置 API
     environment:
       - TZ=Asia/Shanghai
+      # API_BASE_URL 由 Web 服务器用于代理 API 请求（服务端 URL）
       - API_BASE_URL=http://localhost:8080
       - WS_BASE_URL=ws://localhost:8022     # 可选：启用浏览器内交互式认证
     restart: always
 ```
 
 !!! note "网络模式"
-    Web 容器使用 bridge 网络和端口映射，而不是 host 网络模式。API 调用直接从浏览器发送到 API 服务器。
+    Web 容器使用 bridge 网络和端口映射。所有 API 和 WebSocket 请求都通过 Web 服务器代理到 autossh 后端。
 
 ---
 
@@ -241,28 +245,28 @@ services:
     # 无需配置卷挂载 - Web 面板使用 autossh 容器的配置 API
     environment:
       - TZ=Asia/Shanghai
+      # API_BASE_URL 由 Web 服务器用于代理 API 请求（服务端 URL）
       - API_BASE_URL=http://localhost:8080
       - WS_BASE_URL=ws://localhost:8022   # 可选：指向 ws-server 以启用终端弹窗
     restart: always
 ```
 
 !!! note "配置管理"
-    autossh 容器将配置目录挂载为读写模式（`rw`）以支持配置 API。Web 面板不再需要直接访问配置文件 - 所有配置操作都通过配置 API 完成。
+    autossh 容器将配置目录挂载为读写模式（`rw`）以支持配置 API。Web 面板不再需要直接访问配置文件 - 所有配置操作都通过 API 完成。
 
 !!! info "网络架构"
     - **autossh 容器** 使用 host 网络模式以允许隧道绑定到特定 IP 地址
     - **web 容器** 使用 bridge 网络和端口映射（5000:5000）
-    - 浏览器 **直接调用 API** 到 autossh API 服务器（端口 8080）
-    - 浏览器通过 **WebSocket** 连接到 ws-server（端口 8022）进行交互式认证
-    - Go Web 服务器只提供静态文件和配置管理端点
+    - 浏览器只需访问 Web 面板（端口 5000）— 所有 API 和 WebSocket 请求都通过 Go Web 服务器**代理**到 autossh 后端
+    - `API_BASE_URL` 和 `WS_BASE_URL` 是服务端 URL，浏览器不会直接访问
 
 ---
 
 ## 通信流程
 
-### Web 面板到隧道控制（直接 API 架构）
+### Web 面板到隧道控制（代理架构）
 
-Web 面板使用 **直接 API 架构**，浏览器直接向 autossh API 服务器发起 API 调用，绕过 Go Web 服务器进行隧道控制操作。
+Web 面板使用 **代理架构**，所有浏览器请求都通过 Go Web 服务器代理到 autossh 后端。这确保了即使 Docker 宿主机在远程机器上，Web 面板也能正常工作。
 
 ```mermaid
 sequenceDiagram
@@ -278,24 +282,26 @@ sequenceDiagram
     Browser->>WebServer: GET / (静态文件)
     WebServer-->>Browser: HTML/CSS/JS
     Browser->>WebServer: GET /api/config/api
-    WebServer-->>Browser: {base_url: "http://localhost:8080"}
-    
-    Note over Browser,API: 浏览器直接 API 调用
+    WebServer-->>Browser: {ws_enabled}
+
+    Note over Browser,API: API 调用通过 Web 服务器代理
     User->>Browser: 点击"启动隧道"
-    Browser->>API: POST /start/{hash}
+    Browser->>WebServer: POST /api/autossh/start/{hash}
+    WebServer->>API: POST /start/{hash}（反向代理）
     API->>CLI: autossh-cli start-tunnel {hash}
     CLI->>Tunnel: 启动 autossh 进程
     Tunnel-->>CLI: PID
     CLI-->>API: 成功 + 输出
-    API-->>Browser: JSON 响应
+    API-->>WebServer: JSON 响应
+    WebServer-->>Browser: JSON 响应
     Browser-->>User: 更新 UI
 ```
 
-!!! tip "直接 API 架构的优势"
+!!! tip "代理架构的优势"
+    - **远程访问支持**：Web 面板可从任意浏览器访问，即使 Docker 宿主机在远程机器上
+    - **单一入口点**：浏览器只需访问端口 5000
     - **简化网络配置**：Web 容器不需要 host 网络模式
-    - **降低延迟**：API 调用无代理开销
-    - **更好的可扩展性**：Web 服务器只处理静态文件
-    - **更清晰的分离**：配置管理与隧道控制分离
+    - **浏览器内认证**：WebSocket 代理支持在浏览器中直接完成交互式认证
 
 ### 配置变更检测
 
@@ -341,12 +347,12 @@ ports:
 
 这是可行的，因为：
 
-1. Web 服务器只提供静态文件和配置端点
-2. 所有 API 调用都直接从浏览器发送到 API 服务器
-3. Web 和 autossh 容器之间不需要代理功能
+1. Web 服务器代理所有 API 和 WebSocket 请求到 autossh 后端
+2. 浏览器只需访问 Web 面板（端口 5000）
+3. `API_BASE_URL` 和 `WS_BASE_URL` 是服务端代理 URL，非浏览器可见
 
-!!! note "API 可访问性"
-    由于浏览器直接向端口 8080 发起 API 调用，API 服务器必须从用户的浏览器可访问。当 autossh 使用 host 网络模式时，API 在宿主机的 `localhost:8080` 上可用。
+!!! note "远程访问"
+    由于所有请求都通过 Web 面板代理，浏览器只需访问端口 5000。autossh API 端口（8080）不需要对浏览器开放 — 它只需要 Web 面板容器能够访问即可。
 
 ---
 
