@@ -53,9 +53,9 @@ graph TB
     API --> CLI
     WSSERVER -->|spawns auth| CLI
 
-    BROWSER -->|Direct API calls| API
-    BROWSER -->|WebSocket| WSPPROXY
-    WSPPROXY -->|Proxy| WSSERVER
+    BROWSER -->|API + WebSocket| WEBSERVER
+    WEBSERVER -->|API Proxy| API
+    WSPPROXY -->|WS Proxy| WSSERVER
 
     AUTOSSH -->|SSH Tunnel| REMOTE1
     AUTOSSH -->|SSH Tunnel| REMOTE2
@@ -172,7 +172,8 @@ An optional web-based management interface that communicates with the autossh co
 
 | Component | Description |
 |-----------|-------------|
-| `Go Web Server` | Serves static files and proxies WebSocket connections |
+| `Go Web Server` | Serves static files, proxies API and WebSocket connections |
+| `API Proxy` | Reverse proxy forwarding `/api/autossh/*` requests to the autossh API backend |
 | `WebSocket Proxy` | Proxies browser WebSocket connections to the ws-server for interactive auth |
 | `Web UI` | HTML/CSS/JavaScript frontend with i18n and dark/light theme support (runs in browser) |
 
@@ -187,11 +188,11 @@ An optional web-based management interface that communicates with the autossh co
 |----------|-------------|---------|----------|
 | `TZ` | Timezone for log timestamps | `UTC` | No |
 | `PORT` | Web panel listen port | `5000` | No |
-| `API_BASE_URL` | URL of the autossh API server (passed to browser) | `http://localhost:8080` | **Yes** |
+| `API_BASE_URL` | URL of the autossh API server (used server-side for proxying, not sent to browser) | `http://localhost:8080` | **Yes** |
 | `WS_BASE_URL` | URL of the ws-server for WebSocket proxy (e.g., `ws://localhost:8022`) | (not set) | No |
 
-!!! info "Direct API Architecture"
-    The `API_BASE_URL` is passed to the browser-based frontend, which makes API calls directly to the autossh container. The Go web server does not proxy API requests - it only serves static files and proxies WebSocket connections for interactive auth. All configuration management is done through the Config API.
+!!! info "API Proxy Architecture"
+    The `API_BASE_URL` is used by the Go web server to proxy API requests to the autossh backend. The browser never contacts the autossh API directly — all requests go through the web panel at `/api/autossh/*`. This ensures the web panel works reliably for remote access.
 
 ### Docker Compose Example
 
@@ -205,13 +206,14 @@ services:
     # No config volume needed - web panel uses Config API from autossh container
     environment:
       - TZ=Asia/Shanghai
+      # API_BASE_URL is used by the web server to proxy API requests (server-side only)
       - API_BASE_URL=http://localhost:8080
       - WS_BASE_URL=ws://localhost:8022    # Optional: enable in-browser interactive auth
     restart: always
 ```
 
 !!! note "Network Mode"
-    The web container uses bridge networking with port mapping instead of host network mode. API calls are made directly from the browser to the API server.
+    The web container uses bridge networking with port mapping. All API and WebSocket requests from the browser are proxied through the web server to the autossh backend.
 
 ---
 
@@ -244,27 +246,28 @@ services:
     # No config volume needed - web panel uses Config API from autossh container
     environment:
       - TZ=Asia/Shanghai
+      # API_BASE_URL is used by the web server to proxy API requests (server-side only)
       - API_BASE_URL=http://localhost:8080
       - WS_BASE_URL=ws://localhost:8022   # Optional: enable in-browser interactive auth
     restart: always
 ```
 
 !!! note "Configuration Management"
-    The autossh container mounts the config directory as read-write (`rw`) to support the Config API. The web panel no longer needs direct access to config files - all configuration operations go through the Config API.
+    The autossh container mounts the config directory as read-write (`rw`) to support the Config API. The web panel no longer needs direct access to config files - all configuration operations go through the API.
 
 !!! info "Network Architecture"
     - The **autossh container** uses host network mode to allow tunnels to bind to specific IP addresses
     - The **web container** uses bridge networking with port mapping (5000:5000)
-    - The browser makes **direct API calls** to the autossh API server (port 8080)
-    - The Go web server serves static files, configuration management endpoints, and **proxies WebSocket connections** to the ws-server for interactive authentication
+    - The browser only connects to the web panel (port 5000) — all API and WebSocket requests are **proxied** through the Go web server to the autossh backend
+    - `API_BASE_URL` and `WS_BASE_URL` are server-side URLs used for proxying, not accessed by the browser
 
 ---
 
 ## Communication Flow
 
-### Web Panel to Tunnel Control (Direct API Architecture)
+### Web Panel to Tunnel Control (Proxy Architecture)
 
-The web panel uses a **direct API architecture** where the browser makes API calls directly to the autossh API server, bypassing the Go web server for tunnel control operations.
+The web panel uses a **proxy architecture** where all browser requests go through the Go web server, which proxies them to the autossh backend. This ensures reliable operation even when the Docker host is accessed remotely.
 
 ```mermaid
 sequenceDiagram
@@ -281,16 +284,18 @@ sequenceDiagram
     Browser->>WebServer: GET / (static files)
     WebServer-->>Browser: HTML/CSS/JS
     Browser->>WebServer: GET /api/config/api
-    WebServer-->>Browser: {base_url, ws_enabled}
+    WebServer-->>Browser: {ws_enabled}
 
-    Note over Browser,API: Direct API calls from browser
+    Note over Browser,API: API calls proxied through web server
     User->>Browser: Click "Start Tunnel" (non-interactive)
-    Browser->>API: POST /start/{hash}
+    Browser->>WebServer: POST /api/autossh/start/{hash}
+    WebServer->>API: POST /start/{hash} (reverse proxy)
     API->>CLI: autossh-cli start-tunnel {hash}
     CLI->>Tunnel: Start autossh process
     Tunnel-->>CLI: PID
     CLI-->>API: Success + output
-    API-->>Browser: JSON response
+    API-->>WebServer: JSON response
+    WebServer-->>Browser: JSON response
     Browser-->>User: Update UI
 
     Note over Browser,WSSERVER: Interactive auth via WebSocket
@@ -308,11 +313,10 @@ sequenceDiagram
     Browser-->>User: Auto-close modal, refresh status
 ```
 
-!!! tip "Benefits of Direct API Architecture"
+!!! tip "Benefits of Proxy Architecture"
+    - **Remote access**: Works from any browser, even when the Docker host is on a remote machine
+    - **Single entry point**: Only port 5000 needs to be accessible from the browser
     - **Simplified networking**: Web container doesn't need host network mode
-    - **Reduced latency**: No proxy overhead for API calls
-    - **Better scalability**: Web server only handles static files and WebSocket proxy
-    - **Clearer separation**: Configuration management vs tunnel control
     - **In-browser auth**: WebSocket proxy enables interactive authentication without CLI access
 
 ### Configuration Change Detection
@@ -359,12 +363,12 @@ ports:
 
 This is possible because:
 
-1. The web server only serves static files and proxies WebSocket connections for interactive auth
-2. All API calls are made directly from the browser to the API server
-3. No API proxy functionality is needed between web and autossh containers
+1. The web server proxies all API and WebSocket requests to the autossh backend
+2. The browser only needs to reach the web panel (port 5000)
+3. `API_BASE_URL` and `WS_BASE_URL` are server-side URLs for the proxy, not browser-facing
 
-!!! note "API Accessibility"
-    Since the browser makes direct API calls to port 8080, the API server must be accessible from the user's browser. When using host network mode for autossh, the API is available on `localhost:8080` from the host machine.
+!!! note "Remote Access"
+    Since all requests are proxied through the web panel, the browser only needs to reach port 5000. The autossh API port (8080) does not need to be accessible from the browser — it only needs to be reachable by the web panel container.
 
 ---
 

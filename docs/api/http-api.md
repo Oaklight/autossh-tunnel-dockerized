@@ -815,10 +815,10 @@ When using hash prefixes, the following errors may occur:
 
 ## Web Panel
 
-The web panel runs on port 5000 and provides a graphical interface for tunnel management. All API calls are made directly from the browser to the API server (port 8080).
+The web panel runs on port 5000 and provides a graphical interface for tunnel management. All API calls from the browser are proxied through the web panel server (`/api/autossh/*`) to the autossh backend.
 
 !!! note "Network Configuration"
-    The web panel no longer requires host network mode. It uses bridge networking with port mapping, and all API calls are made directly from the browser.
+    The browser only needs to reach the web panel (port 5000). The web server proxies all API requests to the autossh backend internally. `API_BASE_URL` is a server-side URL, not accessed by the browser.
 
 ### Configuration
 
@@ -828,6 +828,7 @@ services:
     ports:
       - "5000:5000"
     environment:
+      # Server-side URL for API proxying (not accessed by the browser)
       - API_BASE_URL=http://localhost:8080
       - API_KEY=your-secret-key  # Must match autossh API_KEY
       - WS_BASE_URL=ws://localhost:8022  # Optional: enable in-browser interactive auth
