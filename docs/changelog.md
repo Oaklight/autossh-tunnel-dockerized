@@ -5,6 +5,22 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [v2.3.1] - 2026-03-27
+
+### 修复
+
+- **API 反向代理**：Web 面板现通过 `/api/autossh/` 代理所有 API 请求到后端，修复远程访问时浏览器无法连接 Docker 宿主机 `localhost:8080` 的问题
+- **QEMU 构建兼容性**：Dockerfile 中 Go 构建添加 `GOMAXPROCS=1`，防止跨平台 QEMU 模拟（s390x、riscv64 等）时出现死锁
+
+### 新增
+
+- **CI/CD Docker 发布**：新增 GitHub Actions 工作流，在发布 Release 时自动构建并推送多架构 Docker 镜像
+- **手动触发工作流**：Docker 发布工作流支持手动触发并指定版本号
+
+### 移除
+
+- **`API_BASE_URL` 前端暴露**：`API_BASE_URL` 环境变量现仅用于服务端代理，不再发送到浏览器
+
 ## [v2.3.0] - 2026-03-20
 
 ### 新增
