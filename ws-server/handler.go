@@ -76,6 +76,15 @@ func wsAuthHandler(w http.ResponseWriter, r *http.Request) {
 	handleAuthSession(conn, hash)
 }
 
+// killProcessGroup sends a signal to the process group of cmd.
+// Returns true if the signal was sent successfully.
+func killProcessGroup(cmd *exec.Cmd, sig syscall.Signal) bool {
+	if cmd.Process == nil {
+		return false
+	}
+	return syscall.Kill(-cmd.Process.Pid, sig) == nil
+}
+
 // handleAuthSession manages the PTY session for interactive authentication.
 func handleAuthSession(conn *websocket.Conn, hash string) {
 	defer func() {
@@ -108,41 +117,26 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 
 	// Track session state
 	var (
-		sessionDone  = make(chan struct{})
-		lastActivity atomic.Int64
-		timedOut     atomic.Bool
+		sessionDone    = make(chan struct{})
+		clientDone     = make(chan struct{})
+		clientDoneOnce sync.Once
+		lastActivity   atomic.Int64
+		timedOut       atomic.Bool
 	)
 	lastActivity.Store(time.Now().Unix())
 
-	// Cleanup function
-	cleanup := func() {
-		// Close PTY
+	// terminateProcess kills the process group with SIGTERM, then SIGKILL
+	// after a timeout. Must be called before waiting on sessionDone.
+	terminateProcess := func() {
 		ptmx.Close()
+		killProcessGroup(cmd, syscall.SIGTERM)
 
-		// Kill process group
-		if cmd.Process != nil {
-			pgid := -cmd.Process.Pid
-			// Send SIGTERM to process group
-			syscall.Kill(pgid, syscall.SIGTERM)
-
-			// Wait up to 3 seconds for graceful shutdown
-			done := make(chan struct{})
-			go func() {
-				cmd.Wait()
-				close(done)
-			}()
-
-			select {
-			case <-done:
-				// Process exited gracefully
-			case <-time.After(3 * time.Second):
-				// Force kill
-				syscall.Kill(pgid, syscall.SIGKILL)
-				cmd.Wait()
-			}
+		select {
+		case <-sessionDone:
+		case <-time.After(3 * time.Second):
+			killProcessGroup(cmd, syscall.SIGKILL)
 		}
 	}
-	defer cleanup()
 
 	// Goroutine: PTY -> WebSocket
 	var wg sync.WaitGroup
@@ -172,6 +166,7 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer func() { clientDoneOnce.Do(func() { close(clientDone) }) }()
 		for {
 			_, data, err := conn.ReadMessage()
 			if err != nil {
@@ -209,7 +204,7 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 				if time.Since(startTime) > maxDuration {
 					logf("WARN", "Session exceeded max duration for hash %s", hash)
 					timedOut.Store(true)
-					ptmx.Close()
+					terminateProcess()
 					return
 				}
 
@@ -218,15 +213,23 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 				if time.Since(lastAct) > idleTimeout {
 					logf("WARN", "Session idle timeout for hash %s", hash)
 					timedOut.Store(true)
-					ptmx.Close()
+					terminateProcess()
 					return
 				}
 			}
 		}
 	}()
 
-	// Wait for session to complete
-	<-sessionDone
+	// Wait for session to complete or client to disconnect
+	select {
+	case <-sessionDone:
+		// Command exited normally
+	case <-clientDone:
+		// Client disconnected — kill the process and wait for exit
+		logf("INFO", "Client disconnected for hash %s, terminating session", hash)
+		terminateProcess()
+		<-sessionDone
+	}
 
 	// Determine exit status and send status message BEFORE waiting for
 	// I/O goroutines — the PTY read goroutine may have already errored
