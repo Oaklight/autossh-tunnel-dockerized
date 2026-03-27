@@ -220,15 +220,22 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 		}
 	}()
 
-	// Wait for session to complete or client to disconnect
+	// Wait for session to complete or client to disconnect.
+	// Prioritize sessionDone to avoid killing a successfully forked SSH
+	// process when both channels fire near-simultaneously.
 	select {
 	case <-sessionDone:
-		// Command exited normally
-	case <-clientDone:
-		// Client disconnected — kill the process and wait for exit
-		logf("INFO", "Client disconnected for hash %s, terminating session", hash)
-		terminateProcess()
-		<-sessionDone
+		// Command exited normally (e.g., ssh -f parent exits after fork)
+	default:
+		select {
+		case <-sessionDone:
+			// Command exited normally
+		case <-clientDone:
+			// Client disconnected while command still running — kill it
+			logf("INFO", "Client disconnected for hash %s, terminating session", hash)
+			terminateProcess()
+			<-sessionDone
+		}
 	}
 
 	// Determine exit status and send status message BEFORE waiting for
