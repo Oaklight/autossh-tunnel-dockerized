@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.3.1] - 2026-03-27
+
+### Fixed
+
+- **API Reverse Proxy**: Web panel now proxies all API calls through `/api/autossh/` to the backend, fixing remote access where the browser could not reach `localhost:8080` on the Docker host
+- **QEMU Build Compatibility**: Added `GOMAXPROCS=1` to Dockerfile Go builds to prevent deadlocks during cross-platform QEMU emulation (s390x, riscv64, etc.)
+
+### Added
+
+- **CI/CD Docker Publish**: GitHub Actions workflow to automatically build and push multi-arch Docker images on release
+- **Manual Workflow Dispatch**: Docker publish workflow supports manual triggering with version input
+
+### Removed
+
+- **`API_BASE_URL` frontend exposure**: The `API_BASE_URL` environment variable is now used server-side only for proxying; it is no longer sent to the browser
+
 ## [v2.3.0] - 2026-03-20
 
 ### Added
