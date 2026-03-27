@@ -72,6 +72,7 @@ nav:
           - CLI Reference: api/cli-reference.md
           - HTTP API: api/http-api.md
           - Tunnel Lifecycle: api/tunnel-lifecycle.md
+  - Docker: docker.md
   - Development:
     - Contributing: development/contributing.md
     - Internationalization: development/i18n.md
