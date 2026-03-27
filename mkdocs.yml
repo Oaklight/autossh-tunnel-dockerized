@@ -72,6 +72,7 @@ nav:
           - CLI 参考: api/cli-reference.md
           - HTTP API: api/http-api.md
           - 隧道生命周期: api/tunnel-lifecycle.md
+  - Docker: docker.md
   - 开发指南:
     - 贡献指南: development/contributing.md
     - 国际化: development/i18n.md
