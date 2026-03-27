@@ -122,6 +122,7 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 		clientDoneOnce sync.Once
 		lastActivity   atomic.Int64
 		timedOut       atomic.Bool
+		keepPTY        bool // when true, don't close ptmx on exit
 	)
 	lastActivity.Store(time.Now().Unix())
 
@@ -250,11 +251,24 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 	if timedOut.Load() {
 		sendStatus(conn, "timeout", "Session timed out", exitCode)
 	} else if exitCode == 0 {
-		// ssh -f forks after successful auth, parent exits with code 0
-		// This indicates successful authentication
+		// ssh -f forks after successful auth, parent exits with code 0.
+		// The forked SSH child needs time to setsid() and fully detach from
+		// the PTY session. If we close ptmx too soon, the kernel sends
+		// SIGHUP to the session's foreground process group, killing the
+		// child before it can detach. Wait briefly, then keep ptmx open
+		// so it won't be closed by explicit Close() calls — the fd will be
+		// released when the process's file table is cleaned up after the
+		// child has detached.
+		time.Sleep(2 * time.Second)
+		keepPTY = true
 		sendStatus(conn, "success", "Tunnel authenticated and running", exitCode)
 	} else {
 		sendStatus(conn, "error", "Authentication failed", exitCode)
+	}
+
+	// Close PTY master unless the session succeeded (ssh -f child needs it)
+	if !keepPTY {
+		ptmx.Close()
 	}
 
 	// Wait for I/O goroutines to finish
