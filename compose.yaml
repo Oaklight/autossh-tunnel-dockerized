@@ -25,8 +25,7 @@ services:
 
   web:
     image: oaklight/autossh-tunnel-web-panel:latest
-    ports:
-      - "5000:5000"
+    network_mode: "host"
     # No config volume needed - web panel uses Config API from autossh container
     environment:
       - TZ=Asia/Shanghai

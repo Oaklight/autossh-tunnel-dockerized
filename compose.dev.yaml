@@ -19,8 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    ports:
-      - "5000:5000"
+    network_mode: "host"
     # No config volume needed - web panel uses Config API from autossh container
     environment:
       - TZ=Asia/Shanghai
