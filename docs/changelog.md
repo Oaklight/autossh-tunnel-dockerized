@@ -14,6 +14,9 @@
 - **隧道状态轮询**：修复状态图标始终显示沙漏（加载中）的问题，通过区分 API 错误和有效的空响应来正确处理 `fetchTunnelStatuses()`
 - **Home 目录权限**：PUID/PGID 变更后添加 `/home/myuser` 的 `chown`，修复 interactive auth 创建 `~/.autossh-sockets` 时的 `Permission denied` 错误
 - **配置目录权限**：添加 `/etc/autossh/config` 的 `chown`，修复 Docker 自动创建 bind mount 目录时属主为 root 的问题
+- **WebSocket 会话清理**：修复浏览器异常断开后哈希锁永远无法释放的问题，通过终止进程组（SIGTERM/SIGKILL）替代仅关闭 PTY
+- **Interactive Auth 竞态条件**：修复 Go `select` 竞态问题，优先处理会话完成信号，避免客户端断开时误杀已成功 fork 的 SSH 进程
+- **Fork SSH 进程 SIGHUP**：成功 `ssh -f` 认证后保持 PTY master 打开，防止内核 SIGHUP 在 SSH 子进程完成 `setsid()` 前将其杀死
 - **QEMU 构建兼容性**：Dockerfile 中 Go 构建添加 `GOMAXPROCS=1`，防止跨平台 QEMU 模拟（s390x、riscv64 等）时出现死锁
 
 ### 新增
