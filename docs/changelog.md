@@ -10,12 +10,17 @@
 ### 修复
 
 - **API 反向代理**：Web 面板现通过 `/api/autossh/` 代理所有 API 请求到后端，修复远程访问时浏览器无法连接 Docker 宿主机 `localhost:8080` 的问题
+- **Web 面板网络**：Web 容器改用 `network_mode: "host"`，使其能够访问宿主机网络上的 autossh API
+- **隧道状态轮询**：修复状态图标始终显示沙漏（加载中）的问题，通过区分 API 错误和有效的空响应来正确处理 `fetchTunnelStatuses()`
+- **Home 目录权限**：PUID/PGID 变更后添加 `/home/myuser` 的 `chown`，修复 interactive auth 创建 `~/.autossh-sockets` 时的 `Permission denied` 错误
+- **配置目录权限**：添加 `/etc/autossh/config` 的 `chown`，修复 Docker 自动创建 bind mount 目录时属主为 root 的问题
 - **QEMU 构建兼容性**：Dockerfile 中 Go 构建添加 `GOMAXPROCS=1`，防止跨平台 QEMU 模拟（s390x、riscv64 等）时出现死锁
 
 ### 新增
 
 - **CI/CD Docker 发布**：新增 GitHub Actions 工作流，在发布 Release 时自动构建并推送多架构 Docker 镜像
 - **手动触发工作流**：Docker 发布工作流支持手动触发并指定版本号
+- **Docker 文档**：新增"Docker 深入解析"文档页，涵盖 Dockerfile 详解、构建优化、多架构构建和 CI/CD 流水线
 
 ### 移除
 
