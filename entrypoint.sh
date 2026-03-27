@@ -48,5 +48,15 @@ chown myuser:mygroup /tmp/autossh_tunnels.state
 # Also ensure log directory is owned by myuser
 chown -R myuser:mygroup /tmp/autossh-logs
 
+# Ensure home directory has proper ownership after PUID/PGID change
+# (needed for interactive auth socket directory creation)
+chown myuser:mygroup /home/myuser
+
+# Ensure config directory has proper ownership
+# (Docker creates bind-mount directories as root if they don't exist on the host)
+if [ -d /etc/autossh/config ]; then
+	chown -R myuser:mygroup /etc/autossh/config
+fi
+
 # Switch to myuser and execute the command passed as arguments
 exec su-exec myuser "$@"
