@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             const response = await apiCall('/status');
-            if (!response.ok) return {};
+            if (!response.ok) return null;
 
             const statuses = await response.json();
             const statusMap = {};
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return statusMap;
         } catch (error) {
             console.warn('Failed to fetch tunnel statuses:', error);
-            return {};
+            return null;
         }
     }
 
@@ -860,7 +860,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function refreshStatuses(retryCount = 0) {
         const statuses = await fetchTunnelStatuses();
 
-        if (Object.keys(statuses).length === 0) {
+        // null means API error — retry
+        if (statuses === null) {
             if (retryCount < 5) {
                 const delay = 500;
                 setTimeout(() => refreshStatuses(retryCount + 1), delay);
@@ -868,6 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Valid response (may be empty if no tunnels are running)
         const rows = tableBody.querySelectorAll('tr');
         rows.forEach(row => {
             const statusIndicator = row.querySelector('.status-indicator');
