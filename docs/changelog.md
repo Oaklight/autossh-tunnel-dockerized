@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Tunnel Status Polling**: Fixed status icons stuck on loading (hourglass) by distinguishing API errors from valid empty responses in `fetchTunnelStatuses()`
 - **Home Directory Permissions**: Added `chown` for `/home/myuser` after PUID/PGID change, fixing `Permission denied` when interactive auth creates `~/.autossh-sockets`
 - **Config Directory Permissions**: Added `chown` for `/etc/autossh/config` to fix ownership when Docker auto-creates bind-mount directories as root
+- **WebSocket Session Cleanup**: Fixed hash lock stuck forever when browser disconnects abnormally by killing the process group (SIGTERM/SIGKILL) instead of only closing the PTY
+- **Interactive Auth Race Condition**: Fixed Go `select` race where client disconnect could kill a successfully forked SSH process by prioritizing session completion over client disconnect
+- **Forked SSH SIGHUP**: Keep PTY master open after successful `ssh -f` authentication to prevent kernel SIGHUP from killing the forked SSH child before it completes `setsid()`
 - **QEMU Build Compatibility**: Added `GOMAXPROCS=1` to Dockerfile Go builds to prevent deadlocks during cross-platform QEMU emulation (s390x, riscv64, etc.)
 
 ### Added
