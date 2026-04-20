@@ -113,6 +113,31 @@ plugins:
   - search:
       lang: zh
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - llmstxt:
+      full_output: llms-full.txt
+      sections:
+        首页:
+          - index.md
+        快速开始:
+          - getting-started.md
+          - ssh-config.md
+          - architecture.md
+        用户指南:
+          - web-panel.md
+          - api/index.md
+          - api/cli-reference.md
+          - api/http-api.md
+          - api/tunnel-lifecycle.md
+        Docker:
+          - docker.md
+        开发指南:
+          - development/contributing.md
+          - development/i18n.md
+          - development/interactive-auth-server.md
+        故障排除:
+          - troubleshooting.md
+        更新日志:
+          - changelog.md
 
 # Copyright
 copyright: Copyright &copy; 2024 Peng Ding

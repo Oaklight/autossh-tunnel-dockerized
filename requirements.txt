@@ -3,3 +3,7 @@ zensical
 
 # Extensions
 pymdown-extensions>=10.0.0
+
+# Plugins
+mkdocs-llmstxt
+llmstxt-standalone
