@@ -21,6 +21,7 @@ clean:
 html: clean
 	@echo "Building HTML documentation..."
 	@$(ZENSICAL) build
+	@python scripts/generate_llmstxt.py -c mkdocs.yml -s $(BUILDDIR) -d $(SOURCEDIR) -v
 
 serve: html
 	@echo "Serving documentation at http://localhost:8000"
