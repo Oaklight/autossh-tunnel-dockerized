@@ -34,7 +34,7 @@
       "tunnel_name": "隧道名稱",
       "remote_host": "遠端主機",
       "remote_port": "遠端連接埠 (例如：44497 或 hostname:44497)",
-      "local_port": "本機連接埠 (例如：55001 或 192.168.1.100:55001)"
+      "local_port": "本機連接埠 (例如：8080 或 db.internal:8080)"
     },
     "direction": {
       "remote_to_local": "遠端到本機",
@@ -103,7 +103,7 @@
   "validation": {
     "port_range": "連接埠必須在 1 到 65535 之間",
     "remote_port_format": "連接埠格式無效。請使用 \"連接埠\" 或 \"主機名:連接埠\" 格式 (例如：44497 或 lambda5:44497)",
-    "local_port_format": "連接埠格式無效。請使用 \"連接埠\" 或 \"IP:連接埠\" 格式 (例如：55001 或 192.168.1.100:55001)"
+    "local_port_format": "連接埠格式無效。請使用 \"連接埠\" 或 \"主機名:連接埠\" 格式 (例如：8080 或 db.internal:8080)"
   },
   "tunnel_detail": {
     "title": "隧道詳情",
@@ -165,7 +165,7 @@
         "status": "Status：隧道目前狀態（執行/停止/錯誤）",
         "remote_host": "Remote Host：遠端主機位址（如：user@server.com）",
         "remote_port": "Remote Port：遠端連接埠或主機:連接埠格式",
-        "local_port": "Local Port：本機連接埠或IP:連接埠格式",
+        "local_port": "Local Port：本機連接埠或主機:連接埠格式",
         "direction": "Direction：隧道方向（遠端到本機/本機到遠端）",
         "actions": "Actions：操作按鈕（互動認證/刪除）"
       },

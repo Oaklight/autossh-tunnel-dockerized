@@ -118,9 +118,12 @@ tunnels:
     direction: remote_to_local
 ```
 
-**Advanced Configuration: Specifying Bind Addresses**
+**Advanced Configuration: Specifying Bind Addresses and Target Hosts**
 
-If you want to bind the remote port or local service to a specific IP address, you can use the `ip:port` format:
+Both port fields accept `port` or `host:port`. The host part depends on `direction`:
+
+- `local_to_remote`: `remote_port` host = remote bind address; `local_port` host = forwarding target, resolved by the remote server.
+- `remote_to_local`: `local_port` host = local bind address; `remote_port` host = forwarding target, resolved by the remote server.
 
 ```yaml
 tunnels:
@@ -130,16 +133,16 @@ tunnels:
     local_port: 18120
     direction: local_to_remote
     
-  # Specify local bind address
+  # Forward to a host reachable from the remote server
   - remote_host: "user@remote-host1"
     remote_port: 22323
-    local_port: "192.168.1.100:18120"  # Bind to specific IP locally
+    local_port: "db.internal:5432"  # Target, resolved on the remote
     direction: local_to_remote
     
-  # Specify both remote and local bind addresses
+  # Specify both a remote bind address and a target host
   - remote_host: "user@remote-host1"
     remote_port: "192.168.45.130:22323"
-    local_port: "192.168.1.100:18120"
+    local_port: "db.internal:5432"
     direction: local_to_remote
 ```
 

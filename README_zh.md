@@ -123,9 +123,12 @@ tunnels:
     direction: remote_to_local
 ```
 
-**高级配置：指定绑定地址**
+**高级配置：指定绑定地址和目标主机**
 
-如果您希望将远程端口或本地服务绑定到特定 IP 地址，可以使用 `ip:port` 格式：
+两个端口字段都支持 `端口` 或 `主机:端口`。主机部分的含义取决于 `direction`：
+
+- `local_to_remote`：`remote_port` 的主机是远程绑定地址；`local_port` 的主机是转发目标，由远程服务器解析。
+- `remote_to_local`：`local_port` 的主机是本地绑定地址；`remote_port` 的主机是转发目标，由远程服务器解析。
 
 ```yaml
 tunnels:
@@ -135,16 +138,16 @@ tunnels:
     local_port: 18120
     direction: local_to_remote
     
-  # 指定本地绑定地址
+  # 转发到远程服务器可达的主机
   - remote_host: "user@remote-host1"
     remote_port: 22323
-    local_port: "192.168.1.100:18120"  # 本地绑定到特定 IP
+    local_port: "db.internal:5432"  # 目标主机，由远程服务器解析
     direction: local_to_remote
     
-  # 同时指定远程和本地绑定地址
+  # 同时指定远程绑定地址和目标主机
   - remote_host: "user@remote-host1"
     remote_port: "192.168.45.130:22323"
-    local_port: "192.168.1.100:18120"
+    local_port: "db.internal:5432"
     direction: local_to_remote
 ```
 

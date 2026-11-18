@@ -34,7 +34,7 @@
       "tunnel_name": "トンネル名",
       "remote_host": "リモートホスト",
       "remote_port": "リモートポート (例: 44497 または hostname:44497)",
-      "local_port": "ローカルポート (例: 55001 または 192.168.1.100:55001)"
+      "local_port": "ローカルポート (例: 8080 または db.internal:8080)"
     },
     "direction": {
       "remote_to_local": "リモートからローカルへ",
@@ -103,7 +103,7 @@
   "validation": {
     "port_range": "ポートは1から65535の間である必要があります",
     "remote_port_format": "無効なポート形式です。\"ポート\" または \"ホスト名:ポート\" 形式を使用してください (例: 44497 または lambda5:44497)",
-    "local_port_format": "無効なポート形式です。\"ポート\" または \"IP:ポート\" 形式を使用してください (例: 55001 または 192.168.1.100:55001)"
+    "local_port_format": "無効なポート形式です。\"ポート\" または \"ホスト名:ポート\" 形式を使用してください (例: 8080 または db.internal:8080)"
   },
   "tunnel_detail": {
     "title": "トンネル詳細",
@@ -165,7 +165,7 @@
         "status": "Status：トンネルの現在の状態（実行中/停止/エラー）",
         "remote_host": "Remote Host：リモートホストアドレス（例：user@server.com）",
         "remote_port": "Remote Port：リモートポートまたはホスト:ポート形式",
-        "local_port": "Local Port：ローカルポートまたはIP:ポート形式",
+        "local_port": "Local Port：ローカルポートまたはホスト:ポート形式",
         "direction": "Direction：トンネルの方向（リモートからローカル/ローカルからリモート）",
         "actions": "Actions：操作ボタン（対話認証/削除）"
       },
