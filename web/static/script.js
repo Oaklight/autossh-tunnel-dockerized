@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const tunnelNamePlaceholder = getTranslation('table.placeholders.tunnel_name', 'Tunnel name');
         const remoteHostPlaceholder = getTranslation('table.placeholders.remote_host', 'Remote host');
         const remotePortPlaceholder = getTranslation('table.placeholders.remote_port', 'Remote port (e.g., 44497 or hostname:44497)');
-        const localPortPlaceholder = getTranslation('table.placeholders.local_port', 'Local port (e.g., 55001 or 192.168.1.100:55001)');
+        const localPortPlaceholder = getTranslation('table.placeholders.local_port', 'Local port (e.g., 8080 or db.internal:8080)');
 
         const remoteToLocalText = getTranslation('table.direction.remote_to_local', 'Remote to Local');
         const localToRemoteText = getTranslation('table.direction.local_to_remote', 'Local to Remote');
@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <input type="text" class="table-input remote-port-input" value="${escapeHtml(tunnel.remote_port || "")}" placeholder="${remotePortPlaceholder}" data-i18n-placeholder="table.placeholders.remote_port">
             </td>
             <td>
-                <input type="text" class="table-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="${localPortPlaceholder}" data-i18n-placeholder="table.placeholders.local_port">
+                <input type="text" class="table-input local-port-input" value="${escapeHtml(tunnel.local_port || "")}" placeholder="${localPortPlaceholder}" data-i18n-placeholder="table.placeholders.local_port">
             </td>
             <td>
                 <select class="table-select">
@@ -679,12 +679,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     input.title = errorMsg;
                 }
             }
-        } else if (input.placeholder && input.placeholder.includes('Local port')) {
+        } else if (input.classList.contains('local-port-input') || input.placeholder && input.placeholder.includes('Local port')) {
             if (value) {
-                const portPattern = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$|^\d{1,5}$/;
+                const portPattern = /^[\w.-]+:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "ip:port"';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "host:port"';
                     input.title = errorMsg;
                 }
             }

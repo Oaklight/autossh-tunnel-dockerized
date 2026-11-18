@@ -34,7 +34,7 @@
       "tunnel_name": "اسم النفق",
       "remote_host": "المضيف البعيد",
       "remote_port": "المنفذ البعيد (مثال: 44497 أو hostname:44497)",
-      "local_port": "المنفذ المحلي (مثال: 55001 أو 192.168.1.100:55001)"
+      "local_port": "المنفذ المحلي (مثال: 8080 أو db.internal:8080)"
     },
     "direction": {
       "remote_to_local": "من البعيد إلى المحلي",
@@ -103,7 +103,7 @@
   "validation": {
     "port_range": "يجب أن يكون المنفذ بين 1 و 65535",
     "remote_port_format": "تنسيق منفذ غير صالح. استخدم تنسيق \"منفذ\" أو \"hostname:منفذ\" (مثال: 44497 أو lambda5:44497)",
-    "local_port_format": "تنسيق منفذ غير صالح. استخدم تنسيق \"منفذ\" أو \"IP:منفذ\" (مثال: 55001 أو 192.168.1.100:55001)"
+    "local_port_format": "تنسيق منفذ غير صالح. استخدم تنسيق \"منفذ\" أو \"hostname:منفذ\" (مثال: 8080 أو db.internal:8080)"
   },
   "tunnel_detail": {
     "title": "تفاصيل النفق",
@@ -165,7 +165,7 @@
         "status": "Status: الحالة الحالية للنفق (يعمل/متوقف/خطأ)",
         "remote_host": "Remote Host: عنوان المضيف البعيد (مثال: user@server.com)",
         "remote_port": "Remote Port: المنفذ البعيد أو تنسيق host:port",
-        "local_port": "Local Port: المنفذ المحلي أو تنسيق IP:port",
+        "local_port": "Local Port: المنفذ المحلي أو تنسيق host:port",
         "direction": "Direction: اتجاه النفق (من البعيد إلى المحلي/من المحلي إلى البعيد)",
         "actions": "Actions: أزرار العمليات (المصادقة التفاعلية/حذف)"
       },

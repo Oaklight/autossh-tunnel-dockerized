@@ -492,12 +492,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         } else if (input.id === 'localPort') {
-            // Validate local_port which can be "port" or "ip:port" format
+            // Validate local_port which can be "port" or "host:port" format
             if (value) {
-                const portPattern = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$|^\d{1,5}$/;
+                const portPattern = /^[\w.-]+:\d{1,5}$|^\d{1,5}$/;
                 if (!portPattern.test(value)) {
                     input.classList.add('error');
-                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "ip:port"';
+                    const errorMsg = window.i18n ? window.i18n.t('validation.local_port_format') : 'Invalid port format. Use "port" or "host:port"';
                     input.title = errorMsg;
                 }
             }

@@ -34,7 +34,7 @@
       "tunnel_name": "Nom du tunnel",
       "remote_host": "Hôte distant",
       "remote_port": "Port distant (ex. : 44497 ou hostname:44497)",
-      "local_port": "Port local (ex. : 55001 ou 192.168.1.100:55001)"
+      "local_port": "Port local (ex. : 8080 ou db.internal:8080)"
     },
     "direction": {
       "remote_to_local": "Distant vers local",
@@ -103,7 +103,7 @@
   "validation": {
     "port_range": "Le port doit être compris entre 1 et 65535",
     "remote_port_format": "Format de port non valide. Utilisez le format \"port\" ou \"hostname:port\" (ex. : 44497 ou lambda5:44497)",
-    "local_port_format": "Format de port non valide. Utilisez le format \"port\" ou \"IP:port\" (ex. : 55001 ou 192.168.1.100:55001)"
+    "local_port_format": "Format de port non valide. Utilisez le format \"port\" ou \"hostname:port\" (ex. : 8080 ou db.internal:8080)"
   },
   "tunnel_detail": {
     "title": "Détails du Tunnel",
@@ -165,7 +165,7 @@
         "status": "Status : État actuel du tunnel (en cours/arrêté/erreur)",
         "remote_host": "Remote Host : Adresse de l'hôte distant (ex. : user@server.com)",
         "remote_port": "Remote Port : Port distant ou format hôte:port",
-        "local_port": "Local Port : Port local ou format IP:port",
+        "local_port": "Local Port : Port local ou format hôte:port",
         "direction": "Direction : Direction du tunnel (distant vers local/local vers distant)",
         "actions": "Actions : Boutons d'action (authentification interactive/supprimer)"
       },

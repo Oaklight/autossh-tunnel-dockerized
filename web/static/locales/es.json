@@ -34,7 +34,7 @@
       "tunnel_name": "Nombre del túnel",
       "remote_host": "Host remoto",
       "remote_port": "Puerto remoto (ej: 44497 o hostname:44497)",
-      "local_port": "Puerto local (ej: 55001 o 192.168.1.100:55001)"
+      "local_port": "Puerto local (ej: 8080 o db.internal:8080)"
     },
     "direction": {
       "remote_to_local": "Remoto a local",
@@ -103,7 +103,7 @@
   "validation": {
     "port_range": "El puerto debe estar entre 1 y 65535",
     "remote_port_format": "Formato de puerto no válido. Utilice el formato \"puerto\" o \"hostname:puerto\" (ej.: 44497 o lambda5:44497)",
-    "local_port_format": "Formato de puerto no válido. Utilice el formato \"puerto\" o \"IP:puerto\" (ej.: 55001 o 192.168.1.100:55001)"
+    "local_port_format": "Formato de puerto no válido. Utilice el formato \"puerto\" o \"hostname:puerto\" (ej.: 8080 o db.internal:8080)"
   },
   "tunnel_detail": {
     "title": "Detalles del Túnel",
@@ -165,7 +165,7 @@
         "status": "Status: Estado actual del túnel (ejecutándose/detenido/error)",
         "remote_host": "Remote Host: Dirección del host remoto (ej.: user@server.com)",
         "remote_port": "Remote Port: Puerto remoto o formato host:puerto",
-        "local_port": "Local Port: Puerto local o formato IP:puerto",
+        "local_port": "Local Port: Puerto local o formato host:puerto",
         "direction": "Direction: Dirección del túnel (remoto a local/local a remoto)",
         "actions": "Actions: Botones de acción (autenticación interactiva/eliminar)"
       },

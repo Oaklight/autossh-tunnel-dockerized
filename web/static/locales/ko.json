@@ -34,7 +34,7 @@
       "tunnel_name": "터널 이름",
       "remote_host": "원격 호스트",
       "remote_port": "원격 포트 (예: 44497 또는 hostname:44497)",
-      "local_port": "로컬 포트 (예: 55001 또는 192.168.1.100:55001)"
+      "local_port": "로컬 포트 (예: 8080 또는 db.internal:8080)"
     },
     "direction": {
       "remote_to_local": "원격에서 로컬로",
@@ -103,7 +103,7 @@
   "validation": {
     "port_range": "포트는 1에서 65535 사이여야 합니다",
     "remote_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"호스트명:포트\" 형식을 사용하세요 (예: 44497 또는 lambda5:44497)",
-    "local_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"IP:포트\" 형식을 사용하세요 (예: 55001 또는 192.168.1.100:55001)"
+    "local_port_format": "잘못된 포트 형식입니다. \"포트\" 또는 \"호스트명:포트\" 형식을 사용하세요 (예: 8080 또는 db.internal:8080)"
   },
   "tunnel_detail": {
     "title": "터널 상세정보",
@@ -165,7 +165,7 @@
         "status": "Status: 터널 현재 상태 (실행/중지/오류)",
         "remote_host": "Remote Host: 원격 호스트 주소 (예: user@server.com)",
         "remote_port": "Remote Port: 원격 포트 또는 호스트:포트 형식",
-        "local_port": "Local Port: 로컬 포트 또는 IP:포트 형식",
+        "local_port": "Local Port: 로컬 포트 또는 호스트:포트 형식",
         "direction": "Direction: 터널 방향 (원격에서 로컬로/로컬에서 원격으로)",
         "actions": "Actions: 작업 버튼 (대화형 인증/삭제)"
       },
