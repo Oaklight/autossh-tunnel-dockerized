@@ -20,3 +20,4 @@ disable=SC2094  # Read and write same file in pipeline
 disable=SC2002  # Useless cat
 disable=SC2153  # Possible misspelling (false positive: env vars vs locals)
 disable=SC2317  # Command appears unreachable (invoked indirectly via trap/eval)
+disable=SC2329  # Function is never invoked (invoked indirectly via sourced modules)
