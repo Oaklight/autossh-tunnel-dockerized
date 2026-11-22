@@ -32,7 +32,7 @@
     },
     "placeholders": {
       "tunnel_name": "隧道名称",
-      "remote_host": "远程主机",
+      "remote_host": "user@host:port",
       "remote_port": "远程端口 (例如：44497 或 hostname:44497)",
       "local_port": "本地端口 (例如：8080 或 db.internal:8080)"
     },
@@ -163,7 +163,7 @@
         "title": "界面说明：",
         "name": "Name：隧道名称，用于标识",
         "status": "Status：隧道当前状态（运行/停止/错误）",
-        "remote_host": "Remote Host：远程主机地址（如：user@server.com）",
+        "remote_host": "Remote Host：远程主机地址（如：user@server.com / user@server.com:2222）",
         "remote_port": "Remote Port：远程端口或主机:端口格式",
         "local_port": "Local Port：本地端口或主机:端口格式",
         "direction": "Direction：隧道方向（远程到本地/本地到远程）",
@@ -255,6 +255,8 @@
       "port_simple": "简单端口",
       "port_hostname": "主机:端口",
       "port_ip": "IP:端口",
+      "ssh_port": "SSH 服务器端口：",
+      "ssh_port_desc": "在远程主机中指定非标准 SSH 端口，例如 user@server:2222",
       "tunnel_directions": "隧道方向：",
       "direction_r2l": "将远程服务映射到本地（默认）",
       "direction_l2r": "将本地服务暴露到远程",

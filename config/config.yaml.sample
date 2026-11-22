@@ -20,6 +20,12 @@ tunnels:
     direction: remote_to_local
     interactive: true
 
+  # SSH server on a non-standard port: append :<port> to remote_host
+  # - name: "ssh-on-2222"
+  #   remote_host: "user@server.example.com:2222"
+  #   remote_port: 8080
+  #   local_port: 8081
+
   # Example with host:port format for remote_port and local_port
   # - name: "custom-bind"
   #   remote_host: "user@server"

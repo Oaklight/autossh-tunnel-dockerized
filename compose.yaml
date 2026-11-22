@@ -6,8 +6,8 @@ services:
       - ~/.ssh:/home/myuser/.ssh:ro
       - ./config:/etc/autossh/config:rw
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - AUTOSSH_GATETIME=0
       - API_ENABLE=true
       - API_PORT=8080

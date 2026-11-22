@@ -388,6 +388,12 @@ start_tunnel_by_hash() {
 	# This avoids the complex dependency chain
 	SSH_CONFIG_DIR="${SSH_CONFIG_DIR:-/home/myuser/.ssh}"
 
+	# Split an optional SSH server port from remote_host ([user@]host[:port]).
+	local parsed_destination
+	parsed_destination=$(parse_ssh_destination "$remote_host")
+	local ssh_destination=$(printf '%s\n' "$parsed_destination" | cut -f1)
+	local ssh_port=$(printf '%s\n' "$parsed_destination" | cut -f2)
+
 	# Parse ports
 	if echo "$remote_port" | grep -q ":"; then
 		target_host=$(echo "$remote_port" | cut -d: -f1)
@@ -412,6 +418,11 @@ start_tunnel_by_hash() {
 		ssh_opts="$ssh_opts -F $SSH_CONFIG_DIR/config"
 	fi
 
+	# Add the SSH server port when remote_host contains one.
+	if [ -n "$ssh_port" ]; then
+		ssh_opts="$ssh_opts -p $ssh_port"
+	fi
+
 	# Create log directory if it doesn't exist
 	log_dir="/tmp/autossh-logs"
 	mkdir -p "$log_dir"
@@ -420,10 +431,10 @@ start_tunnel_by_hash() {
 	# Start tunnel in background
 	if [ "$direction" = "local_to_remote" ]; then
 		log_info "STATE" "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port"
-		autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1 &
+		autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $ssh_destination >>"$log_file" 2>&1 &
 	else
 		log_info "STATE" "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port"
-		autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1 &
+		autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $ssh_destination >>"$log_file" 2>&1 &
 	fi
 	tunnel_pid=$!
 

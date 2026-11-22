@@ -26,6 +26,12 @@ start_single_tunnel() {
 	local direction=${4:-remote_to_local} # 设置默认值为 remote_to_local
 	local tunnel_hash=${5:-""}            # Optional tunnel hash for identification
 
+	# Split an optional SSH server port from remote_host ([user@]host[:port]).
+	local parsed_destination
+	parsed_destination=$(parse_ssh_destination "$remote_host")
+	local ssh_destination=$(printf '%s\n' "$parsed_destination" | cut -f1)
+	local ssh_port=$(printf '%s\n' "$parsed_destination" | cut -f2)
+
 	if echo "$remote_port" | grep -q ":"; then
 		target_host=$(echo "$remote_port" | cut -d: -f1)
 		target_port=$(echo "$remote_port" | cut -d: -f2)
@@ -55,6 +61,11 @@ start_single_tunnel() {
 		ssh_opts="$ssh_opts -o SetEnv=TUNNEL_HASH=$tunnel_hash"
 	fi
 
+	# Add the SSH server port when remote_host contains one.
+	if [ -n "$ssh_port" ]; then
+		ssh_opts="$ssh_opts -p $ssh_port"
+	fi
+
 	# Create log directory if it doesn't exist
 	log_dir="/tmp/autossh-logs"
 	mkdir -p "$log_dir"
@@ -78,19 +89,19 @@ start_single_tunnel() {
 		# SSH-standard mode: align with SSH native terminology
 		if [ "$direction" = "local_to_remote" ]; then
 			log_info "AUTOSSH" "Starting SSH tunnel (local to remote, ssh-standard mode): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
-			exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
+			exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $ssh_destination >>"$log_file" 2>&1
 		else
 			log_info "AUTOSSH" "Starting SSH tunnel (remote to local, ssh-standard mode): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
-			exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
+			exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $ssh_destination >>"$log_file" 2>&1
 		fi
 	else
 		# Default mode: service-oriented (current behavior)
 		if [ "$direction" = "local_to_remote" ]; then
 			log_info "AUTOSSH" "Starting SSH tunnel (local to remote): $local_host:$local_port -> $remote_host:$remote_port" >>"$log_file"
-			exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $remote_host >>"$log_file" 2>&1
+			exec autossh $ssh_opts -N -R $target_host:$target_port:$local_host:$local_port $ssh_destination >>"$log_file" 2>&1
 		else
 			log_info "AUTOSSH" "Starting SSH tunnel (remote to local): $local_host:$local_port <- $remote_host:$remote_port" >>"$log_file"
-			exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $remote_host >>"$log_file" 2>&1
+			exec autossh $ssh_opts -N -L $local_host:$local_port:$target_host:$target_port $ssh_destination >>"$log_file" 2>&1
 		fi
 	fi
 }

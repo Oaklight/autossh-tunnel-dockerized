@@ -32,7 +32,7 @@
     },
     "placeholders": {
       "tunnel_name": "隧道名稱",
-      "remote_host": "遠端主機",
+      "remote_host": "user@host:port",
       "remote_port": "遠端連接埠 (例如：44497 或 hostname:44497)",
       "local_port": "本機連接埠 (例如：8080 或 db.internal:8080)"
     },
@@ -163,7 +163,7 @@
         "title": "介面說明：",
         "name": "Name：隧道名稱，用於識別",
         "status": "Status：隧道目前狀態（執行/停止/錯誤）",
-        "remote_host": "Remote Host：遠端主機位址（如：user@server.com）",
+        "remote_host": "Remote Host：遠端主機位址（如：user@server.com / user@server.com:2222）",
         "remote_port": "Remote Port：遠端連接埠或主機:連接埠格式",
         "local_port": "Local Port：本機連接埠或主機:連接埠格式",
         "direction": "Direction：隧道方向（遠端到本機/本機到遠端）",
@@ -255,6 +255,8 @@
       "port_simple": "簡單連接埠",
       "port_hostname": "主機:連接埠",
       "port_ip": "IP:連接埠",
+      "ssh_port": "SSH 伺服器連接埠：",
+      "ssh_port_desc": "在遠端主機中指定非標準 SSH 連接埠，例如 user@server:2222",
       "tunnel_directions": "隧道方向：",
       "direction_r2l": "將遠端服務對應到本機（預設）",
       "direction_l2r": "將本機服務公開到遠端",

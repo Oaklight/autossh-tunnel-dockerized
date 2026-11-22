@@ -32,6 +32,17 @@ This project relies heavily on the SSH config file because:
 3. **Connection Parameters**: Timeouts, ports, and other connection settings are defined here
 4. **Simplified Configuration**: Instead of specifying full connection details in each tunnel, you can use simple host aliases
 
+You can also put the SSH port in `remote_host` directly, without a `Port` entry in the SSH config:
+
+```yaml
+tunnels:
+  - remote_host: "user@server.example.com:2222"
+    remote_port: 8080
+    local_port: 8081
+```
+
+The `[user@]host:port` form overrides any `Port` value that the SSH config provides for that host.
+
 ## SSH Config File Location
 
 The SSH config file should be located at:

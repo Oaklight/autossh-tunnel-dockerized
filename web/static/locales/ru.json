@@ -32,7 +32,7 @@
     },
     "placeholders": {
       "tunnel_name": "Название туннеля",
-      "remote_host": "Удалённый узел",
+      "remote_host": "user@host:port",
       "remote_port": "Удалённый порт (например: 44497 или hostname:44497)",
       "local_port": "Локальный порт (например: 8080 или db.internal:8080)"
     },
@@ -163,7 +163,7 @@
         "title": "Описание интерфейса:",
         "name": "Name: Название туннеля для идентификации",
         "status": "Status: Текущее состояние туннеля (работает/остановлен/ошибка)",
-        "remote_host": "Remote Host: Адрес удалённого узла (например: user@server.com)",
+        "remote_host": "Remote Host: Адрес удалённого узла (например: user@server.com / user@server.com:2222)",
         "remote_port": "Remote Port: Удалённый порт или формат узел:порт",
         "local_port": "Local Port: Локальный порт или формат узел:порт",
         "direction": "Direction: Направление туннеля (с удалённого на локальный/с локального на удалённый)",
@@ -255,6 +255,8 @@
       "port_simple": "Простой порт",
       "port_hostname": "Узел:порт",
       "port_ip": "IP:порт",
+      "ssh_port": "Порт SSH-сервера:",
+      "ssh_port_desc": "Нестандартный SSH-порт в удалённом узле, например user@server:2222",
       "tunnel_directions": "Направления туннелей:",
       "direction_r2l": "Сопоставить удалённую службу с локальной (по умолчанию)",
       "direction_l2r": "Предоставить локальную службу на удалённом сервере",

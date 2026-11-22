@@ -241,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const tunnelHash = tunnel.hash || '';
 
         const tunnelNamePlaceholder = getTranslation('table.placeholders.tunnel_name', 'Tunnel name');
-        const remoteHostPlaceholder = getTranslation('table.placeholders.remote_host', 'Remote host');
+        const remoteHostPlaceholder = getTranslation('table.placeholders.remote_host', 'user@host:port');
         const remotePortPlaceholder = getTranslation('table.placeholders.remote_port', 'Remote port (e.g., 44497 or hostname:44497)');
         const localPortPlaceholder = getTranslation('table.placeholders.local_port', 'Local port (e.g., 8080 or db.internal:8080)');
 
