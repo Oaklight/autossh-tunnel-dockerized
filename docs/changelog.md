@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **SSH Server Port in `remote_host`**: Configuration and the web panel accept `[user@]host:port` and bracketed IPv6 `user@[2001:db8::1]:port`. The port is passed to `ssh`/`autossh` with `-p`.
+
+### Changed
+
+- **Removed `su-exec`**: The entrypoint now drops privileges with BusyBox `su`, which is already in the base image. `PUID`/`PGID` remain the supported way to match the host UID/GID, because OpenSSH exits when the runtime UID has no `/etc/passwd` entry; Docker `--user` cannot replace the mapping.
+- **Web Panel Entrypoint Removed**: The web panel runs `USER myuser` and `CMD ["./app"]` directly; it no longer uses an entrypoint script.
+- **Interactive Auth Socket Fallback**: When `HOME` is not writable, control sockets go to `/tmp/autossh-sockets-<uid>`.
+
 ## [v2.3.1] - 2026-03-27
 
 ### Fixed

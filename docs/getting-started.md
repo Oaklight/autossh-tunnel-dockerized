@@ -86,9 +86,12 @@ tunnels:
     direction: remote_to_local
 ```
 
-**Advanced Configuration: Specifying Bind Addresses**
+**Advanced Configuration: Specifying Bind Addresses and Target Hosts**
 
-If you want to bind the remote port or local service to a specific IP address, you can use the `ip:port` format:
+Both port fields accept `port` or `host:port`. The host part depends on `direction`:
+
+- `local_to_remote`: `remote_port` host = remote bind address; `local_port` host = forwarding target, resolved by the remote server.
+- `remote_to_local`: `local_port` host = local bind address; `remote_port` host = forwarding target, resolved by the remote server.
 
 ```yaml
 tunnels:
@@ -98,17 +101,29 @@ tunnels:
     local_port: 18120
     direction: local_to_remote
     
-  # Specify local bind address
+  # Forward to a host reachable from the remote server
   - remote_host: "user@remote-host1"
     remote_port: 22323
-    local_port: "192.168.1.100:18120"  # Bind to specific IP locally
+    local_port: "db.internal:5432"  # Target, resolved on the remote
     direction: local_to_remote
     
-  # Specify both remote and local bind addresses
+  # Specify both a remote bind address and a target host
   - remote_host: "user@remote-host1"
     remote_port: "192.168.45.130:22323"
-    local_port: "192.168.1.100:18120"
+    local_port: "db.internal:5432"
     direction: local_to_remote
+```
+
+**SSH Server on a Non-Standard Port**
+
+Append the port to `remote_host` as `[user@]host:port`. The web panel accepts the same format. IPv6 addresses use brackets, for example `user@[2001:db8::1]:2222`.
+
+```yaml
+tunnels:
+  - remote_host: "user@server.example.com:2222"
+    remote_port: 8080
+    local_port: 8081
+    direction: remote_to_local
 ```
 
 #### Option B: Web Panel Configuration
@@ -127,7 +142,7 @@ If you're using the web panel (included in `compose.yaml`):
 
 ### 4. Configure User Permissions (PUID/PGID)
 
-Before running the containers, make sure to set the correct `PUID` and `PGID` values to match your host user's UID and GID.
+Before running the containers, set `PUID` and `PGID` to your host user's UID and GID.
 
 Check your user's UID and GID:
 
@@ -151,6 +166,8 @@ environment:
   - PUID=1000
   - PGID=1000
 ```
+
+The entrypoint maps `PUID`/`PGID` into `/etc/passwd` before dropping privileges. Docker's `--user` alone is not enough for the autossh container: OpenSSH exits when the runtime UID has no `/etc/passwd` entry.
 
 ### 5. Start Services
 

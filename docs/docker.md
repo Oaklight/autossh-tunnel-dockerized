@@ -34,7 +34,7 @@ RUN GOMAXPROCS=1 CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o ws-server 
 # Stage 2: Runtime image with autossh and all scripts
 FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0 AS base
 ARG VERSION=dev
-RUN apk add --no-cache autossh flock inotify-tools netcat-openbsd socat su-exec
+RUN apk add --no-cache autossh flock inotify-tools netcat-openbsd socat
 RUN addgroup -g 1000 mygroup && adduser -D -u 1000 -G mygroup myuser
 COPY autossh-cli /usr/local/bin/autossh-cli
 COPY scripts /usr/local/bin/scripts
@@ -72,13 +72,13 @@ RUN GOMAXPROCS=1 CGO_ENABLED=0 go build \
 # Stage 2: Minimal runtime
 ARG REGISTRY_MIRROR=docker.io
 FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0
-RUN apk add --no-cache su-exec
 RUN addgroup -g 1000 mygroup && adduser -D -u 1000 -G mygroup myuser
 WORKDIR /app
 COPY --from=builder /app/app .
 COPY web/static /app/static
 COPY web/templates /app/templates
-COPY web/entrypoint.sh /entrypoint.sh
+USER myuser
+CMD ["./app"]
 ```
 
 !!! note "Why `golang:tip-alpine`?"
@@ -121,7 +121,6 @@ Runtime dependencies are installed via `apk add --no-cache`:
 
 - `autossh` — persistent SSH connections
 - `socat` — API server socket handling
-- `su-exec` — lightweight privilege dropping (Alpine alternative to `gosu`)
 - `inotify-tools` — config file change monitoring
 - `flock` — file locking for concurrent access
 - `netcat-openbsd` — network utilities
@@ -251,34 +250,19 @@ This separation allows build verification before publishing. The `build-and-push
 
 ### autossh Container (`entrypoint.sh`)
 
-The main entrypoint runs as root and performs initialization before dropping privileges:
+The entrypoint runs as root and prepares the container before dropping privileges:
 
 1. **Export environment variables** for autossh-cli (`AUTOSSH_CONFIG_FILE`, `SSH_CONFIG_DIR`, `AUTOSSH_STATE_FILE`, WebSocket variables)
-2. **Dynamic PUID/PGID** — modifies `/etc/passwd` and `/etc/group` in-place via `sed` to match the host user's UID/GID:
-    ```bash
-    sed -i "s/^myuser:x:[0-9]*:[0-9]*:/myuser:x:$PUID:$PGID:/" /etc/passwd
-    sed -i "s/^mygroup:x:[0-9]*:/mygroup:x:$PGID:/" /etc/group
-    ```
-3. **Initialize state** — create `/tmp` directories, clean old logs and state files, set permissions
-4. **Fix home directory ownership** — `chown` the home directory `/home/myuser` so the container user can create files (e.g., `~/.autossh-sockets` for interactive auth)
-5. **Fix config ownership** — `chown` the config directory (Docker creates bind-mount directories as root if they don't exist on the host)
-6. **Privilege drop** — `exec su-exec myuser "$@"` replaces the shell with the target command running as `myuser`
-
-!!! note "su-exec vs gosu"
-    `su-exec` is preferred in Alpine for its smaller binary size. Unlike `sudo` or `su`, `su-exec` directly `exec()`s the target command, avoiding a parent process overhead.
+2. **Map PUID/PGID** — rewrite the `myuser` entry in `/etc/passwd` and `mygroup` in `/etc/group` to the requested UID/GID. OpenSSH refuses to start when the runtime UID has no passwd entry, so this mapping is required for arbitrary UIDs.
+3. **Initialize state** — create `/tmp/autossh-logs`, clean old logs and the state file, and set ownership/permissions for the container user
+4. **Fix directory ownership** — `chown` `/home/myuser` and the bind-mounted config directory so the container user can write there
+5. **Drop privileges** — `exec su myuser -s /bin/sh -c "exec <shell-quoted arguments>"`. BusyBox `su` replaces the removed `su-exec` package. The entrypoint shell-quotes its arguments because BusyBox `su` parses dash-prefixed words after the user name as its own options. The shell execs the target command, which stays PID 1 and receives `docker stop` signals.
 
 For user-facing PUID/PGID configuration, see [Quick Start](getting-started.md).
 
-### Web Container (`web/entrypoint.sh`)
+### Web Container (`Dockerfile.web`)
 
-The web panel entrypoint is minimal — it only drops privileges:
-
-```bash
-#!/bin/sh
-exec su-exec myuser "$@"
-```
-
-No state cleanup is needed because the web panel is a stateless proxy server.
+The web panel has no entrypoint. Its Dockerfile sets `USER myuser` and runs `CMD ["./app"]` directly. No state cleanup is needed because the web panel is a stateless proxy server.
 
 ### Version Embedding
 

@@ -68,16 +68,16 @@ If your autossh is running in a Docker container:
 
 ```bash
 # List tunnels
-docker exec -it autotunnel-autossh-1 autossh-cli list
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli list
 
 # Stop a tunnel
-docker exec -it autotunnel-autossh-1 autossh-cli stop-tunnel <hash>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli stop-tunnel <hash>
 
 # Start a tunnel
-docker exec -it autotunnel-autossh-1 autossh-cli start-tunnel <hash>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli start-tunnel <hash>
 
 # View status
-docker exec -it autotunnel-autossh-1 autossh-cli status
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli status
 ```
 
 ## HTTP API

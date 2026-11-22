@@ -73,7 +73,7 @@ The core container that manages SSH tunnels using autossh.
 
 | Component | Description |
 |-----------|-------------|
-| `entrypoint.sh` | Initializes the container, sets up permissions, and starts the main process |
+| `entrypoint.sh` | Maps PUID/PGID, initializes runtime directories, and starts the main process |
 | `spinoff_monitor.sh` | Monitors config file changes and triggers tunnel restarts |
 | `autossh-cli` | Command-line interface for tunnel management |
 | `API Server` | HTTP API for programmatic control (optional, port 8080) |
@@ -397,6 +397,6 @@ This is possible because:
 ## Security Considerations
 
 1. **SSH Keys**: Mounted read-only to prevent modification
-2. **Non-root User**: Containers run as `myuser` (configurable via PUID/PGID)
+2. **Non-root User**: Containers run as `myuser` (UID/GID configurable via `PUID`/`PGID`)
 3. **State Isolation**: Each tunnel has isolated state and logs
 4. **API Access**: API server only accessible on localhost by default (host network mode)

@@ -18,7 +18,8 @@ This project provides a Docker-based solution to manage SSH tunnels using `autos
 - **Non-root User**: Run container as a non-root user to enhance security.
 - **YAML Configuration**: Define multiple SSH tunnel mappings using the `config.yaml` file and support automatic service reload upon configuration changes.
 - **Autossh**: Automatically maintain SSH connection to ensure tunnels remain active.
-- **Dynamic UID/GID Support**: Set container user's UID and GID dynamically using `PUID` and `PGID` environment variables to match host user permissions.
+- **Dynamic UID/GID Support**: Set the container user's UID and GID with `PUID` and `PGID` to match host file ownership.
+- **SSH Server Port**: Put a non-standard SSH port in `remote_host` as `[user@]host:port`.
 - **Multi-architecture Support**: Supports all Alpine base architectures, including `linux/amd64`, `linux/arm64/v8`, `linux/arm/v7`, `linux/arm/v6`, `linux/386`, `linux/ppc64le`, `linux/s390x`, and `linux/riscv64`.
 - **Flexible Direction Configuration**: Support exposing local services to a remote server (`local_to_remote`) or mapping remote services to a local port (`remote_to_local`).
 - **Automatic Reload**: Detect changes in `config.yaml` and automatically reload the service configuration.

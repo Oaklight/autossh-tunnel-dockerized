@@ -133,8 +133,8 @@ autossh-tunnel-dockerized/
 
 2. Test CLI commands:
    ```bash
-   docker exec -it <container> autossh-cli list
-   docker exec -it <container> autossh-cli status
+   docker exec -it -u myuser <container> autossh-cli list
+   docker exec -it -u myuser <container> autossh-cli status
    ```
 
 3. Test web panel at http://localhost:5000

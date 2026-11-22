@@ -10,12 +10,12 @@ The `autossh-cli` command-line tool provides comprehensive tunnel management cap
 All commands should be prefixed with `docker exec`:
 
 ```bash
-docker exec -it <container_name> autossh-cli <command>
+docker exec -it -u myuser <container_name> autossh-cli <command>
 ```
 
 For example:
 ```bash
-docker exec -it autotunnel-autossh-1 autossh-cli list
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli list
 ```
 
 ## Basic Commands
@@ -270,22 +270,22 @@ autossh-cli cleanup
 
 ```bash
 # List tunnels
-docker exec -it autotunnel-autossh-1 autossh-cli list
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli list
 
 # Stop a tunnel
-docker exec -it autotunnel-autossh-1 autossh-cli stop-tunnel <hash>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli stop-tunnel <hash>
 
 # Start a tunnel
-docker exec -it autotunnel-autossh-1 autossh-cli start-tunnel <hash>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli start-tunnel <hash>
 
 # View status
-docker exec -it autotunnel-autossh-1 autossh-cli status
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli status
 
 # View logs
-docker exec -it autotunnel-autossh-1 autossh-cli logs
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli logs
 
 # Validate configuration
-docker exec -it autotunnel-autossh-1 autossh-cli validate
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli validate
 ```
 
 ## Exit Codes

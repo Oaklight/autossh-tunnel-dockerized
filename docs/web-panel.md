@@ -68,9 +68,9 @@ The main page displays a list of all configured tunnels in an editable table for
 2. A new empty row will appear in the table
 3. Fill in the tunnel configuration directly in the table:
    - **Name**: Custom name for the tunnel
-   - **Remote Host**: SSH host configuration name (e.g., `user@remote-host`)
+   - **Remote Host**: SSH host configuration name or `[user@]host:port` (e.g., `user@remote-host` or `user@remote-host:2222`)
    - **Remote Port**: Port on the remote server (supports `port` or `hostname:port` format)
-   - **Local Port**: Port on the local machine (supports `port` or `ip:port` format)
+   - **Local Port**: Local port or `host:port`. In `local_to_remote`, the host part is the forwarding target (resolved by the remote server); in `remote_to_local`, it is the local bind address
    - **Direction**: Choose `Remote to Local` or `Local to Remote`
 4. Click the row's "Save" button (💾) or the global "Save & Restart" button
 
@@ -226,19 +226,36 @@ docker compose restart autossh
 
 ## Advanced Configuration
 
-### Specifying Bind Addresses
+### Specifying Bind Addresses and Target Hosts
 
-In the web panel, you can use the `ip:port` format to specify bind addresses:
+Both port fields accept a plain port or `host:port`. The host part depends on `direction`:
 
-**Bind remote port to specific IP:**
+- `remote_to_local` (`-L`): the host in **Remote Port** is the forwarding target, resolved by the remote server. The host in **Local Port** is the local bind address.
+- `local_to_remote` (`-R`): the host in **Remote Port** is the remote bind address. The host in **Local Port** is the forwarding target, resolved by the remote server.
+
+**Forward to a host reachable from the remote server:**
 ```
-Remote Port: 192.168.45.130:22323
+Direction: Local to Remote
+Remote Port: 192.168.45.130:22323   # bind on the remote
+Local Port: db.internal:5432        # target, resolved on the remote
 ```
 
-**Bind local port to specific IP:**
+**Bind locally and target a host reachable from the remote server:**
 ```
-Local Port: 192.168.1.100:18120
+Direction: Remote to Local
+Local Port: 127.0.0.1:8001          # bind locally
+Remote Port: db.internal:5432       # target, resolved on the remote
 ```
+
+### SSH Server on a Non-Standard Port
+
+Put the SSH port in the **Remote Host** field as `[user@]host:port`:
+
+```
+Remote Host: user@server.example.com:2222
+```
+
+IPv6 addresses use brackets: `user@[2001:db8::1]:2222`.
 
 ### Using SSH Config Aliases
 

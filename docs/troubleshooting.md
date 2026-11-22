@@ -174,7 +174,7 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
 
 3. Verify config file path:
    ```bash
-   docker compose exec autossh cat /etc/autossh/config/config.yaml
+   docker compose exec -u myuser autossh cat /etc/autossh/config/config.yaml
    ```
 
 ## Interactive Authentication Issues
@@ -198,14 +198,14 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
 
    Check if the tunnel has `interactive: true` in config:
    ```bash
-   docker exec -it autossh-1 autossh-cli show-tunnel <hash>
+   docker exec -it -u myuser autossh-1 autossh-cli show-tunnel <hash>
    ```
 
 3. **Check SSH host configuration:**
 
    Ensure the remote host is properly configured in `~/.ssh/config`:
    ```bash
-   docker exec -it autossh-1 cat /home/myuser/.ssh/config
+   docker exec -it -u myuser autossh-1 cat /home/myuser/.ssh/config
    ```
 
 4. **WebSocket connection fails (in-browser terminal):**
@@ -249,7 +249,7 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
 
 1. **Check tunnel logs:**
    ```bash
-   docker exec -it autossh-1 autossh-cli logs <hash>
+   docker exec -it -u myuser autossh-1 autossh-cli logs <hash>
    ```
 
 2. **Verify port availability:**
@@ -261,7 +261,7 @@ This guide helps you diagnose and resolve common issues with SSH Tunnel Manager.
 
 3. **Check SSH control socket:**
    ```bash
-   docker exec -it autossh-1 ls -la /tmp/ssh_control_*
+   docker exec -it -u myuser autossh-1 ls -la /tmp/ssh_control_*
    ```
 
 ## Tunnel Runtime Issues
@@ -460,7 +460,7 @@ docker compose logs --tail=100
 
 ```bash
 # Enter autossh container
-docker compose exec autossh sh
+docker compose exec -u myuser autossh sh
 
 # Enter web container
 docker compose exec web sh
