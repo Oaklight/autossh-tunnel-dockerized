@@ -34,7 +34,7 @@ RUN GOMAXPROCS=1 CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o ws-server 
 # 阶段 2：包含 autossh 和所有脚本的运行时镜像
 FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0 AS base
 ARG VERSION=dev
-RUN apk add --no-cache autossh flock inotify-tools netcat-openbsd socat su-exec
+RUN apk add --no-cache autossh flock inotify-tools netcat-openbsd socat
 RUN addgroup -g 1000 mygroup && adduser -D -u 1000 -G mygroup myuser
 COPY autossh-cli /usr/local/bin/autossh-cli
 COPY scripts /usr/local/bin/scripts
@@ -72,13 +72,13 @@ RUN GOMAXPROCS=1 CGO_ENABLED=0 go build \
 # 阶段 2：最小运行时
 ARG REGISTRY_MIRROR=docker.io
 FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0
-RUN apk add --no-cache su-exec
 RUN addgroup -g 1000 mygroup && adduser -D -u 1000 -G mygroup myuser
 WORKDIR /app
 COPY --from=builder /app/app .
 COPY web/static /app/static
 COPY web/templates /app/templates
-COPY web/entrypoint.sh /entrypoint.sh
+USER myuser
+CMD ["./app"]
 ```
 
 !!! note "为什么使用 `golang:tip-alpine`？"
@@ -121,7 +121,6 @@ Alpine Linux 3.22.0 提供约 5 MB 的基础镜像，使最终镜像保持在 20
 
 - `autossh` — 持久 SSH 连接
 - `socat` — API 服务器 socket 处理
-- `su-exec` — 轻量级权限降级（Alpine 上 `gosu` 的替代品）
 - `inotify-tools` — 配置文件变更监控
 - `flock` — 并发访问文件锁
 - `netcat-openbsd` — 网络工具
@@ -251,34 +250,19 @@ make push
 
 ### autossh 容器 (`entrypoint.sh`)
 
-主入口点以 root 身份运行，在降权前执行初始化：
+入口点以 root 运行，在降权前准备容器：
 
 1. **导出环境变量**供 autossh-cli 使用（`AUTOSSH_CONFIG_FILE`、`SSH_CONFIG_DIR`、`AUTOSSH_STATE_FILE`、WebSocket 变量）
-2. **动态 PUID/PGID** — 通过 `sed` 就地修改 `/etc/passwd` 和 `/etc/group` 以匹配宿主机用户的 UID/GID：
-    ```bash
-    sed -i "s/^myuser:x:[0-9]*:[0-9]*:/myuser:x:$PUID:$PGID:/" /etc/passwd
-    sed -i "s/^mygroup:x:[0-9]*:/mygroup:x:$PGID:/" /etc/group
-    ```
-3. **初始化状态** — 创建 `/tmp` 目录，清理旧日志和状态文件，设置权限
-4. **修正 home 目录权限** — `chown` home 目录 `/home/myuser`，使容器用户能够创建文件（如 interactive auth 所需的 `~/.autossh-sockets`）
-5. **修正配置目录权限** — `chown` 配置目录（Docker 在宿主机目录不存在时以 root 身份创建 bind mount 目录）
-6. **权限降级** — `exec su-exec myuser "$@"` 将 shell 替换为以 `myuser` 身份运行的目标命令
-
-!!! note "su-exec vs gosu"
-    Alpine 中优先使用 `su-exec`，因为其二进制文件更小。与 `sudo` 或 `su` 不同，`su-exec` 直接 `exec()` 目标命令，避免了父进程开销。
+2. **映射 PUID/PGID** — 将 `/etc/passwd` 中的 `myuser` 和 `/etc/group` 中的 `mygroup` 改写为请求的 UID/GID。运行时 UID 在 `/etc/passwd` 中没有条目时 OpenSSH 拒绝启动，因此任意 UID 都需要这一步。
+3. **初始化状态** — 创建 `/tmp/autossh-logs`，清理旧日志和状态文件，并为容器用户设置属主和权限
+4. **修正目录属主** — `chown` `/home/myuser` 和绑定挂载的配置目录，使容器用户可写
+5. **降权** — `exec su myuser -s /bin/sh -c "exec <shell 引用后的参数>"`。BusyBox `su` 替代已移除的 `su-exec` 包。入口点对参数做 shell 引用，因为 BusyBox `su` 会把用户名后的、以 `-` 开头的词当作自己的选项。shell 会 exec 目标命令，使命令保持 PID 1 并接收 `docker stop` 信号。
 
 用户端 PUID/PGID 配置请参阅[快速入门](getting-started.md)。
 
-### Web 容器 (`web/entrypoint.sh`)
+### Web 容器 (`Dockerfile.web`)
 
-Web 面板的入口点非常简单——仅降权：
-
-```bash
-#!/bin/sh
-exec su-exec myuser "$@"
-```
-
-无需状态清理，因为 Web 面板是无状态的代理服务器。
+Web 面板没有入口点。其 Dockerfile 设置 `USER myuser` 并直接运行 `CMD ["./app"]`。无需状态清理，因为 Web 面板是无状态的代理服务器。
 
 ### 版本嵌入
 

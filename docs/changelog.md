@@ -5,6 +5,18 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+### 新增
+
+- **`remote_host` 支持 SSH 服务器端口**：配置文件和网页面板支持 `[user@]主机:端口` 及带方括号的 IPv6 `user@[2001:db8::1]:端口`。端口通过 `-p` 传给 `ssh`/`autossh`。
+
+### 变更
+
+- **移除 `su-exec`**：入口点改用基础镜像已包含的 BusyBox `su` 降权。`PUID`/`PGID` 仍是匹配主机 UID/GID 的受支持方式，因为运行时 UID 在 `/etc/passwd` 中没有条目时 OpenSSH 会退出；Docker `--user` 无法替代该映射。
+- **移除 Web 面板入口点**：Web 面板直接使用 `USER myuser` 和 `CMD ["./app"]`，不再使用入口脚本。
+- **交互认证套接字回退**：`HOME` 不可写时，控制套接字放在 `/tmp/autossh-sockets-<uid>`。
+
 ## [v2.3.1] - 2026-03-27
 
 ### 修复

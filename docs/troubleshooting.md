@@ -177,7 +177,7 @@
 
 3. 验证配置文件路径：
    ```bash
-   docker compose exec autossh cat /etc/autossh/config/config.yaml
+   docker compose exec -u myuser autossh cat /etc/autossh/config/config.yaml
    ```
 
 ## 交互式认证问题
@@ -201,14 +201,14 @@
    
    检查隧道配置中是否有 `interactive: true`：
    ```bash
-   docker exec -it autossh-1 autossh-cli show-tunnel <hash>
+   docker exec -it -u myuser autossh-1 autossh-cli show-tunnel <hash>
    ```
 
 3. **检查 SSH 主机配置**：
    
    确保远程主机在 `~/.ssh/config` 中正确配置：
    ```bash
-   docker exec -it autossh-1 cat /home/myuser/.ssh/config
+   docker exec -it -u myuser autossh-1 cat /home/myuser/.ssh/config
    ```
 
 ### 认证失败
@@ -238,7 +238,7 @@
 
 1. **检查隧道日志**：
    ```bash
-   docker exec -it autossh-1 autossh-cli logs <hash>
+   docker exec -it -u myuser autossh-1 autossh-cli logs <hash>
    ```
 
 2. **验证端口可用性**：
@@ -250,7 +250,7 @@
 
 3. **检查 SSH 控制套接字**：
    ```bash
-   docker exec -it autossh-1 ls -la /tmp/ssh_control_*
+   docker exec -it -u myuser autossh-1 ls -la /tmp/ssh_control_*
    ```
 
 ## 隧道运行问题
@@ -389,7 +389,7 @@
 
    检查 autossh 容器是否设置了 `WS_PORT` 环境变量：
    ```bash
-   docker compose exec autossh env | grep WS_PORT
+   docker compose exec -u myuser autossh env | grep WS_PORT
    ```
 
 3. **检查 ws-server 端口是否可访问**：
@@ -484,7 +484,7 @@ docker compose logs --tail=100
 
 ```bash
 # 进入 autossh 容器
-docker compose exec autossh sh
+docker compose exec -u myuser autossh sh
 
 # 进入 web 容器
 docker compose exec web sh

@@ -68,16 +68,16 @@ Managed tunnels:
 
 ```bash
 # 列出隧道
-docker exec -it autotunnel-autossh-1 autossh-cli list
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli list
 
 # 停止隧道
-docker exec -it autotunnel-autossh-1 autossh-cli stop-tunnel <hash>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli stop-tunnel <hash>
 
 # 启动隧道
-docker exec -it autotunnel-autossh-1 autossh-cli start-tunnel <hash>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli start-tunnel <hash>
 
 # 查看状态
-docker exec -it autotunnel-autossh-1 autossh-cli status
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli status
 ```
 
 ## HTTP API 接口

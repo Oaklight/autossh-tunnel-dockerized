@@ -72,7 +72,7 @@ graph TB
 
 | 组件 | 描述 |
 |------|------|
-| `entrypoint.sh` | 初始化容器，设置权限，启动主进程 |
+| `entrypoint.sh` | 映射 PUID/PGID、初始化运行时目录并启动主进程 |
 | `spinoff_monitor.sh` | 监控配置文件变化并触发隧道重启 |
 | `autossh-cli` | 隧道管理的命令行界面 |
 | `API Server` | 用于程序化控制的 HTTP API（可选，端口 8080） |
@@ -381,7 +381,7 @@ ports:
 ## 安全考虑
 
 1. **SSH 密钥**：以只读方式挂载以防止修改
-2. **非 root 用户**：容器以 `myuser` 运行（可通过 PUID/PGID 配置）
+2. **非 root 用户**：容器以 `myuser` 运行（UID/GID 可通过 `PUID`/`PGID` 配置）
 3. **状态隔离**：每个隧道都有独立的状态和日志
 4. **API 访问**：API 服务器默认仅在 localhost 上可访问（宿主机网络模式）
 5. **WebSocket 安全**：ws-server 默认仅在 localhost 上可访问，建议在非本地环境中使用 `wss://` 协议

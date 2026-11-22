@@ -146,8 +146,8 @@ autossh-tunnel-dockerized/
    docker compose -f compose.dev.yaml up -d
    
    # 测试基本功能
-   docker exec -it autotunnel-autossh-1 autossh-cli list
-   docker exec -it autotunnel-autossh-1 autossh-cli status
+   docker exec -it -u myuser autotunnel-autossh-1 autossh-cli list
+   docker exec -it -u myuser autotunnel-autossh-1 autossh-cli status
    ```
 
 2. **Web 面板测试**：

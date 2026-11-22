@@ -20,7 +20,8 @@ hide:
 - **非 root 用户**：以非 root 用户运行容器，增强安全性。
 - **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射，支持配置变更时自动重载服务。
 - **Autossh**：自动维护 SSH 连接，确保隧道保持活跃。
-- **动态 UID/GID 支持**：使用 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户权限。
+- **动态 UID/GID 支持**：使用 `PUID` 和 `PGID` 设置容器用户的 UID 和 GID，以匹配主机文件属主。
+- **SSH 服务器端口**：在 `remote_host` 中按 `[user@]主机:端口` 指定非标准 SSH 端口。
 - **多架构支持**：支持所有 Alpine 基础架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 - **自动重载**：检测 `config.yaml` 的变化并自动重载服务配置。

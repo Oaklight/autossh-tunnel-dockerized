@@ -20,6 +20,17 @@ SSH配置文件（`~/.ssh/config`）允许您为SSH主机定义连接参数，�
 3. **连接参数**：超时、端口和其他连接设置在此定义
 4. **简化配置**：无需在每个隧道中指定完整的连接详细信息，您可以使用简单的主机别名
 
+您也可以直接在 `remote_host` 中指定 SSH 端口，无需在 SSH 配置中写 `Port`：
+
+```yaml
+tunnels:
+  - remote_host: "user@server.example.com:2222"
+    remote_port: 8080
+    local_port: 8081
+```
+
+`[user@]主机:端口` 格式会覆盖 SSH 配置中为该主机设置的 `Port` 值。
+
 ## SSH配置文件位置
 
 SSH配置文件应位于：

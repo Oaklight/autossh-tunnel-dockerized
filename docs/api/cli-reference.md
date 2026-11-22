@@ -10,12 +10,12 @@
 所有命令都应以 `docker exec` 为前缀：
 
 ```bash
-docker exec -it <容器名称> autossh-cli <命令>
+docker exec -it -u myuser <容器名称> autossh-cli <命令>
 ```
 
 例如：
 ```bash
-docker exec -it autotunnel-autossh-1 autossh-cli list
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli list
 ```
 
 ## 基本命令
@@ -270,22 +270,22 @@ autossh-cli cleanup
 
 ```bash
 # 列出隧道
-docker exec -it autotunnel-autossh-1 autossh-cli list
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli list
 
 # 停止隧道
-docker exec -it autotunnel-autossh-1 autossh-cli stop-tunnel <哈希值>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli stop-tunnel <哈希值>
 
 # 启动隧道
-docker exec -it autotunnel-autossh-1 autossh-cli start-tunnel <哈希值>
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli start-tunnel <哈希值>
 
 # 查看状态
-docker exec -it autotunnel-autossh-1 autossh-cli status
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli status
 
 # 查看日志
-docker exec -it autotunnel-autossh-1 autossh-cli logs
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli logs
 
 # 验证配置
-docker exec -it autotunnel-autossh-1 autossh-cli validate
+docker exec -it -u myuser autotunnel-autossh-1 autossh-cli validate
 ```
 
 ## 退出代码
