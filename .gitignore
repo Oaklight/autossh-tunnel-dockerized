@@ -1,2 +1,5 @@
 config.yaml
 config/backups
+
+# Locally built ws-server binary
+/ws-server/ws-server
