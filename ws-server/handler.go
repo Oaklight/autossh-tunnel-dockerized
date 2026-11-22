@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -96,22 +97,46 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 	// Prepare command
 	cmd := exec.Command("/usr/local/bin/autossh-cli", "auth", hash)
 
-	// Set environment variables
-	cmd.Env = append(os.Environ(),
+	// Set environment variables.
+	// Ensure HOME matches the real user from /etc/passwd so that SSH
+	// config resolution (~/.ssh) and interactive auth work correctly.
+	env := os.Environ()
+	if u, err := user.Current(); err == nil && u.HomeDir != os.Getenv("HOME") {
+		filtered := env[:0]
+		for _, e := range env {
+			if !strings.HasPrefix(e, "HOME=") {
+				filtered = append(filtered, e)
+			}
+		}
+		env = append(filtered, "HOME="+u.HomeDir)
+	}
+	cmd.Env = append(env,
 		"TERM=xterm-256color",
 		"WS_MODE=1", // Tells interactive_auth.sh to skip tee
 	)
 
-	// Note: pty.Start() sets Setsid and Setctty on SysProcAttr internally.
-	// Do NOT set Setpgid here — it conflicts with Setsid (EPERM).
-	// Process group cleanup still works because setsid() makes the child
-	// its own session leader, so PID == PGID.
-
-	// Start command with PTY
-	ptmx, err := pty.Start(cmd)
+	// Use StartWithAttrs to control session/terminal setup precisely.
+	// Setsid: true  — child becomes session leader (PID == PGID), required
+	//                  for PTY I/O and process-group cleanup.
+	// Setctty: false — do NOT make the PTY the controlling terminal.
+	//                  When ssh -f forks, the ProxyJump child stays in the
+	//                  original session's foreground process group. If the
+	//                  PTY were the controlling terminal, the kernel would
+	//                  send SIGHUP to that group when the session leader
+	//                  (autossh-cli) exits — killing the ProxyJump child and
+	//                  breaking the tunnel. Without a controlling terminal,
+	//                  no SIGHUP is sent, and the ProxyJump child survives.
+	//                  SSH falls back from /dev/tty to stdin (the PTY slave)
+	//                  for password/2FA prompts, so interactive auth still works.
+	ptmx, err := pty.StartWithAttrs(cmd, nil, &syscall.SysProcAttr{
+		Setsid: true,
+	})
 	if err != nil {
 		logf("ERROR", "Failed to start PTY for hash %s: %v", hash, err)
-		sendStatus(conn, "error", "Failed to start authentication session", 0)
+		msg := StatusMessage{Type: "status", Code: "error", Message: "Failed to start authentication session"}
+		if data, err := json.Marshal(msg); err == nil {
+			conn.WriteMessage(websocket.TextMessage, data)
+		}
 		return
 	}
 
@@ -122,7 +147,7 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 		clientDoneOnce sync.Once
 		lastActivity   atomic.Int64
 		timedOut       atomic.Bool
-		keepPTY        bool // when true, don't close ptmx on exit
+		wsMu           sync.Mutex // protects conn.WriteMessage (gorilla disallows concurrent writes)
 	)
 	lastActivity.Store(time.Now().Unix())
 
@@ -155,7 +180,10 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 			}
 			if n > 0 {
 				lastActivity.Store(time.Now().Unix())
-				if err := conn.WriteMessage(websocket.BinaryMessage, buf[:n]); err != nil {
+				wsMu.Lock()
+				err := conn.WriteMessage(websocket.BinaryMessage, buf[:n])
+				wsMu.Unlock()
+				if err != nil {
 					logf("DEBUG", "WebSocket write error for hash %s: %v", hash, err)
 					return
 				}
@@ -239,44 +267,43 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 		}
 	}
 
-	// Determine exit status and send status message BEFORE waiting for
-	// I/O goroutines — the PTY read goroutine may have already errored
-	// out, which can cause the browser to close the WebSocket before we
-	// get a chance to send the status.
 	exitCode := 0
 	if cmd.ProcessState != nil {
 		exitCode = cmd.ProcessState.ExitCode()
 	}
 
 	if timedOut.Load() {
-		sendStatus(conn, "timeout", "Session timed out", exitCode)
+		sendStatus(conn, &wsMu, "timeout", "Session timed out", exitCode)
 	} else if exitCode == 0 {
-		// ssh -f forks after successful auth, parent exits with code 0.
-		// The forked SSH child needs time to setsid() and fully detach from
-		// the PTY session. If we close ptmx too soon, the kernel sends
-		// SIGHUP to the session's foreground process group, killing the
-		// child before it can detach. Wait briefly, then keep ptmx open
-		// so it won't be closed by explicit Close() calls — the fd will be
-		// released when the process's file table is cleaned up after the
-		// child has detached.
-		time.Sleep(2 * time.Second)
-		keepPTY = true
-		sendStatus(conn, "success", "Tunnel authenticated and running", exitCode)
+		sendStatus(conn, &wsMu, "success", "Tunnel authenticated and running", exitCode)
 	} else {
-		sendStatus(conn, "error", "Authentication failed", exitCode)
+		sendStatus(conn, &wsMu, "error", "Authentication failed", exitCode)
 	}
 
-	// Close PTY master unless the session succeeded (ssh -f child needs it)
-	if !keepPTY {
+	if exitCode == 0 && !timedOut.Load() {
+		// ssh -f forks after successful auth. The forked SSH child and its
+		// ProxyJump subprocess inherit the PTY slave (as stderr). Closing
+		// ptmx immediately would hang up the slave and kill ProxyJump,
+		// breaking the tunnel's transport pipe.
+		//
+		// Wait for the child to fully detach (setsid + close inherited fds),
+		// then close ptmx. Also close the WebSocket first so the PTY→WS
+		// goroutine won't try to write after conn is gone.
+		conn.Close()
+		time.Sleep(3 * time.Second)
 		ptmx.Close()
+	} else {
+		ptmx.Close()
+		conn.Close()
 	}
 
-	// Wait for I/O goroutines to finish
+	// Wait for I/O goroutines to finish.
 	wg.Wait()
 }
 
 // sendStatus sends a JSON status message over the WebSocket connection.
-func sendStatus(conn *websocket.Conn, code, message string, exitCode int) {
+// mu must be the same mutex used to guard conn.WriteMessage elsewhere.
+func sendStatus(conn *websocket.Conn, mu *sync.Mutex, code, message string, exitCode int) {
 	status := StatusMessage{
 		Type:    "status",
 		Code:    code,
@@ -292,7 +319,10 @@ func sendStatus(conn *websocket.Conn, code, message string, exitCode int) {
 		return
 	}
 
-	if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
+	mu.Lock()
+	err = conn.WriteMessage(websocket.TextMessage, data)
+	mu.Unlock()
+	if err != nil {
 		logf("DEBUG", "Failed to send status message: %v", err)
 	}
 }
