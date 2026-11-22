@@ -38,7 +38,11 @@ fi
 # Use home directory to avoid permission issues between users
 get_sockets_dir() {
 	local sockets_dir="${HOME}/.autossh-sockets"
-	mkdir -p "$sockets_dir"
+	if ! mkdir -p "$sockets_dir" 2>/dev/null; then
+		# HOME may be unwritable (for example, with an unexpected UID).
+		sockets_dir="/tmp/autossh-sockets-$(id -u)"
+		mkdir -p "$sockets_dir"
+	fi
 	chmod 700 "$sockets_dir"
 	echo "$sockets_dir"
 }
@@ -153,15 +157,33 @@ start_interactive_tunnel() {
 		ssh_opts="$ssh_opts -p $ssh_port"
 	fi
 
-	# Add SSH config directory if it exists
+	# Create a wrapper SSH config that redirects ControlPath to a writable
+	# location.  The user's ~/.ssh is typically mounted read-only, so any
+	# ControlMaster sockets (e.g. for ProxyJump hosts) would fail to bind.
+	# Command-line -M -S above still wins for the outer connection.
+	local ssh_control_dir="/tmp/ssh-control"
+	mkdir -p "$ssh_control_dir"
+	chmod 700 "$ssh_control_dir"
+
 	if [ -d "$ssh_config_dir" ] && [ -f "$ssh_config_dir/config" ]; then
-		ssh_opts="$ssh_opts -F $ssh_config_dir/config"
+		local wrapper_config="/tmp/ssh_config_wrapper_${target_hash}"
+		cat >"$wrapper_config" <<-SSHCFG
+			Host *
+			    ControlPath ${ssh_control_dir}/%h:%p:%r
+			Include ${ssh_config_dir}/config
+		SSHCFG
+		ssh_opts="$ssh_opts -F $wrapper_config"
 	fi
 
 	# Create log directory if it doesn't exist
 	local log_dir="/tmp/autossh-logs"
 	mkdir -p "$log_dir"
 	local log_file="$log_dir/tunnel-${target_hash}.log"
+
+	# Optional: log SSH daemon output after fork to diagnose tunnel death.
+	if [ "${AUTOSSH_SSH_DEBUG:-0}" = "1" ]; then
+		ssh_opts="$ssh_opts -v -E $log_dir/ssh-debug-${target_hash}.log"
+	fi
 
 	echo ""
 	log_info "INTERACTIVE" "Starting SSH session for: $name" | tee -a "$log_file"
