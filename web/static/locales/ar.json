@@ -32,7 +32,7 @@
     },
     "placeholders": {
       "tunnel_name": "اسم النفق",
-      "remote_host": "المضيف البعيد",
+      "remote_host": "user@host:port",
       "remote_port": "المنفذ البعيد (مثال: 44497 أو hostname:44497)",
       "local_port": "المنفذ المحلي (مثال: 8080 أو db.internal:8080)"
     },
@@ -163,7 +163,7 @@
         "title": "وصف الواجهة:",
         "name": "Name: اسم النفق، للتعريف",
         "status": "Status: الحالة الحالية للنفق (يعمل/متوقف/خطأ)",
-        "remote_host": "Remote Host: عنوان المضيف البعيد (مثال: user@server.com)",
+        "remote_host": "Remote Host: عنوان المضيف البعيد (مثال: user@server.com / user@server.com:2222)",
         "remote_port": "Remote Port: المنفذ البعيد أو تنسيق host:port",
         "local_port": "Local Port: المنفذ المحلي أو تنسيق host:port",
         "direction": "Direction: اتجاه النفق (من البعيد إلى المحلي/من المحلي إلى البعيد)",
@@ -255,6 +255,8 @@
       "port_simple": "منفذ بسيط",
       "port_hostname": "مضيف:منفذ",
       "port_ip": "IP:منفذ",
+      "ssh_port": "منفذ خادم SSH:",
+      "ssh_port_desc": "منفذ SSH غير القياسي في المضيف البعيد، مثال: user@server:2222",
       "tunnel_directions": "اتجاهات النفق:",
       "direction_r2l": "ربط الخدمة البعيدة بالمحلي (افتراضي)",
       "direction_l2r": "عرض الخدمة المحلية على البعيد",

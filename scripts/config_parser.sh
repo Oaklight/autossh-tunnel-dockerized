@@ -19,6 +19,57 @@ calculate_tunnel_hash() {
 	printf '%s' "$hash_input" | md5sum | cut -d' ' -f1
 }
 
+# Function to split an SSH destination into destination and port.
+# Accepts [user@]host, [user@]host:port, [user@][IPv6], and [user@][IPv6]:port.
+# Prints a tab-separated pair: "<destination>\t<port>". The port field is
+# empty when the destination does not contain one.
+parse_ssh_destination() {
+	local value=$1
+	local destination=$value
+	local port=""
+
+	case "$value" in
+	*\[*\]:*)
+		# Bracketed IPv6 address with a port, e.g. user@[2001:db8::1]:2222
+		local prefix="${value%%\[*}"
+		local rest="${value#*\[}"
+		local inner="${rest%%\]*}"
+		local candidate_port="${rest##*\]:}"
+		case "$candidate_port" in
+		'' | *[!0-9]*) ;;
+		*)
+			destination="${prefix}${inner}"
+			port=$candidate_port
+			;;
+		esac
+		;;
+	*\[*\])
+		# Bracketed IPv6 address without a port. SSH expects no brackets.
+		local prefix="${value%%\[*}"
+		local inner="${value#*\[}"
+		destination="${prefix}${inner%\]}"
+		;;
+	*:*)
+		local host_part="${value%:*}"
+		local candidate_port="${value##*:}"
+		case "$host_part" in
+		*:*) ;; # Bare IPv6 address; the colons do not separate a port.
+		*)
+			case "$candidate_port" in
+			'' | *[!0-9]*) ;;
+			*)
+				destination=$host_part
+				port=$candidate_port
+				;;
+			esac
+			;;
+		esac
+		;;
+	esac
+
+	printf '%s\t%s\n' "$destination" "$port"
+}
+
 # Function to parse YAML and extract tunnel configurations using pure shell
 parse_config() {
 	local config_file=$1

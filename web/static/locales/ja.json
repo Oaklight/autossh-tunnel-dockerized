@@ -32,7 +32,7 @@
     },
     "placeholders": {
       "tunnel_name": "トンネル名",
-      "remote_host": "リモートホスト",
+      "remote_host": "user@host:port",
       "remote_port": "リモートポート (例: 44497 または hostname:44497)",
       "local_port": "ローカルポート (例: 8080 または db.internal:8080)"
     },
@@ -163,7 +163,7 @@
         "title": "インターフェースの説明：",
         "name": "Name：トンネル名、識別用",
         "status": "Status：トンネルの現在の状態（実行中/停止/エラー）",
-        "remote_host": "Remote Host：リモートホストアドレス（例：user@server.com）",
+        "remote_host": "Remote Host：リモートホストアドレス（例：user@server.com / user@server.com:2222）",
         "remote_port": "Remote Port：リモートポートまたはホスト:ポート形式",
         "local_port": "Local Port：ローカルポートまたはホスト:ポート形式",
         "direction": "Direction：トンネルの方向（リモートからローカル/ローカルからリモート）",
@@ -255,6 +255,8 @@
       "port_simple": "シンプルポート",
       "port_hostname": "ホスト名:ポート",
       "port_ip": "IP:ポート",
+      "ssh_port": "SSH サーバーポート：",
+      "ssh_port_desc": "リモートホストで非標準の SSH ポートを指定します（例：user@server:2222）",
       "tunnel_directions": "トンネルの方向：",
       "direction_r2l": "リモートサービスをローカルにマップ（デフォルト）",
       "direction_l2r": "ローカルサービスをリモートに公開",

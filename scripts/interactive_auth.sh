@@ -121,6 +121,12 @@ start_interactive_tunnel() {
 		local_port_num="$local_port"
 	fi
 
+	# Split an optional SSH server port from remote_host ([user@]host[:port]).
+	local parsed_destination
+	parsed_destination=$(parse_ssh_destination "$remote_host")
+	local ssh_destination=$(printf '%s\n' "$parsed_destination" | cut -f1)
+	local ssh_port=$(printf '%s\n' "$parsed_destination" | cut -f2)
+
 	# Prepare Control Socket path for PID tracking
 	local sockets_dir=$(get_sockets_dir)
 	local ctrl_socket="$sockets_dir/$target_hash"
@@ -141,6 +147,11 @@ start_interactive_tunnel() {
 	ssh_opts="$ssh_opts -o ServerAliveInterval=30"
 	ssh_opts="$ssh_opts -o ServerAliveCountMax=3"
 	ssh_opts="$ssh_opts -o SetEnv=TUNNEL_HASH=$target_hash"
+
+	# Add the SSH server port when remote_host contains one.
+	if [ -n "$ssh_port" ]; then
+		ssh_opts="$ssh_opts -p $ssh_port"
+	fi
 
 	# Add SSH config directory if it exists
 	if [ -d "$ssh_config_dir" ] && [ -f "$ssh_config_dir/config" ]; then
@@ -171,12 +182,12 @@ start_interactive_tunnel() {
 		if [ "$direction" = "local_to_remote" ]; then
 			log_info "INTERACTIVE" "Direction: local_to_remote (Remote Forwarding)"
 			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num -> $remote_host:$target_host:$target_port"
-			ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $remote_host 2>&1
+			ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $ssh_destination 2>&1
 			ssh_result=$?
 		else
 			log_info "INTERACTIVE" "Direction: remote_to_local (Local Forwarding)"
 			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num <- $remote_host:$target_host:$target_port"
-			ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $remote_host 2>&1
+			ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $ssh_destination 2>&1
 			ssh_result=$?
 		fi
 		rm -f "$ssh_exit_file"
@@ -188,7 +199,7 @@ start_interactive_tunnel() {
 			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num -> $remote_host:$target_host:$target_port" | tee -a "$log_file"
 			# Run ssh and capture exit code, while still showing output to terminal and log
 			(
-				ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $remote_host 2>&1
+				ssh $ssh_opts -R $target_host:$target_port:$local_host:$local_port_num $ssh_destination 2>&1
 				echo $? >"$ssh_exit_file"
 			) | tee -a "$log_file"
 			ssh_result=$(cat "$ssh_exit_file")
@@ -198,7 +209,7 @@ start_interactive_tunnel() {
 			log_info "INTERACTIVE" "Forwarding: $local_host:$local_port_num <- $remote_host:$target_host:$target_port" | tee -a "$log_file"
 			# Run ssh and capture exit code, while still showing output to terminal and log
 			(
-				ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $remote_host 2>&1
+				ssh $ssh_opts -L $local_host:$local_port_num:$target_host:$target_port $ssh_destination 2>&1
 				echo $? >"$ssh_exit_file"
 			) | tee -a "$log_file"
 			ssh_result=$(cat "$ssh_exit_file")

@@ -32,7 +32,7 @@
     },
     "placeholders": {
       "tunnel_name": "터널 이름",
-      "remote_host": "원격 호스트",
+      "remote_host": "user@host:port",
       "remote_port": "원격 포트 (예: 44497 또는 hostname:44497)",
       "local_port": "로컬 포트 (예: 8080 또는 db.internal:8080)"
     },
@@ -163,7 +163,7 @@
         "title": "인터페이스 설명:",
         "name": "Name: 터널 이름, 식별용",
         "status": "Status: 터널 현재 상태 (실행/중지/오류)",
-        "remote_host": "Remote Host: 원격 호스트 주소 (예: user@server.com)",
+        "remote_host": "Remote Host: 원격 호스트 주소 (예: user@server.com / user@server.com:2222)",
         "remote_port": "Remote Port: 원격 포트 또는 호스트:포트 형식",
         "local_port": "Local Port: 로컬 포트 또는 호스트:포트 형식",
         "direction": "Direction: 터널 방향 (원격에서 로컬로/로컬에서 원격으로)",
@@ -255,6 +255,8 @@
       "port_simple": "단순 포트",
       "port_hostname": "호스트명:포트",
       "port_ip": "IP:포트",
+      "ssh_port": "SSH 서버 포트:",
+      "ssh_port_desc": "원격 호스트에 비표준 SSH 포트를 지정합니다 (예: user@server:2222)",
       "tunnel_directions": "터널 방향:",
       "direction_r2l": "원격 서비스를 로컬에 매핑 (기본값)",
       "direction_l2r": "로컬 서비스를 원격에 노출",

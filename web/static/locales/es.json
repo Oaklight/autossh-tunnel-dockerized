@@ -32,7 +32,7 @@
     },
     "placeholders": {
       "tunnel_name": "Nombre del túnel",
-      "remote_host": "Host remoto",
+      "remote_host": "user@host:port",
       "remote_port": "Puerto remoto (ej: 44497 o hostname:44497)",
       "local_port": "Puerto local (ej: 8080 o db.internal:8080)"
     },
@@ -163,7 +163,7 @@
         "title": "Descripción de la interfaz:",
         "name": "Name: Nombre del túnel, para identificación",
         "status": "Status: Estado actual del túnel (ejecutándose/detenido/error)",
-        "remote_host": "Remote Host: Dirección del host remoto (ej.: user@server.com)",
+        "remote_host": "Remote Host: Dirección del host remoto (ej.: user@server.com / user@server.com:2222)",
         "remote_port": "Remote Port: Puerto remoto o formato host:puerto",
         "local_port": "Local Port: Puerto local o formato host:puerto",
         "direction": "Direction: Dirección del túnel (remoto a local/local a remoto)",
@@ -255,6 +255,8 @@
       "port_simple": "Puerto simple",
       "port_hostname": "Host:puerto",
       "port_ip": "IP:puerto",
+      "ssh_port": "Puerto del servidor SSH:",
+      "ssh_port_desc": "Puerto SSH no estándar en el host remoto, p. ej. user@server:2222",
       "tunnel_directions": "Direcciones de túnel:",
       "direction_r2l": "Mapear servicio remoto a local (predeterminado)",
       "direction_l2r": "Exponer servicio local a remoto",

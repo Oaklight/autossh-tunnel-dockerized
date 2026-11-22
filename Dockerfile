@@ -20,8 +20,7 @@ RUN apk add --no-cache \
     flock \
     inotify-tools \
     netcat-openbsd \
-    socat \
-    su-exec
+    socat
 
 # create user and group
 RUN addgroup -g 1000 mygroup && \
@@ -42,7 +41,9 @@ RUN chmod +x /usr/local/bin/autossh-cli \
 
 RUN echo "$VERSION" > /etc/autossh-version
 
-# Set the entrypoint
+# The entrypoint runs as root so it can map PUID/PGID into /etc/passwd.
+# OpenSSH requires the runtime UID to have a passwd entry, which is why
+# docker --user cannot replace this mapping for arbitrary UIDs.
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Set the default command

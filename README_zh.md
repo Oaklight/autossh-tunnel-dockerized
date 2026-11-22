@@ -15,7 +15,7 @@
 - **非 root 用户**：以非 root 用户运行容器，增强安全性。
 - **YAML 配置**：使用 `config.yaml` 文件定义多个 SSH 隧道映射，支持配置变更时自动重载服务。
 - **Autossh**：自动维护 SSH 连接，确保隧道保持活跃。
-- **动态 UID/GID 支持**：使用 `PUID` 和 `PGID` 环境变量动态设置容器用户的 UID 和 GID，以匹配主机用户权限。
+- **动态 UID/GID 支持**：使用 `PUID` 和 `PGID` 设置容器用户的 UID 和 GID，以匹配主机文件属主。
 - **多架构支持**：支持所有 Alpine 基础架构，包括 `linux/amd64`、`linux/arm64/v8`、`linux/arm/v7`、`linux/arm/v6`、`linux/386`、`linux/ppc64le`、`linux/s390x` 和 `linux/riscv64`。
 - **灵活的方向配置**：支持将本地服务暴露到远程服务器（`local_to_remote`）或将远程服务映射到本地端口（`remote_to_local`）。
 - **自动重载**：检测 `config.yaml` 的变化并自动重载服务配置。
@@ -151,6 +151,20 @@ tunnels:
     direction: local_to_remote
 ```
 
+**SSH 服务器使用非标准端口**
+
+当 SSH 服务器不监听 22 端口时，在 `remote_host` 后追加 `:端口`，格式为 `[user@]主机:端口`。网页面板支持相同格式。
+
+```yaml
+tunnels:
+  - remote_host: "user@server.example.com:2222"
+    remote_port: 8080
+    local_port: 8081
+    direction: remote_to_local
+```
+
+IPv6 地址使用方括号：`user@[2001:db8::1]:2222`。
+
 #### 方式 B：网页面板配置
 
 如果您使用网页面板（包含在 `compose.yaml` 中）：
@@ -166,7 +180,7 @@ tunnels:
 
 ### 4. 配置用户权限 (PUID/PGID)
 
-在运行容器之前，请确保设置正确的 `PUID` 和 `PGID` 值，以匹配您主机用户的 UID 和 GID。
+运行容器前，请将 `PUID` 和 `PGID` 设置为主机用户的 UID 和 GID。
 
 查看您的用户 UID 和 GID：
 
@@ -190,6 +204,8 @@ environment:
   - PUID=1000
   - PGID=1000
 ```
+
+入口点在降权前将 `PUID`/`PGID` 映射到 `/etc/passwd`。仅使用 Docker 的 `--user` 不足以运行 autossh 容器：运行时 UID 在 `/etc/passwd` 中没有条目时，OpenSSH 会直接退出。
 
 ### 5. 启动服务
 

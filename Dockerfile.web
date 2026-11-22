@@ -29,9 +29,8 @@ RUN GOMAXPROCS=1 CGO_ENABLED=0 go build \
 ARG REGISTRY_MIRROR=docker.io
 FROM ${REGISTRY_MIRROR}/library/alpine:3.22.0
 
-RUN apk add --no-cache su-exec
-
-# Create a non-root user with default UID/GID (will be overridden in entrypoint.sh)
+# Create a non-root user with default UID/GID.
+# Override at runtime with docker run --user or Compose user:.
 RUN addgroup -g 1000 mygroup && \
     adduser -D -u 1000 -G mygroup myuser
 
@@ -44,15 +43,10 @@ COPY --from=builder /app/app .
 COPY web/static /app/static
 COPY web/templates /app/templates
 
-# Copy entrypoint script
-COPY web/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Expose the application port
 EXPOSE 5000
 
-# Set the entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
-
 # Run the application as myuser
+USER myuser
+
 CMD ["./app"]
