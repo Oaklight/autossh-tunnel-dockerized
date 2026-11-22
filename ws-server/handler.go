@@ -116,20 +116,19 @@ func handleAuthSession(conn *websocket.Conn, hash string) {
 	)
 
 	// Use StartWithAttrs to control session/terminal setup precisely.
-	// Setsid: true  — child becomes session leader (PID == PGID), required
-	//                  for PTY I/O and process-group cleanup.
-	// Setctty: false — do NOT make the PTY the controlling terminal.
-	//                  When ssh -f forks, the ProxyJump child stays in the
-	//                  original session's foreground process group. If the
-	//                  PTY were the controlling terminal, the kernel would
-	//                  send SIGHUP to that group when the session leader
-	//                  (autossh-cli) exits — killing the ProxyJump child and
-	//                  breaking the tunnel. Without a controlling terminal,
-	//                  no SIGHUP is sent, and the ProxyJump child survives.
-	//                  SSH falls back from /dev/tty to stdin (the PTY slave)
-	//                  for password/2FA prompts, so interactive auth still works.
+	// Setsid:  true — child becomes session leader (PID == PGID), required
+	//                 for PTY I/O and process-group cleanup.
+	// Setctty: true — make the PTY the controlling terminal. OpenSSH opens
+	//                 /dev/tty for password and keyboard-interactive
+	//                 prompts; without a controlling terminal it cannot
+	//                 prompt and fails with "Permission denied
+	//                 (keyboard-interactive)". The forked `ssh -f` child is
+	//                 kept alive by the delayed ptmx.Close() after the
+	//                 session exits (see below), not by omitting the
+	//                 controlling terminal.
 	ptmx, err := pty.StartWithAttrs(cmd, nil, &syscall.SysProcAttr{
-		Setsid: true,
+		Setsid:  true,
+		Setctty: true,
 	})
 	if err != nil {
 		logf("ERROR", "Failed to start PTY for hash %s: %v", hash, err)
