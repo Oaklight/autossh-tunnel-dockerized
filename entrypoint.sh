@@ -74,7 +74,19 @@ if [ -d /etc/autossh/config ]; then
 	chown -R myuser:mygroup /etc/autossh/config
 fi
 
+# Quote one argument so it can be embedded in a shell command string.
+shell_quote() {
+	printf "'"
+	printf '%s' "$1" | sed "s/'/'\\\\''/g"
+	printf "'"
+}
+
 # Switch to myuser and execute the command passed as arguments.
-# BusyBox su replaces su-exec: it execs the target command, so the command
-# stays PID 1 and still receives Docker's SIGTERM.
-exec su myuser -s /bin/sh -c 'exec "$@"' sh "$@"
+# BusyBox su replaces su-exec. Its option parser reads dash-prefixed words
+# after the user name, so the whole command is passed as one quoted string
+# to "sh -c". su execs that shell, which execs the command, keeping it PID 1.
+command=""
+for arg in "$@"; do
+	command="$command $(shell_quote "$arg")"
+done
+exec su myuser -s /bin/sh -c "exec$command"
